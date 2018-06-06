@@ -1,0 +1,467 @@
+\documentclass[finnish]{tktltiki2}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsfonts,amsmath,amssymb,amsthm,booktabs,color,enumitem,graphicx}
+\usepackage{subfigure,xspace}
+%\usepackage[lined,boxed]{algorithm2e}
+%\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage[pdftex,hidelinks]{hyperref}
+
+\makeatletter
+\AtBeginDocument{\hypersetup{pdftitle = {\@title}, pdfauthor = {\@author}}}
+\makeatother
+
+\usepackage[fixlanguage]{babelbib}
+\selectbiblanguage{finnish}
+
+\usepackage[nottoc]{tocbibind}
+\settocbibname{Lähteet}
+
+\newtheorem{lau}{Lause}
+\newtheorem{lem}[lau]{Lemma}
+\newtheorem{kor}[lau]{Korollaari}
+
+\theoremstyle{definition}
+\newtheorem{maar}[lau]{Määritelmä}
+\newtheorem{ong}{Ongelma}
+\newtheorem{alg}[lau]{Algoritmi}
+\newtheorem{esim}[lau]{Esimerkki}
+
+\theoremstyle{remark}
+\newtheorem*{huom}{Huomautus}
+
+\newcommand\range[2]{\ensuremath{\left [ #1 , #2 \right )}\xspace}
+\newcommand\orange[2]{\ensuremath{\left ( #1 , #2 \right )}\xspace}
+\newcommand\crange[2]{\ensuremath{\left [ #1 , #2 \right ]}\xspace}
+\newcommand\set[1]{\ensuremath{\left\{#1\right\}}\xspace}
+\newcommand\size[1]{\ensuremath{\left |#1\right |}\xspace}
+\newcommand\ceil[1]{\ensuremath{\left\lceil #1\right\rceil}\xspace}
+
+\newcommand\epts{\ensuremath{S}\xspace}
+\newcommand\inter[1]{\ensuremath{\textsc{väli}(#1)}\xspace}
+\newcommand\leftc[1]{\ensuremath{\textsc{vasen}(#1)}\xspace}
+\newcommand\rightc[1]{\ensuremath{\textsc{oikea}(#1)}\xspace}
+\newcommand\reach[1]{\ensuremath{\textsc{valaistu}(#1)}\xspace}
+\newcommand\canon[1]{\ensuremath{\bar{\textsc{c}}(#1)}\xspace}
+\newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
+\newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
+
+\newcommand\y[1]{\ensuremath{#1_y}\xspace}
+\newcommand\xrange[1]{\ensuremath{x(#1)}\xspace}
+\newcommand\yrange[1]{\ensuremath{y(#1)}\xspace}
+\newcommand\xranget[2]{\ensuremath{x(#1)_{#2}}\xspace}
+\newcommand\yranget[2]{\ensuremath{y(#1)_{#2}}\xspace}
+\newcommand\nbs[1]{\ensuremath{\textsc{naapurit}{(#1)}}\xspace}
+
+
+\title{Algoritmeja minimilinkkipolun ongelmaan}
+\author{Mikko Sysikaski}
+\date{\today}
+\level{Pro gradu -tutkielma}
+\abstract{
+Tutkielman aihe ovat algoritmit minimilinkkipolun etsimiseen.
+Minimilinkkipolku on on geometrinen reitinhakuongelma, jossa haettavan reitin on tehtävä mahdollisimman vähän käännöksiä.
+Työssä esitellään uusia algoritmeja ongelman eri variantteihin.
+}
+
+\keywords{algoritmit, laskennallinen geometria}
+
+% classification according to ACM Computing Classification System (http://www.acm.org/about/class/)
+% This is probably mostly relevant for computer scientists
+% uncomment the following; contents of \classification will be printed under the abstract with a title
+% "ACM Computing Classification System (CCS):"
+% \classification{}
+
+% If the automatic page number counting is not working as desired in your case,
+% uncomment the following to manually set the number of pages displayed in the abstract page:
+%
+% \numberofpagesinformation{16 sivua + 10 sivua liitteissä}
+
+
+\begin{document}
+
+\frontmatter      % roman page numbering for front matter
+
+\maketitle        % title page
+\makeabstract     % abstract page
+
+\tableofcontents  % table of contents
+
+\mainmatter       % clear page, start arabic page numbering
+
+
+
+\section{Johdanto}
+
+Erilaiset reitinhakuongelmat ovat laajasti tutkittu algoritmiikan osa-alue.\cite{survey}
+Tyypillinen tehtävä on löytää lyhin polku kahden verkon solmun välillä.
+Ongelman geometrisessa versiossa taas pyritään löytämään polku kahden pisteen välillä jatkuvassa avaruudessa, yleensä monikulmioiden rajoittamalla alueella tasossa.
+Tyypillinen ongelma on minimoida polun euklidinen pituus, mutta pituus ei ole ainoa mielekäs mitta polun hyvyydelle.
+Esimerkiksi robotin voi olla nopeampaa liikkua suoraan kuin kääntyillä, jolloin pitkä mutta yksinkertainen polku on lyhyttä mutkittelevaa reittiä parempi vaihtoehto.
+
+Tässä tutkielmassa keskitymme vähän käännöksiä tekevien polkujen löytämiseen.
+Kun polku koostuu äärellisestä määrästä suoria janoja, sen \textit{linkkietäisyys} tarkoittaa janojen määrää.
+Kahden pisteen välinen \textit{minimilinkkipolku} tarkoittaa polkua jonka linkkietäisyys on pienen mahdollinen.
+
+Minimilinkkipolun haku on hyvin tutkittu algoritmiongelma.
+Perusidealtaa algoritmit ovat yksinkertaisia, ja muistuttavat leveyshakua: etsitään alkupisteestä lähtien ensin etäisyydellä 1 olevat pisteet, sitten etäysyydellä 2, ja niin edelleen, kunnes haluttu loppupiste poluta löytyy.
+Algoritmien vaikea osuus on löytää sopivat tietorakenteet, joilla ylläpitää jo löydettyjen tason pisteiden joukkoa ja etsiä tehokkaasti seuraavan linkin päässä olevat pisteet.
+%Periaatetta kutsutaan usein \textit{vaiheittaiseksi valaistukseksi} (staged illumination), koska sitä voi havainnollistaa valaisun kautta:
+%Asetetaan valonlähde haettavan polun alkupisteeseen.
+%Kaikki tason pisteet, joihin valo koskee, ovat etäisyydellä~1.
+
+%Kyseessä on klassinen ongelma, jota on tutkittu laajasti.
+%Työssä esitellään uusia algoritmeja ongelman eri variaatioihin.
+%Algoritmit ovat kirjoittajan omaa kontribuutiota, kehitetty yhteistyössä muiden tutkijoiden kanssa, ja ne on aiemmin julkaistu vertaisarvioiduissa lehdissä.
+
+Työssä esitellään uusia algoritmeja ongelman 2-~ja 3-ulotteisiin variantteihin.
+Minimilinkkiongelmaan esitetään approksimaatioalgoritmi, joka on ensimmäinen tunnettu ratkaisu, joka toimii alle neliöllisessä ajassa\cite{revisited}.
+Tämän lisäksi tutkitaan ongelman rajoitettua versiota, jossa haettava polku saa kulkea ainoastaan tiettyihin suuntiin.
+Ongelmaan esitetään uusi algoritmi, joka toimii ajassa $O(C^2n\log n)$, kun syötepolygoni sisältää $n$ kärkipistettä ja käytettävissä on $C$ kulkusuuntaa\cite{revisited}.
+Lisäksi tutustutaan ongelman 3-ulotteiseen versioon, kun ainoat sallitut suunnat ovat koordinaattiakselien suunnat.
+3D~ongelmaan esitetään uusi algoritmi, joka toimii ajassa $O(n^2\log^2n)$, joka on merkittävä parannus aiempaan $O(n^{2.5}\log n)$ ratkaisuun\cite{restricted}.
+
+\subsection{Yleiskuva algoritmeista}
+
+Kaikki tunnetut minimilinkkipolut käyttävät samaa perusideaa:
+Halutaan muodostaa minimilinkkipolku pisteestä $A$ pisteeseen $B$.
+Merkitään kaikki alkupisteistä $k$ linkillä saavutettavien pisteiden joukkoa \reach{k}.
+Määritetään aluksi $\reach{0}=\set{A}$, ja lasketaan iteratiivisesti joukko \reach{k+1} aina joukosta \reach{k}.
+Iteraatiota jatketaan, kunnes löytyy $k$ jolle $B\in\reach{k}$.
+Iteraatiosta käytetään tyypillisesti nimitystä \emph{vaiheittainen valaistus}, koska joukon \reach{k+1} laskua voidaan visualisoida asettamalla valonlähteet kaikkiin pisteisiin \reach{k}, ja tutkimalla mitkä pisteet tulivat valaistuksi.
+
+Prosessi muistuttaa läheisesti syvyyssuuntaista hakua, mutta oleellisena erona hakua ei tehdä verkossa, vaan jatkuvassa avaruudessa.
+Algoritmien epätriviaali osuus onkin valaistun osuuden ylläpito, ja joukon \reach{k+1} tehokas laskenta joukosta \reach{k}.
+Valaistun alueen esitystä voidaan helpottaa jakamalla alue aluksi yksinkertaisiin osiin.
+Kolmiointi on tällaisesta jaosta tyypillinen esimerkki, ja sitä käytetään monissa geometrisissa algoritmeissa.
+Rajoitetun suuntaisten minimilinkkipolkujen tapauksessa alue on kuitenkin kätevämpi jakaa suorakulmioihin tai suunnikkaisiin.
+Luvussa~\ref{sec:jako} esitetään algoritmi reintinhakuun sopivaan alueen jakoon.
+
+Rajoitetun suuntaisen minimilinkkipolun laskussa alue \reach{k+1} voidaan laskea tehokkaasti alueesta \reach{k} käyttäen \emph{pyyhkäisyviiva-algoritmeja}.
+Ideana on, että tason yli "pyyhkäistään" suoralla viivalla, ja pyyhkäisyn aikana lasketaan kuinka polku voi edetä pyyhkäisyviivan liikesuuntaan.
+Tällä menetelmällä saadaan vaikea 2-ulotteinen valaistusongelma muutettua joukoksi helpompia 1-ulotteisia ongelmia.
+Pyyhkäisyviiva-algoritmien ideaa käsitellään tarkemmin kappaleessa~\ref{sec:sweep}.
+
+Pyyhkäisyn aikana ylläpidetään tietoa pyyhkäisyviivan suhteesta alueen esteisiin sekä joukkoon \reach{k}.
+Näiden tietojen ylläpitäminen edellyttää tehokasta 1-ulotteisten intervallien käsittelyä.
+\emph{Segmenttipuu} on monikäyttöinen tietorakenne lukuvälien käsittelyyn, ja se mahdollistaa vaiheittaisen valaistuksen vaatimien operaatioiden tehokkaan toteutuksen.
+Segmenttipuita käsitellään luvussa~\ref{sec:segtree}.
+
+Edellä mainitut ideat rajoitetun suuntaisen minimilinkkipolun hakuun voidaan yleistää myös kolmiulotteiseen avaruuteen.
+Monet yksityiskohdat ovat monimutkaisempia, mutta perusajatus pysyy samana.
+Avaruus jaetaan suorakulmioiden sijaan suorakulmaisiin särmiöihin, ja pyyhkäisyviivan sijaan käytetään pyyhkäisytasoa.
+Myös segmenttipuut yleistyvät elegantisti moniulottutteiseksi rakenteeksi.
+Näitä osatekijöitä yhdistämällä muodostetaan kolmiulotteisen rektilineaarisen minimilinkkipolkuongelman ratkaiseva algoritmi luvussa~\ref{sec:link3d}.
+
+
+
+\section{Segmenttipuu}\label{sec:segtree}
+
+Segmenttipuu on tietorakenne yksiulotteisten lukuvälien joukon käsittelyyn.
+Rakenne mahdollistaa laajan joukon erilaisia välioperaatioita logaritmisessa ajassa, kuten esimerkiksi
+\begin{itemize}
+	\item Uuden välin lisäys ja poisto.
+	\item Löydä kaikki välit, jotka leikkaavat annettua kyselyväliä.
+	\item Etsi piste joka leikkaa annettua kyselyväliä mutta ei yhtäkään väliä tietorakenteessa.
+	\item Muokkaa tietorakenteessa olevia välejä niin, että kaikki annettua väliä koskevat osat poistuvat.
+\end{itemize}
+
+Segmenttipuu on hyvin yleiskäyttöinen rakenne, jota voi laajentaa soveltumaan moniin tarpeisiin.
+Jokaiseen väliin voidaan tallentaa lisäinformaatiota, kuten lisäysaika puuhun, jolloin puusta voidaan hakea vaikkapa viimeisin lisäytty väli joka leikkaa annettua väliä.
+Lisäinformaation tallentaminen puuhun kasvattaa sen muistinkäyttöä ja päivitysoperaatioiden suoritusaikaa vakiokertoimella, joten puun tukemat operaatiot on syytä valita tapauskohtaisesti.
+Esitämme ensin rakenteen yleiset ideat, ja tutkimme sitten niiden sovellusta minimilinkkipolun ongelman kohdalla.
+
+Segmenttipuut toteutetaan tyypillisesti \emph{semi-dynaamisena} rakenteena.
+Tämä tarkoittaa, että puuta voidaan päivittää tehokkaasti, mutta puun rakenne on määritetty etukäteen.
+Semi-dynaamisuus mahdollistaa puun tallentamisen muistiin tehokkaasti taulukkona binäärikeon tapaan, mikä tekee puusta käytännöllisen paitsi asymptoottisten rajojen todistamiseen, myös käytännön toteutuksiin.
+Semi-dynaamisuus asettaa käytännön rajoitteen, että kaikkien puuhun tallennettavien välien kärkipisteiden joukko \epts on tunnettava etukäteen.
+Suurin osa kysely- ja päivitysoperaatioista toimii ajassa $O(\log \size{\epts})$, ja puun tilavaativuus ja luontiaika ovat $O(\size{\epts})$.
+
+\subsection{Segmenttipuun rakenne}
+
+\begin{figure}
+\caption{Segmenttipuussa jokainen solmu vastaa lukuväliä, ja lapsisolmujen välit peittävät tarkalleen vanhemman lukuvälin.}\label{segpuu}
+\end{figure}
+
+Segmenttipuu on binääripuu, jonka jokainen solmu $s$ vastaa puoliavointa lukuväliä $\inter{s}$.
+Solmun $s$ lapsisolmut $\leftc{s}$ ja $\rightc{s}$ jakavat välin $\inter{s}$ kahteen pienempään osaan: $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cup\inter{\rightc{s}}=\emptyset$.
+Puun juurisolmu vastaa suurinta mahdollista, kaikki muut välit sisältävät lukuväliä, ja lehtisolmut pienimpiä mahdollisia välejä $\range{\epts[i]}{\epts[i+1]}$.
+Esimerkki segmenttipuun rakenteesta näkyy kuvassa~\ref{segpuu}.
+
+Semi-dynaamisessa segmenttipuussa rakenne muodostetaan heti puun luontivaiheessa, eikä se riipu puuhun lisätyistä väleistä.
+Puu on täysin tasapainoinen binääripuu, joten sen voi tallentaa taulukkoon binäärikeon tapaan: jokaista solmua vastaa taulukon indeksi $i$, ja solmun $i$ lapsisolmut ovat $2i$ ja $2i+1$.
+Juurisolmua vastaa indeksi~1.
+
+\subsection{Kanoniset solmut}
+
+Tarkastellaan seuraavaksi mielivaltaistan välien esitystä puussa.
+Koska kärkipisteiden joukko on etukäteen rajattu $\epts$, jokainen lisätty väli on muotoa $\range{\epts[i]}{\epts[j]}$ joillekin indekseille $i$ ja $j$.
+
+\begin{figure}
+\caption{Lukuvälin kanoniset solmut ovat pienin joukko segmenttipuun solmuja, jotka peittävät välin mutta eivät mitään muuta.}\label{kanon}
+\end{figure}
+
+Jokaista tällaista väliä $v$ vastaa joukko puun solmuja, joita kutsutaan $v$:n \emph{kanonisiksi solmuiksi}, $\canon{v}$.
+Välin $v$ kanoniset solmut ovat pienin joukko solmuja, jotka peittävät kokonaan välin $v$, mutta eivät mitään muuta, eli $\bigcup_{s\in\canon{v}}\inter{s}=v$.
+
+Kanonisten solmujen käsite on määritetty myös \emph{pisteelle} (eli luvulle).
+Pisteen $p$ kanoniset solmut ovat kaikki solmut, joihin $p$ koskee, eli $\canonp{p}=\set{s \mid p\in\inter{s}}$.
+Kuvassa~\ref{kanon} näkyy esimerkki välin ja pisteen kanonisista solmuista puussa.
+
+Seuraavat kaksi lemmaa auttavat segmenttipuuoperaatioiden suoritusajan määrityksessä.
+
+\begin{lem}\label{kanonlog}Kaikille väleille $v$ pätee $\size{\canon{v}}=O(\log\size{\epts})$\end{lem}
+\begin{proof}
+Koska segmenttipuu on tasapainoinen binääripuu, sen syvyys on $\Theta(\log\size{\epts})$.
+Voidaan osoittaa, että $\canon{v}$ sisältää korkeintaan 2 solmua jokaisella syvyydellä, josta seuraa haluttu väittämä.
+Tämä nähdään helposti, sillä jos jollakin syvyydellä on 3 solmua, niistä keskimmäinen voidaan korvata solmun vanhemmalla ilman että solmujen virittämä lukuväli muuttuu, eli solmujoukko ei ole minimaalinen joten se ei ole kanoninen solmujoukko.
+\end{proof}
+
+\begin{lem}\label{kanonplog}Joukolla $\canon{v}$ on $O(\log\size{\epts})$ esivanhempaa segmenttipuussa.\end{lem}
+\begin{proof}
+Edellistä vastaavalla argumentilla voidaan osoittaa, että puun jokaisella tasolla on korkeintaan 2 esivanhempaa, josta seuraa jälleen haluttu väite.
+Selvästi jokaiselle solmulle $s$ ja sen esivanhemmalle $p$ pätee $\inter{s}\in\inter{p}$.
+Siis jos jollakin puun tasolla on 3 joukon $\canon{v}$ esivanhempaa, niistä keskimmäiselle solmulle $x$.
+\end{proof}
+
+Puun kanoniset solmut ja niiden esivanhemmat voidaan iteroida läpi seuraavalla algoritmilla:
+
+\begin{algorithmic}\label{seghaku}
+\Procedure{EtsiKanoniset}{$s$}
+\Comment{Tulosta välin $v$ kanoniset solmut ja niiden esivanhemmat alipuussa $s$}
+	\If{$\inter{s}\subseteq v$}
+		\State TulostaKanoninen($s$)
+	\ElsIf{$\inter{s}\cap v\neq\emptyset$}
+		\State TulostaEsivanhempi($s$)
+		\State EtsiKanoniset($\leftc{s}$)
+		\State EtsiKanoniset($\rightc{s}$)
+	\EndIf
+\EndProcedure
+\end{algorithmic}
+
+Jos päädytään solmuun joka ei ole kanonisen joukon esivanhempi, rekursio loppuu heti.
+Siis algoritmin suoritusaika on verrannollinen kanonisten solmujen ja niiden esivanhempien määrään, joka on lemmojen~\ref{kanonlog} ja~\ref{kanonplog} nojalla $O(\log\size{\epts})$.
+
+\subsection{Operaatiot puussa}
+
+Pisteen ja välin kanoniset solmut määriteltiin hyvin erilaisella tavalla.
+Seuraavaksi nähdään, kuinka nämä kaksi määritelmää toimivat yhdessä, ja sallivat välioperaatioiden helpon toteutuksen.
+
+Määritelmistä nähdään triviaalisti, että jos piste $p$ ei ole välillä $v$, niin $\canonp{p}\cap\canon{v}=\emptyset$. Jos piste on välillä, kanonisilla solmujoukoilla on tasan yksi yhteinen solmu.
+
+\begin{lem}\label{leikkaus1}
+Olkoon v väli ja p piste. Jos $p\in v$, niin $\size{\canonp{p}\cap\canon{v}}=1$.\end{lem}
+\begin{proof}
+Koska $\bigcup_{s\in\canon{v}}\inter{s}=v$ ja $p\in v$, pätee $p\in s$ vähintään yhdelle solmulle $s\in\canon{v}$, jolloin määritelmän mukaan myös $s\in\canonp{p}$.
+Siis $\size{\canonp{p}\cap\canon{v}}\ge 1$.
+
+Koska $\canon{v}$ on minimaalinen välin $v$ peittävä joukko, mitkään sen välit eivät leikkaa toisiaan, joten solmuja $s$ joille pätee $p\in\inter{x}$ on korkeintaan 1.
+Siis $\size{\canonp{p}\cap\canon{v}}\le 1$.
+\end{proof}
+
+Lemman~\ref{leikkaus1} ja algoritmin~\ref{seghaku} avulla on helppo toteuttaa rakenne, joka tukee välien tallennusta, ja mahdollistaa tiettyä pistettä leikkaavien välien etsimisen.
+Tallennetaan jokaiseen puun solmuun lista siihen lisätyistä väleistä, ja merkitään lisättävä väli jokaisen kanonisen solmun listaan.
+Kyselyvaiheessa käydään läpi kaikki pisteen kanoniset solmut, ja niiden välilistat antavat pistettä leikkaavat välit.
+
+Vastaavasti voidaan vaihtaa pisteiden ja lukuvälien järjestystä, ja luoda rakenne, joka tallentaa pisteitä ja sallii annetulla välillä olevien pisteiden tehokkaan haun.
+Uuden pisteen lisäys merkitsee pisteen kaikkiin kanonisten solmujen listoihin, ja välillä olevien pisteiden haku tarkistaa pistelistat kaikista välin kanonisista solmuista.
+
+Jos halutaan sekä lisätä rakenteeseen lukuvälejä, että käyttää välejä kyselyihin, tilanne ei ole yhtä suoraviivainen.
+Toisiaan leikkaavat välit välit eivät välttämättä jaa yhteisiä kanonisia solmuja, tai kanonisia solmuja voi olla useita, kuten näkyy kuvassa~\ref{kanonfailkuva}.
+
+\begin{figure}
+\caption{Toisiaan leikkaavilla väleillä voi olla 0, 1, tai useampia yhteisiä kanonisia solmuja.}\label{kanonfailkuva}
+\end{figure}
+
+Ongelma voidaan ratkaista käyttäen kahta segmenttipuuta.
+Toiseen tallennetaan lisätyt välit, ja toiseen niiden alkupisteet.
+Seuraava lemma auttaa tämän yhdistelmän analyysissä.
+
+\begin{lem}\label{segleikkaus2}Jos $\range{a}{b}\cap\orange{c}{d}\neq\emptyset$, niin joko $a\in\orange{c}{d}$ tai $c\in\range{a}{b}$, mutta ei molemmat.\end{lem}
+\begin{proof}
+Tarkastellaan kahta tapausta:
+\begin{itemize}
+\item Jos $a\le c$: Selvästi $a\notin\orange{c}{d}$, ja $\range{a}{b}\cap\orange{c}{d}\neq\emptyset \Leftrightarrow b>c$, jolloin $c\in\range{a}{b}$.
+\item Jos $a>c$: Sevästi $c\notin\range{a}{b}$, ja $\range{a}{b}\cap\orange{c}{d}\neq\emptyset \Leftrightarrow a<d$, jolloin $a\in\orange{c}{d}$.
+\end{itemize}
+\end{proof}
+
+Ylläpidetään kahta segmenttipuuta:
+Puuhun $A$ tallennetaan lukuvälejä ja tehdään kyselyjä pisteillä.
+Puuhun $B$ tallennetaan pisteitä ja tehdään kyselyjä väleillä.
+
+Välin $\range{a}{b}$ lisäys muokkaa molempia segmenttipuita:
+\begin{enumerate}
+\item Lisää väli $\range{a}{b}$ puuhun $A$.
+\item Lisää piste $a$ puuhun $B$.
+\end{enumerate}
+
+Väliä $\range{c}{d}$ leikkaavien välien haku tehdään molemmissa puissa:
+\begin{enumerate}
+\item Etsi pistettä $c$ leikkaavat välit puussa $A$.
+\item Etsi väliin $\range{c}{d}$ sisältyvät pisteet puussa $B$.
+\end{enumerate}
+
+Lemman~\ref{segleikkaus2} nojalla kahteen puuhun tehtävien operaatioiden ansiosta hakuoperaatio löytää jokaisen kyselyväliä leikkaavan välin tasan kerran.
+
+\subsection{Laiskat puuoperaatiot}
+
+\subsection{Persistentit segmenttipuut}
+
+\subsection{Moniulotteiset segmenttipuut}
+
+Segmenttipuu voidaan yleistää kaksi- ja useampiulotteiseksi rakenteeksi varsin suoraviivaisesti.
+Kaksiulotteinen segmenttipuu mahdollistaa suorakulmioiden tallentamisen ja tehokkaat aluekyselyt suorakulmion muotoiselle alueelle.
+Vastaavasti $u$-ulotteinen segmenttipuu mahdollistaa kyselyt $u$-ulotteisessa suorakaiteessa.
+
+Moniulotteinen segmenttipuu koostuu sisäkkäisistä 1-ulotteisista segmenttipuista.
+$u$-ulotteisen puun rakenne on tavallinen segmenttipuu, jonka jokaiseen solmuun on tallennettu $u-1$-ulotteinen segmenttipuu.
+
+Jokainen puun dimensio vastaa yhtä puuhun tallennettavien suorakaiteiden koordinaattiakseleista.
+Esimerkiksi 2-ulotteisessa puussa uloin segmenttipuu vastaa $y$-koordinaatteja, ja jokainen solmuihin tallennetuista sisemmistä puista vastaa $x$-koordinaatteja.
+
+%Kanoniset solmujoukot voidaan määrittää.
+
+
+
+\section{Avaruuden jako}\label{sec:jako}
+
+Minimilinkkipolkuongelmassa reittiä etsitään monimutkaisen muotoisella alueella, jossa on pienempiä monikulmioita esteinä.
+Syöte on lista monikulmioita, ja kukin monikulmio esitetään listana kärkipisteitä.
+Tämä muoto soveltuu heikosti reitin hakuun, sillä estilistasta on hidasta tarkistaa esimerkiksi voiko annetusta lähtepisteestä liikkua haluttuun suuntaan.
+
+Reitinhaun tehostamiseksi vapaa alue voidaan esittää toisessa muodossa, kuten kolmioituna.
+Rajoitetun suuntaisten minimilinkkipolkujen haussa kätevä esitysmuoto on jakaa vapaa alue suorakaiteisiin.
+Jotta hajotelmaa voidaan käyttää hakualgoritmien toteuttamiseen, tallennettan jokaisen suorakaiteen yhteyteen linkit jokaisessa suunnassa olevaan kyseistä suorakaidetta koskettaviin naapurisuorakaiteisiin.
+Toisin sanottuna rakenne on suuntaamaton verkko, jonka jokainen solmu on suorakaide, ja jokaisen toisiaan koskettavan suorakaideparin välillä on kaari.
+Jos syötteen estemonikulmioissa on yhteensä $n$ kärkipistettä, voidaan vapaa tila esittää $O(n)$ monikulmiona niin, että naapurilinkkejä on yhteensä $O(n)$.
+
+Vastaavaa rakennetta voidaan käyttää myös 3-ulotteisen minimilinkkipolun haussa.
+3-ulotteisessa rektilineaarisessa tapauksessa vapaata aluetta määrittävät monitahokkaat, joiden sivut ovat koordinaattiakselien suuntaiset, ja joilla on yhteensä $n$ kärkipistettä.
+Tällöin vapaa alue voidaan esittää suorakulmaisten särmiöiden verkkona, jossa on $O(n^2)$ kaarta.
+
+\subsection{Pyyhkäisyviiva-algoritmit}\label{sec:sweep}
+
+\subsection{Tason jakoalgoritmi}
+
+Rektilineaarinen alue voidaan jakaa suorakaiteisiin jatkamalla jokaista vaakasuoraa janaa molempiin suuntiin kunnes ne törmäävät esteeseen.
+Näin muodostunutta rakennetta kutsutaan alueen \emph{vaakasuoraksi hajotelmaksi}.
+Tämän rakenteen koko on $O(n)$, sillä jokainen jatkettu jana koskettaa korkeintaan 3:a suorakaidetta.
+Jokaisella suorakaiteella on korkeintaan 2 naapuria yläpuolella ja 2 alapuolella.
+
+Vaakasuora hajotelma voidaan muodostaa pyyhkäisyviiva-algoritmilla.
+Alueen yli pyyhkäistään vaakasuoralla viivalla, joka liikkuu alhaalta ylös.
+Pyyhkäisyn aikana pidetään yllä pyyhkäisyviivan ja vapaan alueen leikkausta.
+Leikkaus koostuu erillisistä lukuväleistä, jotka tallennetaan binäärihakupuuhun välien alkupisteen mukaan järjestettynä.
+
+Jokainen binäärihakupuuhun lisättävä elementti on rakenteilla oleva suorakaide $a$, jolla on seuraavat kentät:
+\begin{itemize}
+\item Väli $\xrange{a}=\range{\xranget{a}{1}}{\xranget{a}{2}}$.
+\item Väli $\yrange{a}=\range{\yranget{a}{1}}{\yranget{a}{2}}$.
+\item Lista naapurilinkkejä $\nbs{a}$.
+\end{itemize}
+
+Pyyhkäisy pysähtyy jokaisen estesuorakulmion vaakasuoran rajaviivan kohdalla.
+Jokainen rajaviiva joko aloittaa tai lopettaa esteen pyyhkäisyn liikutussuuntaan nähden.
+Jos viiva aloittaa esteen, niin viivan kohdalle tultaessa sen x-suuntainen väli sisältyy kokonaan hakupuuhun, eli sitä koskettaa puussa tasan 1 väli.
+Jos viiva lopettaa esteen, sen vasen tai oikea reuna saattavat koskettaa puussa olevia välejä, eli sitä koskettavia välejä puussa on 0-2.
+Kummassakin tapauksessa esteviivaa koskettavat välit poistetaan puusta, ja lisätään mahdollisesti tilalle vakiomäärä uusia välejä, ja lisätään linkit vanhojen ja uusien elementtien välille.
+Algoritmin tarkempi kuvaus on seuraava.
+
+\begin{algorithmic}\label{jako2d}
+\State $T\gets \text{tyhjä binäärihakupuu}$
+\State $E\gets\text{Esteiden vaakasuorat janat}$
+\State Järjestä $E$ y-koordinaatin mukaan kasvavaan järjestykseen.
+\ForAll{$e\in E$}
+	\If{$e$ aloittaa esteen}
+		\Comment Tasan 1 väli $T$:ssä koskettaa väliä \xrange{e}
+		\State $v\gets\text{Väliä \xrange{e} koskettava väli puussa $T$}$
+		\State $\yranget{v}{2}\gets\y{e}$
+		\State Poista väli $v$ puusta $T$
+		\ForAll{$u\gets v\setminus s$}
+			\State $\yranget{u}{1}\gets\y{e}$
+			\State Lisää $v$ listaan $\nbs{u}$
+			\State $a\gets\text{Uusi suorakaide}$
+			\State $\xrange{a}\gets u$
+			\State $\yranget{a}{1}\gets\y{e}$
+			\State Lisää $a$ puuhun $T$
+		\EndFor
+	\Else\Comment $s$ aloittaa vapaan tilan
+		\State $a\gets\text{Uusi suorakaide}$
+		\State $\xrange{a}\gets\xrange{e}$
+		\State $\yranget{a}{1}\gets\y{e}$
+		\ForAll{$v\in $ väliä \xrange{e} koskettavat välit puussa $T$}
+			\State Lisää $v$ listaan \nbs{a}
+			\State $\xrange{a}\gets\xrange{a}\cup\xrange{v}$
+			\State Poista $v$ puusta $T$
+		\EndFor
+		\State Lisää $a$ puuhun $T$.
+	\EndIf
+\EndFor
+\end{algorithmic}
+
+Algoritmin~\ref{jako2d} perusteella voimme todeta seuraavan.
+
+\begin{lem}2D-alue voidaan ajassa $O(n\log n)$ jakaa $O(n)$ suorakulmioon niin, että vierekkäisiä suorakulmiopareja on $O(n)$.\end{lem}
+\begin{proof}
+Algoritmi~\ref{jako2d} järjestää esteiden vaakasuorat janat y-koordinaatin mukaan ajassa $O(n\log n)$, ja käy ne sitten läpi $O(n)$ askeleessa.
+
+Jokaisella askeleella tulotetaan $O(1)$ suorakaidetta ja yhteyttä niiden välille, sekä tehdään $O(1)$ operaatiota binääripuuhun.
+Binääripuu pidetään tasapainotettuna, joten jokainen operaatio siihen voidaan suorittaa ajassa $O(\log n)$.
+Siis tulotettavan suorakaideverkon koko on $O(n)$ solmua ja kaarta, ja se rakennetaan ajassa $O(n\log n)$.
+\end{proof}
+
+\subsection{3D-hajotelma suorakulmaisiin särmiöihin}
+
+Vastaavasti kuin taso jaettiin suorakaiteisiin, voidaan 3-ulotteinen suorakulmaisten monitahokkaiden rajaama alua voidaan jakaa suorakulmaisiin särmiöihin.
+Tätä hajotelmaa hyödynnetään 3D-minimilinkkipolun laskussa luvussa~\ref{sec:link3d}.
+Polunhakualgoritmin suoritusaika riippuu vahvasti hajotelman koosta, joten on toivottavaa löytää mahdollisimman pieni hajotelma.
+
+Aluetta rajaavat monitahokkaat on määritetty syötteessä listaamalla jokaisen monikulmion kaikkien tahkojen kärkipisteet.
+Syötteen koko on kärkipisteiden kokonaismäärä $n$.
+
+Edellä esitetyn 2D-hajotelman ideat voidaan yleistää toimimaan myös 3:ssa ulottuvuudessa.
+Tämä ratkaisu tuottaa $O(n^2)$ solmua ja $O(n^2)$ linkkiä niiden välille.
+Tunnetaan myös tapoja jakaa 3D-alue pienempään määrään suorakaiteita, mutta näissä hajotelmissa solmujen välinen vierusverkko voi sisältää ylineliöllisen määrän linkkejä.
+
+Hajotelman idea on pyyhkäistä alueen läpi tasolla joka on kohtisuorassa $z$-akselia kohti, ja tarkastella tason ja esteiden leikkausta pyyhkäisyn aikana.
+Alueen ja tason leikkausta kutsutaan alueen \emph{poikkileikkaukseksi}.
+Idea on muodostaa 2D-hajotelma jokaisessa uniikissa poikkileikkauksessa, ja venyttää näin saatuja $xy$-tason suorakaiteita $z$-akselin suunnassa jotta ne peittävät koko 3-ulotteisen alueen.
+
+\begin{algorithmic}\label{jako3d}
+\State $L \gets \text{tyhjä lista}$
+\ForAll{Este-suorakaide $t$ kohtisuorassa $z$-akselia vastaan}
+	\If $t$ aloittaa esteen
+	\Else
+	\EndIf
+	\State Muodosta 2D-hajotelma alueella $L$.
+\EndFor
+\end{algorithmic}
+
+
+
+\section{Rajoitetun suuntaiset minimilinkkipolut}
+
+\subsection{Rektilineaariset minimilinkkipolut}
+
+Tarkastellaan aluksi minimilinkkipolun ongelman \emph{rektilineaarista} versiosta.
+Tässä versiossa sekä hakualueen monikulmiot että tuotettava reitti on rajattu koostumaan koordinaattiakselien suuntaisista janoista.
+Esitämme ongelmaan $O(n \log n)$ ajassa toimivan ratkaisun, jonka ideat toimivat pohjana monimutkaisempien tapausten ratkaisuissa.
+
+
+\section{3D-minimilinkkipolut}\label{sec:link3d}
+
+
+
+\section{Yhteenveto}
+
+
+
+\bibliographystyle{babplain-lf}
+\bibliography{ref}
+
+\end{document}
