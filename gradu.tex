@@ -8,6 +8,7 @@
 \usepackage{subfigure,xspace}
 %\usepackage[lined,boxed]{algorithm2e}
 %\usepackage{algorithmicx}
+%\usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage[pdftex,hidelinks]{hyperref}
 
@@ -110,13 +111,6 @@ Kahden pisteen välinen \textit{minimilinkkipolku} tarkoittaa polkua jonka linkk
 Minimilinkkipolun haku on hyvin tutkittu algoritmiongelma.
 Perusidealtaa algoritmit ovat yksinkertaisia, ja muistuttavat leveyshakua: etsitään alkupisteestä lähtien ensin etäisyydellä 1 olevat pisteet, sitten etäysyydellä 2, ja niin edelleen, kunnes haluttu loppupiste poluta löytyy.
 Algoritmien vaikea osuus on löytää sopivat tietorakenteet, joilla ylläpitää jo löydettyjen tason pisteiden joukkoa ja etsiä tehokkaasti seuraavan linkin päässä olevat pisteet.
-%Periaatetta kutsutaan usein \textit{vaiheittaiseksi valaistukseksi} (staged illumination), koska sitä voi havainnollistaa valaisun kautta:
-%Asetetaan valonlähde haettavan polun alkupisteeseen.
-%Kaikki tason pisteet, joihin valo koskee, ovat etäisyydellä~1.
-
-%Kyseessä on klassinen ongelma, jota on tutkittu laajasti.
-%Työssä esitellään uusia algoritmeja ongelman eri variaatioihin.
-%Algoritmit ovat kirjoittajan omaa kontribuutiota, kehitetty yhteistyössä muiden tutkijoiden kanssa, ja ne on aiemmin julkaistu vertaisarvioiduissa lehdissä.
 
 Työssä esitellään uusia algoritmeja ongelman 2-~ja 3-ulotteisiin variantteihin.
 Minimilinkkiongelmaan esitetään approksimaatioalgoritmi, joka on ensimmäinen tunnettu ratkaisu, joka toimii alle neliöllisessä ajassa\cite{revisited}.
@@ -125,7 +119,7 @@ Ongelmaan esitetään uusi algoritmi, joka toimii ajassa $O(C^2n\log n)$, kun sy
 Lisäksi tutustutaan ongelman 3-ulotteiseen versioon, kun ainoat sallitut suunnat ovat koordinaattiakselien suunnat.
 3D~ongelmaan esitetään uusi algoritmi, joka toimii ajassa $O(n^2\log^2n)$, joka on merkittävä parannus aiempaan $O(n^{2.5}\log n)$ ratkaisuun\cite{restricted}.
 
-\subsection{Yleiskuva algoritmeista}
+\subsection{Yleiskuva algoritmeista}\label{sec:yleiskuva}
 
 Kaikki tunnetut minimilinkkipolut käyttävät samaa perusideaa:
 Halutaan muodostaa minimilinkkipolku pisteestä $A$ pisteeseen $B$.
@@ -230,7 +224,9 @@ Siis jos jollakin puun tasolla on 3 joukon $\canon{v}$ esivanhempaa, niistä kes
 
 Puun kanoniset solmut ja niiden esivanhemmat voidaan iteroida läpi seuraavalla algoritmilla:
 
-\begin{algorithmic}\label{seghaku}
+\begin{alg}\label{alg:seghaku}
+Välin $v$ kanonisen solmujoukon haku segmenttipuussa.
+\begin{algorithmic}
 \Procedure{EtsiKanoniset}{$s$}
 \Comment{Tulosta välin $v$ kanoniset solmut ja niiden esivanhemmat alipuussa $s$}
 	\If{$\inter{s}\subseteq v$}
@@ -242,6 +238,7 @@ Puun kanoniset solmut ja niiden esivanhemmat voidaan iteroida läpi seuraavalla 
 	\EndIf
 \EndProcedure
 \end{algorithmic}
+\end{alg}
 
 Jos päädytään solmuun joka ei ole kanonisen joukon esivanhempi, rekursio loppuu heti.
 Siis algoritmin suoritusaika on verrannollinen kanonisten solmujen ja niiden esivanhempien määrään, joka on lemmojen~\ref{kanonlog} ja~\ref{kanonplog} nojalla $O(\log\size{\epts})$.
@@ -263,7 +260,7 @@ Koska $\canon{v}$ on minimaalinen välin $v$ peittävä joukko, mitkään sen v�
 Siis $\size{\canonp{p}\cap\canon{v}}\le 1$.
 \end{proof}
 
-Lemman~\ref{leikkaus1} ja algoritmin~\ref{seghaku} avulla on helppo toteuttaa rakenne, joka tukee välien tallennusta, ja mahdollistaa tiettyä pistettä leikkaavien välien etsimisen.
+Lemman~\ref{leikkaus1} ja algoritmin~\ref{alg:seghaku} avulla on helppo toteuttaa rakenne, joka tukee välien tallennusta, ja mahdollistaa tiettyä pistettä leikkaavien välien etsimisen.
 Tallennetaan jokaiseen puun solmuun lista siihen lisätyistä väleistä, ja merkitään lisättävä väli jokaisen kanonisen solmun listaan.
 Kyselyvaiheessa käydään läpi kaikki pisteen kanoniset solmut, ja niiden välilistat antavat pistettä leikkaavat välit.
 
@@ -346,10 +343,11 @@ Tällöin vapaa alue voidaan esittää suorakulmaisten särmiöiden verkkona, jo
 
 \subsection{Pyyhkäisyviiva-algoritmit}\label{sec:sweep}
 
-\subsection{Tason jakoalgoritmi}
+\subsection{Tason jakoalgoritmi}\label{sec:jako2d}
 
-Rektilineaarinen alue voidaan jakaa suorakaiteisiin jatkamalla jokaista vaakasuoraa janaa molempiin suuntiin kunnes ne törmäävät esteeseen.
+Rektilineaarinen alue voidaan jakaa suorakaiteisiin jatkamalla jokaista vaakasuoraa janaa molempiin suuntiin kunnes ne törmäävät pystysuoraan esteeseen.
 Näin muodostunutta rakennetta kutsutaan alueen \emph{vaakasuoraksi hajotelmaksi}.
+Vastaavasti jatkamalla pystysuoria janoja kunnes ne törmäävät vaakasuoraan esteeseen saadaan alueen \emph{pystysuora hajotelma}.
 Tämän rakenteen koko on $O(n)$, sillä jokainen jatkettu jana koskettaa korkeintaan 3:a suorakaidetta.
 Jokaisella suorakaiteella on korkeintaan 2 naapuria yläpuolella ja 2 alapuolella.
 
@@ -372,7 +370,9 @@ Jos viiva lopettaa esteen, sen vasen tai oikea reuna saattavat koskettaa puussa 
 Kummassakin tapauksessa esteviivaa koskettavat välit poistetaan puusta, ja lisätään mahdollisesti tilalle vakiomäärä uusia välejä, ja lisätään linkit vanhojen ja uusien elementtien välille.
 Algoritmin tarkempi kuvaus on seuraava.
 
-\begin{algorithmic}\label{jako2d}
+\begin{alg}\label{alg:jako2d}
+Tason vapaan tilan jako suorakaiteisiin.
+\begin{algorithmic}
 \State $T\gets \text{tyhjä binäärihakupuu}$
 \State $E\gets\text{Esteiden vaakasuorat janat}$
 \State Järjestä $E$ y-koordinaatin mukaan kasvavaan järjestykseen.
@@ -403,12 +403,13 @@ Algoritmin tarkempi kuvaus on seuraava.
 	\EndIf
 \EndFor
 \end{algorithmic}
+\end{alg}
 
-Algoritmin~\ref{jako2d} perusteella voimme todeta seuraavan.
+Algoritmin~\ref{alg:jako2d} perusteella voimme todeta seuraavan.
 
 \begin{lem}2D-alue voidaan ajassa $O(n\log n)$ jakaa $O(n)$ suorakulmioon niin, että vierekkäisiä suorakulmiopareja on $O(n)$.\end{lem}
 \begin{proof}
-Algoritmi~\ref{jako2d} järjestää esteiden vaakasuorat janat y-koordinaatin mukaan ajassa $O(n\log n)$, ja käy ne sitten läpi $O(n)$ askeleessa.
+Algoritmi~\ref{alg:jako2d} järjestää esteiden vaakasuorat janat y-koordinaatin mukaan ajassa $O(n\log n)$, ja käy ne sitten läpi $O(n)$ askeleessa.
 
 Jokaisella askeleella tulotetaan $O(1)$ suorakaidetta ja yhteyttä niiden välille, sekä tehdään $O(1)$ operaatiota binääripuuhun.
 Binääripuu pidetään tasapainotettuna, joten jokainen operaatio siihen voidaan suorittaa ajassa $O(\log n)$.
@@ -444,13 +445,35 @@ Idea on muodostaa 2D-hajotelma jokaisessa uniikissa poikkileikkauksessa, ja veny
 
 
 
-\section{Rajoitetun suuntaiset minimilinkkipolut}
+\section{Rajoitetun suuntaiset minimilinkkipolut tasossa}\label{sec:limited2d}
 
-\subsection{Rektilineaariset minimilinkkipolut}
+Tarkastellaan nyt minimilinkkipolun hakua rajoitteella, että polku saa käyttää vain tietyn suuntaisia linkkejä.
+Lisäksi myös esteiden reunat ovat rajoitettu kulkusuuntien mukaisesti.
+Luvussa~\ref{subsec:rect2d} tutustutaan rektilineaariseen tapaukseen, jossa kulkusuunnat vastaavat koordinaattiakselien suuntia.
+Rektilineaarisen ongelman ratkaisun pohjalta kehitetään luvussa~\ref{subsec:c2d} ratkaisu tapaukseen, jossa mahdollisten kulkusuuntien joukko $C$ on määritetty osana syötettä.
+
+\subsection{Rektilineaariset minimilinkkipolut}\label{subsec:rect2d}
 
 Tarkastellaan aluksi minimilinkkipolun ongelman \emph{rektilineaarista} versiosta.
 Tässä versiossa sekä hakualueen monikulmiot että tuotettava reitti on rajattu koostumaan koordinaattiakselien suuntaisista janoista.
 Esitämme ongelmaan $O(n \log n)$ ajassa toimivan ratkaisun, jonka ideat toimivat pohjana monimutkaisempien tapausten ratkaisuissa.
+
+Reitinhaku etenee kappaleessa~\ref{sec:yleiskuva} esitetyn vaiheittaisen valaistuksen mukaisesti.
+Siis aluksi määritetään \reach{0} vastaamaan alupistettä, ja iteratiivisesti lasketaan \reach{k+1} joukon \reach{k} perusteella.
+Prosessia jatketaan kunnes haettu loppupiste löytyy.
+
+On helppo nähdä, että missä tahansa minimilinkkipolussa joka toinen linkki on pystysuuntainen, ja joka toinen vaakasuuntainen.
+Jaetaan ongelma kahteen osaan, riippuen onko ensimmäinen linkki pysty- vai vaakasuuntainen.
+Lyhin polku voidaan löytää ratkaisemalla molemmat osaongelmat, ja valitsemalla löydetyistä poluista lyhyempi.
+
+
+Perusidea tehokkaaseen reitinhakuun perustuun luvussa~\ref{sec:jako2d} esiteltyihin alueen vaakasuoraan ja pystysuoraan hajotelmaan.
+Geometristen kappaleiden joukon \emph{leikkausverkko} tarkoittaa verkkoa, jonka solmuja ovat kappaleet, ja solmujen välillä on kaari, jos vastaavien kappaleiden leikkaus on epätyhjä.
+Tarkastellaan vaakasuoran ja pystysuoran hajotelman leikkausverkkoa.
+Taso voidaan jakaa suorakaiteisiin valitsemalla mikä tahansa suunta $c\in C$, ja jatkamalla $c$-suuntaisia esteiden reunoja kunnes ne törmäävät toiseen esteeseen.
+
+\subsection{$C$-suuntaiset minimilinkkipolut}\label{subsec:c2d}
+
 
 
 \section{3D-minimilinkkipolut}\label{sec:link3d}
