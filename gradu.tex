@@ -58,6 +58,8 @@
 \newcommand\yranget[2]{\ensuremath{y(#1)_{#2}}\xspace}
 \newcommand\nbs[1]{\ensuremath{\textsc{naapurit}{(#1)}}\xspace}
 
+\newcommand\decomp[1]{\ensuremath{\textsc{hajotelma}(#1)}\xspace}
+
 
 \title{Algoritmeja minimilinkkipolun ongelmaan}
 \author{Mikko Sysikaski}
@@ -346,12 +348,12 @@ Tällöin vapaa alue voidaan esittää suorakulmaisten särmiöiden verkkona, jo
 \subsection{Tason jakoalgoritmi}\label{sec:jako2d}
 
 Rektilineaarinen alue voidaan jakaa suorakaiteisiin jatkamalla jokaista vaakasuoraa janaa molempiin suuntiin kunnes ne törmäävät pystysuoraan esteeseen.
-Näin muodostunutta rakennetta kutsutaan alueen \emph{vaakasuoraksi hajotelmaksi}.
-Vastaavasti jatkamalla pystysuoria janoja kunnes ne törmäävät vaakasuoraan esteeseen saadaan alueen \emph{pystysuora hajotelma}.
+Näin muodostunutta rakennetta kutsutaan alueen \emph{vaakasuoraksi hajotelmaksi} \decomp{x}.
+Vastaavasti jatkamalla pystysuoria janoja kunnes ne törmäävät vaakasuoraan esteeseen saadaan alueen \emph{pystysuora hajotelma} \decomp{y}.
 Tämän rakenteen koko on $O(n)$, sillä jokainen jatkettu jana koskettaa korkeintaan 3:a suorakaidetta.
 Jokaisella suorakaiteella on korkeintaan 2 naapuria yläpuolella ja 2 alapuolella.
 
-Vaakasuora hajotelma voidaan muodostaa pyyhkäisyviiva-algoritmilla.
+\decomp{x} voidaan muodostaa pyyhkäisyviiva-algoritmilla.
 Alueen yli pyyhkäistään vaakasuoralla viivalla, joka liikkuu alhaalta ylös.
 Pyyhkäisyn aikana pidetään yllä pyyhkäisyviivan ja vapaan alueen leikkausta.
 Leikkaus koostuu erillisistä lukuväleistä, jotka tallennetaan binäärihakupuuhun välien alkupisteen mukaan järjestettynä.
@@ -371,7 +373,7 @@ Kummassakin tapauksessa esteviivaa koskettavat välit poistetaan puusta, ja lis�
 Algoritmin tarkempi kuvaus on seuraava.
 
 \begin{alg}\label{alg:jako2d}
-Tason vapaan tilan jako suorakaiteisiin.
+Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{x}.
 \begin{algorithmic}
 \State $T\gets \text{tyhjä binäärihakupuu}$
 \State $E\gets\text{Esteiden vaakasuorat janat}$
@@ -466,11 +468,31 @@ On helppo nähdä, että missä tahansa minimilinkkipolussa joka toinen linkki o
 Jaetaan ongelma kahteen osaan, riippuen onko ensimmäinen linkki pysty- vai vaakasuuntainen.
 Lyhin polku voidaan löytää ratkaisemalla molemmat osaongelmat, ja valitsemalla löydetyistä poluista lyhyempi.
 
+Tarkastellaan tapausta, jossa ensimmäinen linkki on vaakasuuntainen.
+Jos $k$ on parillinen, minkä tahansa minimilinkkipolun linkki $k$ (0-indeksoituna) on vaakasuuntainen, joten \reach{k+1} muodostuu pisteistä, joihin joukosta \reach{k} pääsee liikkumalla vaakasuunnassa.
+Vastaavasti parittomalla $k$ voidaan joukko \reach{k+1} muodostaa liikkumalla pystysuunnassa lähtien joukosta \reach{k}.
+Näin valaistut alueet liittyvät läheisesti luvussa~\ref{sec:jako2d} esitettyyn alueen vakasuoraan ja pystysuoraan hajotelmaan, mitä havainnollistaa seuraava lemma.
 
-Perusidea tehokkaaseen reitinhakuun perustuun luvussa~\ref{sec:jako2d} esiteltyihin alueen vaakasuoraan ja pystysuoraan hajotelmaan.
+\begin{lem}\label{lem:valaisu}
+Jos $k>0$ on parillinen, alue \reach{k+1} muodostuu tasan niistä joukon \decomp{x} suorakaiteista $h$, joille pätee $h\cap\reach{k}\neq\emptyset$.
+Jos $k>0$ on pariton, pätee vastaava väite hajotelmalle \decomp{y}.
+\end{lem}
+\begin{proof}
+Joukko \reach{k} on muodostettu valaisemalla joukko \reach{k-1} pystysuunnassa, eli jos $p\in\reach{k}$, niin myös jokainen $q\in\reach{k}$ jolle pätee $q_x=p_x$ ja pisteiden $q$ ja $p$ välillä ei ole estettä.
+Siis jos $p\in h\cap\reach{k}$ jollekin $h\in\decomp{x}$, koko pystysuora jana pisteen $p$ läpi suorakaiteen $h$ sisällä on joukossa \reach{k}.
+\reach{k+1} muodostetaan valaisemalla vaakasuunnassa joukosta \reach{k}, joten suorakaiteen $h$ lävistävä pystysuora jana valaisee koko suorakaiteen, eli $h\subseteq\reach{k+1}$.
+
+Jokaisen suorakaiteen $h\in\decomp{x}$ vasen ja oikea reuna sisältyvät esteen reunaan, joten jos $h\cap\reach{k}=\emptyset$, niin alueelta \reach{k} ei voida vaakasuunnassa siirtymällä päätyä suorakaiteeseen $h$.
+Siis $h\cap\reach{k+1}\emptyset$.
+
+Jos $k$ on pariton, joukko \reach{k} on muodostettu valaisemalla joukko \reach{k-1} vaakasuunnassa, ja vastaava todistus pätee joukolle \decomp{y}.
+\end{proof}
+
 Geometristen kappaleiden joukon \emph{leikkausverkko} tarkoittaa verkkoa, jonka solmuja ovat kappaleet, ja solmujen välillä on kaari, jos vastaavien kappaleiden leikkaus on epätyhjä.
-Tarkastellaan vaakasuoran ja pystysuoran hajotelman leikkausverkkoa.
-Taso voidaan jakaa suorakaiteisiin valitsemalla mikä tahansa suunta $c\in C$, ja jatkamalla $c$-suuntaisia esteiden reunoja kunnes ne törmäävät toiseen esteeseen.
+Tarkastellaan joukon $\decomp{x}\cup\decomp{y}$ leikkausverkkoa.
+Tämän verkon solmuja ovat suorakaiteet, ja toisiaan leikkaavat joukon \decomp{x} ja \decomp{y} suorakaiteet on yhdistetty kaarella.
+Lemman~\ref{lem:valaisu} perusteella jos suorakaiteelle $h\in\decomp{x}$ pätee $h\subseteq\reach{2k}$, niin kaikille solmun $h$ naapureille $n$ leikkausverkossa pätee $n\subseteq\reach{2k+1}$.
+Siis vaiheittainen valaistus löytää suorakaiteet tasan samassa järjestyksessä kuin leveyssuuntainen haku leikkausverkossa.
 
 \subsection{$C$-suuntaiset minimilinkkipolut}\label{subsec:c2d}
 
