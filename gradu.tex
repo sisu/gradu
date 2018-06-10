@@ -42,7 +42,11 @@
 \newcommand\size[1]{\ensuremath{\left |#1\right |}\xspace}
 \newcommand\ceil[1]{\ensuremath{\left\lceil #1\right\rceil}\xspace}
 
-\newcommand\epts{\ensuremath{S}\xspace}
+\newcommand\spt{\ensuremath{\dot{s}}\xspace}
+\newcommand\ept{\ensuremath{\dot{t}}\xspace}
+\newcommand\fspace{\ensuremath{A}\xspace}
+
+\newcommand\epts{\ensuremath{P}\xspace}
 \newcommand\inter[1]{\ensuremath{\textsc{väli}(#1)}\xspace}
 \newcommand\leftc[1]{\ensuremath{\textsc{vasen}(#1)}\xspace}
 \newcommand\rightc[1]{\ensuremath{\textsc{oikea}(#1)}\xspace}
@@ -120,6 +124,23 @@ Tämän lisäksi tutkitaan ongelman rajoitettua versiota, jossa haettava polku s
 Ongelmaan esitetään uusi algoritmi, joka toimii ajassa $O(C^2n\log n)$, kun syötepolygoni sisältää $n$ kärkipistettä ja käytettävissä on $C$ kulkusuuntaa\cite{revisited}.
 Lisäksi tutustutaan ongelman 3-ulotteiseen versioon, kun ainoat sallitut suunnat ovat koordinaattiakselien suunnat.
 3D~ongelmaan esitetään uusi algoritmi, joka toimii ajassa $O(n^2\log^2n)$, joka on merkittävä parannus aiempaan $O(n^{2.5}\log n)$ ratkaisuun\cite{restricted}.
+
+\subsection{Ongelman kuvaus}
+
+Minimilinkkipolkuongelma on määritetty seuraavasti.
+\begin{ong}
+Syötteenä on annettu alueen \fspace kuvaus sekä pisteet $\spt\in\fspace$ ja $\ept\in\fspace$.
+Etsi polku, jonka linkkietäisyys on pienin mahdollinen, pisteestä \spt pisteeseen \ept alueen \fspace sisällä.
+\end{ong}
+
+Tyypillisesti lyhimmän polun hakevat algoritmit aloittavat haun alkupisteestä ja tutkivat aluetta kunnes loppupiste saavutetaan.
+Tällöin voidaan usein muodostaa tietorakenne, joka löytää tehokkaasti polun alkupisteen \spt ja minkä tahansa muun pisteen välillä.
+Siksi lähes samoja algoritmeja voidaan soveltaa myös ongelmaan jossa \ept määritellään vasta myöhemmin.
+
+\begin{ong}
+Syötteenä on annettu alueen \fspace kuvaus sekä piste $\spt\in\fspace$.
+Esikäsittele syöte niin, että on tehokasta hakua polku pisteen \spt ja minkä tahansa annetun pisteen $\ept\in\fspace$ välillä.
+\end{ong}
 
 \subsection{Yleiskuva algoritmeista}\label{sec:yleiskuva}
 
@@ -460,6 +481,8 @@ Tarkastellaan aluksi minimilinkkipolun ongelman \emph{rektilineaarista} versiost
 Tässä versiossa sekä hakualueen monikulmiot että tuotettava reitti on rajattu koostumaan koordinaattiakselien suuntaisista janoista.
 Esitämme ongelmaan $O(n \log n)$ ajassa toimivan ratkaisun, jonka ideat toimivat pohjana monimutkaisempien tapausten ratkaisuissa.
 
+\subsubsection{Leikkausverkko}
+
 Reitinhaku etenee kappaleessa~\ref{sec:yleiskuva} esitetyn vaiheittaisen valaistuksen mukaisesti.
 Siis aluksi määritetään \reach{0} vastaamaan alupistettä, ja iteratiivisesti lasketaan \reach{k+1} joukon \reach{k} perusteella.
 Prosessia jatketaan kunnes haettu loppupiste löytyy.
@@ -493,6 +516,21 @@ Tarkastellaan joukon $\decomp{x}\cup\decomp{y}$ leikkausverkkoa.
 Tämän verkon solmuja ovat suorakaiteet, ja toisiaan leikkaavat joukon \decomp{x} ja \decomp{y} suorakaiteet on yhdistetty kaarella.
 Lemman~\ref{lem:valaisu} perusteella jos suorakaiteelle $h\in\decomp{x}$ pätee $h\subseteq\reach{2k}$, niin kaikille solmun $h$ naapureille $n$ leikkausverkossa pätee $n\subseteq\reach{2k+1}$.
 Siis vaiheittainen valaistus löytää suorakaiteet tasan samassa järjestyksessä kuin leveyssuuntainen haku leikkausverkossa.
+
+Rektilineaarinen minimilinkkipolun ongelma voidaan siis ratkaista muodostamalla leikkausverkko, ja etsimällä siinä lyhin polku alku- ja loppupisteen sisältävien suorakaiteiden välillä leveyshakua käyttäen.
+Leikkausverkko on kuitenkin neliöllisen kokoinen, eli sen eksplisiittisesti muodostava algoritmi ei voi toimia alle neliöllisessä ajassa.
+Varsinainen haaste onkin leveyshaun tehokas toteuttaminen leikkausverkossa muodostamatta itse verkkoa eksplisiittisesti.
+
+\subsubsection{Leveyshaku leikkausverkossa}
+
+Tarkastellaan jälleen tapausta, jossa polun ensimmäinen linkki on vaakasuuntainen.
+Muodostetaan aluksi vaakasuuntainen hajotelma algoritmilla~\ref{alg:jako2d}.
+Pystysuuntaista hajotelmaa ei ole tarvetta muodostaa eksplisiittisesti, vaan sen ja vaakasuuntaisen hajotelman leikkausverkkoa käytetään ainoastaan implisiittisenä rakenteena.
+
+\reach{0} on reitin alkupiste, ja \reach{1} sitä vävistävä vaakasuora suorakaide.
+Kun $k$ on pariton, voidaan \reach{k} esittää joukkona suorakaiteita, $\reach{k}=\cup_{h\in H}h$ missä $H\subseteq\decomp{x}$.
+%Jokaisella parillisella askeleella \reach{2k}
+
 
 \subsection{$C$-suuntaiset minimilinkkipolut}\label{subsec:c2d}
 
