@@ -41,16 +41,17 @@
 \newcommand\set[1]{\ensuremath{\left\{#1\right\}}\xspace}
 \newcommand\size[1]{\ensuremath{\left |#1\right |}\xspace}
 \newcommand\ceil[1]{\ensuremath{\left\lceil #1\right\rceil}\xspace}
+\newcommand\reals{\ensuremath{\mathbb{R}}\xspace}
 
 \newcommand\spt{\ensuremath{\dot{s}}\xspace}
 \newcommand\ept{\ensuremath{\dot{t}}\xspace}
-\newcommand\fspace{\ensuremath{A}\xspace}
+\newcommand\fspace{\ensuremath{\mathcal{A}}\xspace}
 
 \newcommand\epts{\ensuremath{P}\xspace}
 \newcommand\inter[1]{\ensuremath{\textsc{väli}(#1)}\xspace}
 \newcommand\leftc[1]{\ensuremath{\textsc{vasen}(#1)}\xspace}
 \newcommand\rightc[1]{\ensuremath{\textsc{oikea}(#1)}\xspace}
-\newcommand\reach[1]{\ensuremath{\textsc{valaistu}(#1)}\xspace}
+\newcommand\reach[1]{\ensuremath{\textsc{val}(#1)}\xspace}
 \newcommand\canon[1]{\ensuremath{\bar{\textsc{c}}(#1)}\xspace}
 \newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
 \newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
@@ -60,9 +61,11 @@
 \newcommand\yrange[1]{\ensuremath{y(#1)}\xspace}
 \newcommand\xranget[2]{\ensuremath{x(#1)_{#2}}\xspace}
 \newcommand\yranget[2]{\ensuremath{y(#1)_{#2}}\xspace}
-\newcommand\nbs[1]{\ensuremath{\textsc{naapurit}{(#1)}}\xspace}
+\newcommand\nbs[1]{\ensuremath{\textsc{naap}{(#1)}}\xspace}
 
-\newcommand\decomp[1]{\ensuremath{\textsc{hajotelma}(#1)}\xspace}
+\newcommand\decomp[1]{\ensuremath{\textsc{hajo}_{#1}}\xspace}
+
+\newcommand\sweep[2]{\ensuremath{\textsc{PYYH}_{#2}{(#1)}}\xspace}
 
 
 \title{Algoritmeja minimilinkkipolun ongelmaan}
@@ -527,12 +530,44 @@ Tarkastellaan jälleen tapausta, jossa polun ensimmäinen linkki on vaakasuuntai
 Muodostetaan aluksi vaakasuuntainen hajotelma algoritmilla~\ref{alg:jako2d}.
 Pystysuuntaista hajotelmaa ei ole tarvetta muodostaa eksplisiittisesti, vaan sen ja vaakasuuntaisen hajotelman leikkausverkkoa käytetään ainoastaan implisiittisenä rakenteena.
 
-\reach{0} on reitin alkupiste, ja \reach{1} sitä vävistävä vaakasuora suorakaide.
-Kun $k$ on pariton, voidaan \reach{k} esittää joukkona suorakaiteita, $\reach{k}=\cup_{h\in H}h$ missä $H\subseteq\decomp{x}$.
-%Jokaisella parillisella askeleella \reach{2k}
+\reach{0} on alkupisteestä muodostuva alue $\set{\spt}$, ja \reach{1} pistettä vävistävä vaakasuora suorakaide.
+Reitinhaku toimii toistamalla vuorotellen kahta vaihetta:
+
+\begin{enumerate}
+\item Kun $k$ on pariton, \reach{k} esitetään joukkona suorakaiteita $H_k\subseteq\decomp{x}$. Jokaisesta suorakaiteesta $h\in H_k$ tutkitaan mitkä uudet suorakaiteet ovat näkyvissä pystysuorassa suunnassa $h$:sta lähtien, ja saadaan näin uusi joukko $\hat{H}_{k+1}=\set{h \mid h\in\decomp{x}, h\cap\reach{k+1}\neq\emptyset}$.
+\item Kun $k$ on parillinen, voidaan lemman~\ref{lem:valaisu} perusteella triviaalisti muodostaa $H_{k+1}=\hat{H}_k$, jolloin $\reach{k+1}=\cup_{h\in H_{k+1}}h$.
+\end{enumerate}
+
+Näitä vaiheita toistetaan kunnes piste~\ept saavutetaan jommassakummassa vaiheessa.
+
+Algoritmin suorituskyvyn kannalta on myös oleellista välttää tutkimasta useaan kertaan samoja alueita.
+Koska jokainen aluetta \reach{k} koskettava suorakaide $h$ sisältyy kokonaan joukkoon \reach{k+1}, kuuluu jokainen $h$:sta näkyvä piste joukkoon \reach{k+2}.
+Jos suorakaiteen osa valaisteen algoritmin askeleella $k$, niin askeleeta $k+2$ lähtien sitä voidaan käsitellä kuin estettä, sillä kaikki sen läpi kulkevat lyhimmät polut on jo löydetty.
+
+Tarkastellaan nyt pystysuoraa valaisuoperaatiota lähtien suorakaiteiden joukosta $H\subseteq\decomp{x}$.
+Uusi valaistu alue haetaan kahden pyyhkäisyn avulla, suuntiin $+y$ ja $-y$.
+Merkitään alueesta $A$ suuntaan $s$ suoritettavan pyyhkäisyn tulosta \sweep{A}{s}.
+Tarkemmin $\sweep{A}{s}=\set{a+\alpha s \mid a\in A, \alpha\in\reals_+, a+\beta d\in\fspace \text{ kaikille } \beta\in\range{0}{\alpha}}$.
+Selvästi $\reach{k+1}=\sweep{\reach{k}}{+y}\cup\sweep{\reach{k}}{-y}$ kun $k$ on pariton.
+
+Pyyhkäisyn aikana ylläpidetään tietoa pyyhkäisyviivan sekä uuden valaistavan alueen \reach{k+1} poikkileikkauksesta.
+Poikkileikkaus muodostuu toisiaan leikkaamattomista yksiulotteisesta lukuväleistä.
+Tietoa säilytetään tasapainotetussa binääripuussa, joka on järjestetty lukuvälien vasemman kärkipisteen mukaan.
+Jokainen puuhun tallennettu väli $v$ sisältää seuraavat kentät:
+\begin{itemize}
+\item x
+\end{itemize}
+
+Pyyhkäisyalgoritmi pysähtyy joukon $H$ sekä jokaisen uuden valaistun suorakaiteiden kohdalla.
+
+\begin{alg}Laske $\sweep{\reach{k}}{+y}$, kun $\reach{k}=\cup_{h\in H}h$.
+\end{alg}
+
 
 
 \subsection{$C$-suuntaiset minimilinkkipolut}\label{subsec:c2d}
+
+\subsection{Lyhimmän polun kartan muodostus}
 
 
 
