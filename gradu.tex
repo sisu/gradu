@@ -62,6 +62,7 @@
 \newcommand\xranget[2]{\ensuremath{x(#1)_{#2}}\xspace}
 \newcommand\yranget[2]{\ensuremath{y(#1)_{#2}}\xspace}
 \newcommand\nbs[1]{\ensuremath{\textsc{naap}{(#1)}}\xspace}
+\newcommand\nbsd[2]{\ensuremath{\textsc{naap}_{#2}{(#1)}}\xspace}
 
 \newcommand\decomp[1]{\ensuremath{\textsc{hajo}_{#1}}\xspace}
 
@@ -442,6 +443,11 @@ Binääripuu pidetään tasapainotettuna, joten jokainen operaatio siihen voidaa
 Siis tulotettavan suorakaideverkon koko on $O(n)$ solmua ja kaarta, ja se rakennetaan ajassa $O(n\log n)$.
 \end{proof}
 
+Lisäksi voidaan todeta seuraava tulos, joka helpottaa jakoa käyttävien algoritmien analyysiä.
+
+\begin{lem}\label{lem:jako2do1}Algoritmin~\ref{alg:jako2d} tuottamalle jokaiselle suorakaiteelle $h$ pätee $\size{\nbs{h}}=O(1)$.\end{lem}
+\begin{proof}triv\end{proof}
+
 \subsection{3D-hajotelma suorakulmaisiin särmiöihin}
 
 Vastaavasti kuin taso jaettiin suorakaiteisiin, voidaan 3-ulotteinen suorakulmaisten monitahokkaiden rajaama alua voidaan jakaa suorakulmaisiin särmiöihin.
@@ -547,7 +553,8 @@ Jos suorakaiteen osa valaisteen algoritmin askeleella $k$, niin askeleeta $k+2$ 
 Tarkastellaan nyt pystysuoraa valaisuoperaatiota lähtien suorakaiteiden joukosta $H\subseteq\decomp{x}$.
 Uusi valaistu alue haetaan kahden pyyhkäisyn avulla, suuntiin $+y$ ja $-y$.
 Merkitään alueesta $A$ suuntaan $s$ suoritettavan pyyhkäisyn tulosta \sweep{A}{s}.
-Tarkemmin $\sweep{A}{s}=\set{a+\alpha s \mid a\in A, \alpha\in\reals_+, a+\beta d\in\fspace \text{ kaikille } \beta\in\range{0}{\alpha}}$.
+Tarkemmin
+$$\sweep{A}{s}=\set{p+\alpha s \mid p\in A, \alpha\ge 0, p+\beta s\in\fspace \text{ kaikille } \beta\in\crange{0}{\alpha}}.$$
 Selvästi $\reach{k+1}=\sweep{\reach{k}}{+y}\cup\sweep{\reach{k}}{-y}$ kun $k$ on pariton.
 
 Pyyhkäisyn aikana ylläpidetään tietoa pyyhkäisyviivan sekä uuden valaistavan alueen \reach{k+1} poikkileikkauksesta.
@@ -559,10 +566,39 @@ Jokainen puuhun tallennettu väli $v$ sisältää seuraavat kentät:
 \end{itemize}
 
 Pyyhkäisyalgoritmi pysähtyy joukon $H$ sekä jokaisen uuden valaistun suorakaiteiden kohdalla.
+Suorakaiteita säilytetään prioriteettijonossa, joka on järjestetty suorakaiteiden alimman pisteen (eli sen joka pyyhkäisyviiva saavuttaa ensimmäisenä) mukaan.
 
-\begin{alg}Laske $\sweep{\reach{k}}{+y}$, kun $\reach{k}=\cup_{h\in H}h$.
+\begin{alg}\label{alg:light2d}
+Laske $\sweep{\cup_{h\in H}h}{+y}$.
+\begin{algorithmic}
+\State $Q\gets\text{Joukon $H$ sisältävä prioriteettijono}$.
+\State $T\gets\text{Tyhjä binäärihakupuu}$.
+\While{$Q$ ei ole tyhjä}
+	\State $h\gets \texttt{pop}(Q)$
+	\If{$h\in H$}
+		\State Lisää \xrange{h} puuhun $T$.
+	\EndIf
+	\State $r\gets\xrange{h}$
+	\ForAll{$n\in\nbsd{h}{+y}$}
+		\State $r\gets r\setminus\xrange{n}$
+		\If{$\xrange{n}\cap T\neq\emptyset$}
+			\If{$n\notin Q$}
+				\State Lisää $n$ jonoon $Q$.
+			\EndIf
+		\EndIf
+	\EndFor
+	\State Poista väli $r$ puusta $T$.
+\EndWhile
+\end{algorithmic}
 \end{alg}
 
+\begin{lem}\label{lem:light2dtime}Algoritmi~\ref{alg:light2d} toimii ajassa $O(m\log m)$, missä $m$ on löydettyjen suorakaiteiden määrä.\end{lem}
+\begin{proof}
+Pääsilmukan jokaisella iteraatiolla käsitellään löydetty suorakaide, joten silmukkaa suoritetaan tasan $m$ iteraatiota.
+Lemman~\ref{lem:jako2do1} perusteella $\size{\nbs{h}=O(1)}$, joten algoritmin sisempää silmukkaa suoritetaan $O(1)$ iteraatiota.
+Siis jokaisella iteraatiolla tehdään $O(1)$ operaatiota prioriteettijonoon $Q$ sekä binäärihakupuuhun $T$.
+Jokainen näistä operaatioista voidaan suorittaa ajassa $O(\log m)$, joten algoritmin suoritusaika on $O(m\log m)$.
+\end{proof}
 
 
 \subsection{$C$-suuntaiset minimilinkkipolut}\label{subsec:c2d}
