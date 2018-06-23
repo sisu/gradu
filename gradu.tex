@@ -4,7 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{microtype}
-\usepackage{amsfonts,amsmath,amssymb,amsthm,booktabs,color,enumitem,graphicx}
+\usepackage{amsfonts,amsmath,amssymb,amsthm,booktabs,color,enumitem,graphicx,mathabx}
 \usepackage{subfigure,xspace}
 %\usepackage[lined,boxed]{algorithm2e}
 %\usepackage{algorithmicx}
@@ -51,10 +51,11 @@
 \newcommand\inter[1]{\ensuremath{\textsc{väli}(#1)}\xspace}
 \newcommand\leftc[1]{\ensuremath{\textsc{vasen}(#1)}\xspace}
 \newcommand\rightc[1]{\ensuremath{\textsc{oikea}(#1)}\xspace}
-\newcommand\reach[1]{\ensuremath{\textsc{val}(#1)}\xspace}
+\newcommand\reach[1]{\ensuremath{\textsc{valo}(#1)}\xspace}
 \newcommand\canon[1]{\ensuremath{\bar{\textsc{c}}(#1)}\xspace}
 \newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
 \newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
+\newcommand\canoni[2]{\ensuremath{\textsc{c}_{#2}(#1)}\xspace}
 
 \newcommand\y[1]{\ensuremath{#1_y}\xspace}
 \newcommand\xrange[1]{\ensuremath{x(#1)}\xspace}
@@ -65,8 +66,8 @@
 \newcommand\nbsd[2]{\ensuremath{\textsc{naap}_{#2}{(#1)}}\xspace}
 
 \newcommand\decomp[1]{\ensuremath{\textsc{hajo}_{#1}}\xspace}
-
-\newcommand\sweep[2]{\ensuremath{\textsc{PYYH}_{#2}{(#1)}}\xspace}
+\newcommand\sweep[2]{\ensuremath{\textsc{pyyh}_{#2}{(#1)}}\xspace}
+\newcommand\stepof[1]{\ensuremath{\textsc{askel}{(#1)}}\xspace}
 
 
 \title{Algoritmeja minimilinkkipolun ongelmaan}
@@ -227,7 +228,9 @@ Koska kärkipisteiden joukko on etukäteen rajattu $\epts$, jokainen lisätty v�
 \end{figure}
 
 Jokaista tällaista väliä $v$ vastaa joukko puun solmuja, joita kutsutaan $v$:n \emph{kanonisiksi solmuiksi}, $\canon{v}$.
+\begin{maar}\label{def:canon}
 Välin $v$ kanoniset solmut ovat pienin joukko solmuja, jotka peittävät kokonaan välin $v$, mutta eivät mitään muuta, eli $\bigcup_{s\in\canon{v}}\inter{s}=v$.
+\end{maar}
 
 Kanonisten solmujen käsite on määritetty myös \emph{pisteelle} (eli luvulle).
 Pisteen $p$ kanoniset solmut ovat kaikki solmut, joihin $p$ koskee, eli $\canonp{p}=\set{s \mid p\in\inter{s}}$.
@@ -347,9 +350,25 @@ $u$-ulotteisen puun rakenne on tavallinen segmenttipuu, jonka jokaiseen solmuun 
 
 Jokainen puun dimensio vastaa yhtä puuhun tallennettavien suorakaiteiden koordinaattiakseleista.
 Esimerkiksi 2-ulotteisessa puussa uloin segmenttipuu vastaa $y$-koordinaatteja, ja jokainen solmuihin tallennetuista sisemmistä puista vastaa $x$-koordinaatteja.
+Puun lehtisolmut ovat tällöin suorakaiteita, joiden $y$-sivun määrää lehden paikka ulommassa puussa, ja $y$-sivun määrittää paikka sisemmässä puussa.
 
-%Kanoniset solmujoukot voidaan määrittää.
+Kanoniset solmujoukot määritellään vastaavasti kuin yksiulotteisessa puussa.
+Määritelmää~\ref{def:canon} mukaillen määrittelemme:
+\begin{maar}\label{def:canond}
+$u$-ulotteisen suorakaiteen $s$ kanoniset solmut ovat pienin joukko solmuja, jotka peittävät kokonaan suorakaiteen $s$, mutta eivät mitään muuta, eli $\bigcup_{s\in\canon{v}}\inter{s}=v$.
+\end{maar}
 
+Moniulotteisten suorakaiteen $s$ kanonista joukkoa merkitään samoin kuin yksiulotteisessa tapauksessakin, $\canon{s}$.
+Merkitään suorakaiteen $s$ akselin $k$ suuntaista väliä $s_k$, ja sen kanonista joukkoa 1-ulotteisessa puussa $\canoni{s_k}{k}$.
+Kanoninen joukko voidaan määrittää ulottuvuus kerrallaan, mitä valaisee seuraava lemma.
+
+\begin{lem}$u$-ulotteiselle suorakaiteelle $s$ pätee
+$$\canon{s}=\set{c_1\times c_2\times c_3\dots \mid c_1\in\canoni{s_1}{1}, c_2\in\canoni{s_2}{2}\dots}$$
+eli \canon{s} on yksiulotteisten kanonisten joukkojen karteeninen tulo
+$$\canon{s}=\bigtimes_{i=1}^u \canoni{s_i}{i}.$$
+%$$\size{\canon{s}}=O(\prod_{i=1}^u \log\size{\epts_i}).$$
+\end{lem}
+\begin{proof}HT\end{proof}
 
 
 \section{Avaruuden jako}\label{sec:jako}
@@ -600,10 +619,46 @@ Siis jokaisella iteraatiolla tehdään $O(1)$ operaatiota prioriteettijonoon $Q$
 Jokainen näistä operaatioista voidaan suorittaa ajassa $O(\log m)$, joten algoritmin suoritusaika on $O(m\log m)$.
 \end{proof}
 
+\begin{alg}\label{alg:minlink2d}
+Laske minimilinkkipolku pisteestä \spt pisteeseen \ept alueen \fspace sisällä.
+\begin{algorithmic}
+\State Muodosta \decomp{x} alueesta \fspace.
+\State $H\gets\set{h\in\decomp{x} \mid \spt\in h}$
+\State $k\gets 0$
+\While{$H\neq\emptyset$}
+	\If{$\ept\in H$}
+		\State Lopeta haku.
+	\EndIf
+	\ForAll{$h\in H$}
+		\If{$\stepof{h}$ ei määritelty}
+			\State $\stepof{h}\gets k$
+		\ElsIf{$\stepof{h} \le k+2$}
+			\ForAll{$n\in\nbs{h}$}
+				\State Poista $h$ listasta \nbs{n}.
+			\EndFor
+			\State Poista $h$ joukosta $H$.
+		\EndIf
+	\EndFor
+	\State $H_{+y}\gets\sweep{H}{+y}$
+	\State $H_{-y}\gets\sweep{H}{-y}$
+	\State $H\gets H_{+y}\cup H_{-y}$
+	\State $k\gets k+1$
+\EndWhile
+\If{$\ept\notin H$}
+	\State Alue \fspace ei ole yhtenäinen. \spt ja \ept kuuluvat sen eri osiin.
+\EndIf
+\end{algorithmic}
+\end{alg}
+
+\begin{lau}Algoritmi~\ref{alg:minlink2d} toimii ajassa $O(n\log n)$.\end{lau}
+\begin{proof}HT\end{proof}
 
 \subsection{$C$-suuntaiset minimilinkkipolut}\label{subsec:c2d}
 
 \subsection{Lyhimmän polun kartan muodostus}
+
+\begin{lau}Ajassa $O(n\log n)$ voidaan muodostaa lyhimmän polun kartta, joka kertoo annetulle pisteelle \ept lyhimmän polun pituuden ajassa $O(\log n)$, ja tulostaa lyhimmän polun ajassa $O(\log n + k)$, missä $k$ on polun pituus.\end{lau}
+\begin{proof}HT\end{proof}
 
 
 
