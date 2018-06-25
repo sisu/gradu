@@ -66,6 +66,7 @@
 \newcommand\nbsd[2]{\ensuremath{\textsc{naap}_{#2}{(#1)}}\xspace}
 
 \newcommand\decomp[1]{\ensuremath{\textsc{hajo}_{#1}}\xspace}
+%\newcommand\decompc[1]{\ensuremath{\textsc{hajo}({#1})}\xspace}
 \newcommand\sweep[2]{\ensuremath{\textsc{pyyh}_{#2}{(#1)}}\xspace}
 \newcommand\stepof[1]{\ensuremath{\textsc{askel}{(#1)}}\xspace}
 
@@ -653,7 +654,21 @@ Laske minimilinkkipolku pisteestä \spt pisteeseen \ept alueen \fspace sisällä
 \begin{lau}Algoritmi~\ref{alg:minlink2d} toimii ajassa $O(n\log n)$.\end{lau}
 \begin{proof}HT\end{proof}
 
+\begin{lau}Algoritmi~\ref{alg:minlink2d} toimii tilassa $O(n)$.\end{lau}
+\begin{proof}triv\end{proof}
+
 \subsection{$C$-suuntaiset minimilinkkipolut}\label{subsec:c2d}
+
+Tarkastellaan nyt rektilineaarisen minimilinkkipolun ongelman yleistystä.
+Rektilineaarisessa ongelmassa sekä aluetta \fspace rajaavat esteet, että tulostettava polku koostuvat koordinaattiakselien suuntaisista janoista.
+$C$-suuntaisessa minimilinkkipolun ongelmassa määritetään syötteessä joukko suuntia $C$, ja sekä esteiden reunat että haettavan polun linkit ovat kaikki $C$:n suuntaisia.
+Esitämme ongelmaan ajassa $O(\size{C}^2n\log n)$ ja tilassa $O(\size{C}n)$ toimivan algoritmin, joka perustuu edellä esitetyn rektilineaarisen algoritmin ideoihin.
+
+\subsubsection{Alueen jako puolisuunnikkaisiin}
+
+Yleistetään aluksi kappaleessa~\ref{sec:jako} esitetty avaruuden jakomenetelmä toimimaan $C$-suuntaisella alueella.
+Hajotelmat \decomp{x} ja \decomp{y} määritettiin jatkamalla $x$- ja $y$-suuntaisia esteiden reunoja kunnes ne törmäävät toisiin esteisiin.
+Vastaavasti jokaiselle suunnalle $c\in C$ voidaan määrittää hajotelma \decomp{c} jatkamalla $c$-suuntaisia esteiden reunoja.
 
 \subsection{Lyhimmän polun kartan muodostus}
 
