@@ -668,7 +668,43 @@ Esitämme ongelmaan ajassa $O(\size{C}^2n\log n)$ ja tilassa $O(\size{C}n)$ toim
 
 Yleistetään aluksi kappaleessa~\ref{sec:jako} esitetty avaruuden jakomenetelmä toimimaan $C$-suuntaisella alueella.
 Hajotelmat \decomp{x} ja \decomp{y} määritettiin jatkamalla $x$- ja $y$-suuntaisia esteiden reunoja kunnes ne törmäävät toisiin esteisiin.
-Vastaavasti jokaiselle suunnalle $c\in C$ voidaan määrittää hajotelma \decomp{c} jatkamalla $c$-suuntaisia esteiden reunoja.
+Vastaavasti jokaiselle suunnalle $c\in C$ voidaan määrittää hajotelma \decomp{c} piirtämällä mahdollisimman pitkä $c$-suuntainen jana jokaisen alueen \fspace kärkipisteen läpi.
+Jako voidaan muodostaa algoritmia~\ref{alg:jako2d} muistuttavalla menetelmällä.
+
+\begin{alg}\label{alg:jako2dc}
+Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{c}.
+\begin{algorithmic}
+\State $T\gets \text{tyhjä binäärihakupuu}$
+\State $E\gets\text{Alueen \fspace kärkipisteet}$
+\State Laske jokaiselle $e\in E$ pistetulo $p\dot c$, ja järjestä joukko $E$ pistetulon mukaiseen kasvavaan järjestykseen.
+\ForAll{$e\in E$}
+	\If{$e$ aloittaa esteen}
+		\Comment Tasan 1 väli $T$:ssä koskettaa väliä \xrange{e}
+		\State $v\gets\text{Väliä \xrange{e} koskettava väli puussa $T$}$
+		\State $\yranget{v}{2}\gets\y{e}$
+		\State Poista väli $v$ puusta $T$
+		\ForAll{$u\gets v\setminus s$}
+			\State $\yranget{u}{1}\gets\y{e}$
+			\State Lisää $v$ listaan $\nbs{u}$
+			\State $a\gets\text{Uusi suorakaide}$
+			\State $\xrange{a}\gets u$
+			\State $\yranget{a}{1}\gets\y{e}$
+			\State Lisää $a$ puuhun $T$
+		\EndFor
+	\Else\Comment $s$ aloittaa vapaan tilan
+		\State $a\gets\text{Uusi suorakaide}$
+		\State $\xrange{a}\gets\xrange{e}$
+		\State $\yranget{a}{1}\gets\y{e}$
+		\ForAll{$v\in $ väliä \xrange{e} koskettavat välit puussa $T$}
+			\State Lisää $v$ listaan \nbs{a}
+			\State $\xrange{a}\gets\xrange{a}\cup\xrange{v}$
+			\State Poista $v$ puusta $T$
+		\EndFor
+		\State Lisää $a$ puuhun $T$.
+	\EndIf
+\EndFor
+\end{algorithmic}
+\end{alg}
 
 \subsection{Lyhimmän polun kartan muodostus}
 
