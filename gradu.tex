@@ -70,6 +70,8 @@
 \newcommand\sweep[2]{\ensuremath{\textsc{pyyh}_{#2}{(#1)}}\xspace}
 \newcommand\stepof[1]{\ensuremath{\textsc{askel}{(#1)}}\xspace}
 
+\newcommand\rotr[1]{\ensuremath{\top #1}\xspace}
+
 
 \title{Algoritmeja minimilinkkipolun ongelmaan}
 \author{Mikko Sysikaski}
@@ -671,12 +673,15 @@ Hajotelmat \decomp{x} ja \decomp{y} määritettiin jatkamalla $x$- ja $y$-suunta
 Vastaavasti jokaiselle suunnalle $c\in C$ voidaan määrittää hajotelma \decomp{c} piirtämällä mahdollisimman pitkä $c$-suuntainen jana jokaisen alueen \fspace kärkipisteen läpi.
 Jako voidaan muodostaa algoritmia~\ref{alg:jako2d} muistuttavalla menetelmällä.
 
+Merkitään suuntaan $c$ osoittavaa yksikkövektoria $\vec{c}$.
+Lisäksi merkitään \rotr{\vec{c}} vektorin $\vec{c}$ pyöritystä $90\degree$ myötäpäivään.
+
 \begin{alg}\label{alg:jako2dc}
 Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{c}.
 \begin{algorithmic}
 \State $T\gets \text{tyhjä binäärihakupuu}$
 \State $E\gets\text{Alueen \fspace kärkipisteet}$
-\State Laske jokaiselle $e\in E$ pistetulo $p\dot c$, ja järjestä joukko $E$ pistetulon mukaiseen kasvavaan järjestykseen.
+\State Laske jokaiselle $e\in E$ pistetulo $e\cdot\vec{c}$, ja järjestä joukko $E$ pistetulon mukaiseen kasvavaan järjestykseen.
 \ForAll{$e\in E$}
 	\If{$e$ aloittaa esteen}
 		\Comment Tasan 1 väli $T$:ssä koskettaa väliä \xrange{e}
