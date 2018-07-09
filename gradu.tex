@@ -71,6 +71,10 @@
 \newcommand\stepof[1]{\ensuremath{\textsc{askel}{(#1)}}\xspace}
 
 \newcommand\rotr[1]{\ensuremath{\top #1}\xspace}
+\newcommand\vecof[1]{\ensuremath{\left [#1\right ]}\xspace}
+\newcommand\sline[1]{\ensuremath{S_{#1}}\xspace}
+\newcommand\intert[2]{\ensuremath{\textsc{väli}_{#1}(#2)}\xspace}
+\newcommand\point[1]{\ensuremath{\left ({#1}\right )}\xspace}
 
 
 \title{Algoritmeja minimilinkkipolun ongelmaan}
@@ -671,18 +675,39 @@ Esitämme ongelmaan ajassa $O(\size{C}^2n\log n)$ ja tilassa $O(\size{C}n)$ toim
 Yleistetään aluksi kappaleessa~\ref{sec:jako} esitetty avaruuden jakomenetelmä toimimaan $C$-suuntaisella alueella.
 Hajotelmat \decomp{x} ja \decomp{y} määritettiin jatkamalla $x$- ja $y$-suuntaisia esteiden reunoja kunnes ne törmäävät toisiin esteisiin.
 Vastaavasti jokaiselle suunnalle $c\in C$ voidaan määrittää hajotelma \decomp{c} piirtämällä mahdollisimman pitkä $c$-suuntainen jana jokaisen alueen \fspace kärkipisteen läpi.
-Jako voidaan muodostaa algoritmia~\ref{alg:jako2d} muistuttavalla menetelmällä.
 
 Merkitään suuntaan $c$ osoittavaa yksikkövektoria $\vec{c}$.
-Lisäksi merkitään \rotr{\vec{c}} vektorin $\vec{c}$ pyöritystä $90\degree$ myötäpäivään.
+Lisäksi merkitään \rotr{\vec{c}} vektorin $\vec{c}$ pyöritystä $90\degree$ vastapäivään, eli $\rotr{\vecof{x,y}}=\vecof{-y,x}$.
+
+Tarkastellaan jaon \decomp{c} muodostusta.
+Yksinkertaisuuden vuoksi oletetaan vektorin $\vec{c}$ osoittavan positiivisen $y$-akselin suuntaan, eli $\vec{c}=\point{0,1}$.
+Syöte voidaan muuntaa tähän koordinaatistoon korvaamalla jokainen kärkipiste $\vec{p}$ pisteellä $\point{p\cdot\rotr{\vec{c}},p\cdot\vec{c}}$.
+
+Jako \decomp{c} voidaan muodostaa algoritmia~\ref{alg:jako2d} muistuttavalla menetelmällä.
+Pyyhkäistään alueen \fspace yli vaakasuuntaisella suoralla.
+Pyyhkäisy pysähtyy alueen \fspace jokaisen kärkipisteen $y$-koordinaatin kohdalla, ja pyyhkäisyviivan ja alueen \fspace leikkaukset ovat \decomp{c}:n puolisuunnikkaiden kantoja.
+
+Rektilineaarisesta tapauksesta poiketen alueen \fspace ja pyyhkäisyviivan leikkaus ei pysy vakiona pysähdyspisteiden välillä, vaan muuttuu jatkuvasti.
+Leikkaus koostuu yksiulotteisista lukuväleistä, joiden päätepisteet liikkuvat vakionopeudella pyyhkäisyviivan liikkuessa.
+Päätepisteiden reitit eivät leikkaa toisiaan, joten lukuvälit voidaan säilyttää järjestyksessä tavallissa binäärihakupuussa.
+
+Jokainen binääripuussa säilytetty elementti $e$ kuvaa kahden esteen rajaama muuttuvaa lukuväliä.
+Kun pyyhkäisyviiva on yhtälön $y=t$ määrittämä suora, merkitään elementin $e$ väliä \intert{t}{e}.
+Pyyhkäisyviivan saapuessa pisteeseen $p$ muodostetaan joukon \decomp{c} puolisuunnikkaat niistä binääripuun elementeistä $e$ joilla $p\in\intert{t}{e}$.
+Lisäksi puun tila päivitetään vastaamaan pistettä $p$ sivuavia estejanoja.
+Algoritmin tarkempi kuvaus on seuraava.
 
 \begin{alg}\label{alg:jako2dc}
 Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{c}.
 \begin{algorithmic}
 \State $T\gets \text{tyhjä binäärihakupuu}$
-\State $E\gets\text{Alueen \fspace kärkipisteet}$
-\State Laske jokaiselle $e\in E$ pistetulo $e\cdot\vec{c}$, ja järjestä joukko $E$ pistetulon mukaiseen kasvavaan järjestykseen.
-\ForAll{$e\in E$}
+\State $P\gets\text{Alueen \fspace kärkipisteet}$
+\State Järjestä joukko $P$ kasvavaan järjestykseen $y$-koordinaatin mukaan.
+\ForAll{$p\in P$}
+	\If{$p\in T$}
+	\Else
+	\EndIf
+
 	\If{$e$ aloittaa esteen}
 		\Comment Tasan 1 väli $T$:ssä koskettaa väliä \xrange{e}
 		\State $v\gets\text{Väliä \xrange{e} koskettava väli puussa $T$}$
