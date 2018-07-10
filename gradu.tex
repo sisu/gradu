@@ -57,7 +57,8 @@
 \newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
 \newcommand\canoni[2]{\ensuremath{\textsc{c}_{#2}(#1)}\xspace}
 
-\newcommand\y[1]{\ensuremath{#1_y}\xspace}
+\newcommand\y[1]{\ensuremath{{#1}_y}\xspace}
+\newcommand\x[1]{\ensuremath{{#1}_x}\xspace}
 \newcommand\xrange[1]{\ensuremath{x(#1)}\xspace}
 \newcommand\yrange[1]{\ensuremath{y(#1)}\xspace}
 \newcommand\xranget[2]{\ensuremath{x(#1)_{#2}}\xspace}
@@ -505,7 +506,7 @@ Idea on muodostaa 2D-hajotelma jokaisessa uniikissa poikkileikkauksessa, ja veny
 
 \section{Rajoitetun suuntaiset minimilinkkipolut tasossa}\label{sec:limited2d}
 
-Tarkastellaan nyt minimilinkkipolun hakua rajoitteella, että polku saa käyttää vain tietyn suuntaisia linkkejä.
+Tarkastellaan minimilinkkipolun hakua rajoitteella, että polku saa käyttää vain tietyn suuntaisia linkkejä.
 Lisäksi myös esteiden reunat ovat rajoitettu kulkusuuntien mukaisesti.
 Luvussa~\ref{subsec:rect2d} tutustutaan rektilineaariseen tapaukseen, jossa kulkusuunnat vastaavat koordinaattiakselien suuntia.
 Rektilineaarisen ongelman ratkaisun pohjalta kehitetään luvussa~\ref{subsec:c2d} ratkaisu tapaukseen, jossa mahdollisten kulkusuuntien joukko $C$ on määritetty osana syötettä.
@@ -567,7 +568,7 @@ Reitinhaku toimii toistamalla vuorotellen kahta vaihetta:
 
 \begin{enumerate}
 \item Kun $k$ on pariton, \reach{k} esitetään joukkona suorakaiteita $H_k\subseteq\decomp{x}$. Jokaisesta suorakaiteesta $h\in H_k$ tutkitaan mitkä uudet suorakaiteet ovat näkyvissä pystysuorassa suunnassa $h$:sta lähtien, ja saadaan näin uusi joukko $\hat{H}_{k+1}=\set{h \mid h\in\decomp{x}, h\cap\reach{k+1}\neq\emptyset}$.
-\item Kun $k$ on parillinen, voidaan lemman~\ref{lem:valaisu} perusteella triviaalisti muodostaa $H_{k+1}=\hat{H}_k$, jolloin $\reach{k+1}=\cup_{h\in H_{k+1}}h$.
+\item Kun $k$ on parillinen, voidaan lemman~\ref{lem:valaisu} perusteella triviaalisti muodostaa $H_{k+1}=\hat{H}_k$, jolloin $\reach{k+1}=\bigcup_{h\in H_{k+1}}h$.
 \end{enumerate}
 
 Näitä vaiheita toistetaan kunnes piste~\ept saavutetaan jommassakummassa vaiheessa.
@@ -576,7 +577,7 @@ Algoritmin suorituskyvyn kannalta on myös oleellista välttää tutkimasta usea
 Koska jokainen aluetta \reach{k} koskettava suorakaide $h$ sisältyy kokonaan joukkoon \reach{k+1}, kuuluu jokainen $h$:sta näkyvä piste joukkoon \reach{k+2}.
 Jos suorakaiteen osa valaisteen algoritmin askeleella $k$, niin askeleeta $k+2$ lähtien sitä voidaan käsitellä kuin estettä, sillä kaikki sen läpi kulkevat lyhimmät polut on jo löydetty.
 
-Tarkastellaan nyt pystysuoraa valaisuoperaatiota lähtien suorakaiteiden joukosta $H\subseteq\decomp{x}$.
+Tarkastellaan pystysuoraa valaisuoperaatiota lähtien suorakaiteiden joukosta $H\subseteq\decomp{x}$.
 Uusi valaistu alue haetaan kahden pyyhkäisyn avulla, suuntiin $+y$ ja $-y$.
 Merkitään alueesta $A$ suuntaan $s$ suoritettavan pyyhkäisyn tulosta \sweep{A}{s}.
 Tarkemmin
@@ -588,14 +589,14 @@ Poikkileikkaus muodostuu toisiaan leikkaamattomista yksiulotteisesta lukuväleis
 Tietoa säilytetään tasapainotetussa binääripuussa, joka on järjestetty lukuvälien vasemman kärkipisteen mukaan.
 Jokainen puuhun tallennettu väli $v$ sisältää seuraavat kentät:
 \begin{itemize}
-\item x
+\item HT
 \end{itemize}
 
 Pyyhkäisyalgoritmi pysähtyy joukon $H$ sekä jokaisen uuden valaistun suorakaiteiden kohdalla.
 Suorakaiteita säilytetään prioriteettijonossa, joka on järjestetty suorakaiteiden alimman pisteen (eli sen joka pyyhkäisyviiva saavuttaa ensimmäisenä) mukaan.
 
 \begin{alg}\label{alg:light2d}
-Laske $\sweep{\cup_{h\in H}h}{+y}$.
+Laske $\sweep{\bigcup_{h\in H}h}{+y}$.
 \begin{algorithmic}
 \State $Q\gets\text{Joukon $H$ sisältävä prioriteettijono}$.
 \State $T\gets\text{Tyhjä binäärihakupuu}$.
@@ -665,7 +666,7 @@ Laske minimilinkkipolku pisteestä \spt pisteeseen \ept alueen \fspace sisällä
 
 \subsection{$C$-suuntaiset minimilinkkipolut}\label{subsec:c2d}
 
-Tarkastellaan nyt rektilineaarisen minimilinkkipolun ongelman yleistystä.
+Tarkastellaan seuraavaksi rektilineaarisen minimilinkkipolun ongelman yleistystä.
 Rektilineaarisessa ongelmassa sekä aluetta \fspace rajaavat esteet, että tulostettava polku koostuvat koordinaattiakselien suuntaisista janoista.
 $C$-suuntaisessa minimilinkkipolun ongelmassa määritetään syötteessä joukko suuntia $C$, ja sekä esteiden reunat että haettavan polun linkit ovat kaikki $C$:n suuntaisia.
 Esitämme ongelmaan ajassa $O(\size{C}^2n\log n)$ ja tilassa $O(\size{C}n)$ toimivan algoritmin, joka perustuu edellä esitetyn rektilineaarisen algoritmin ideoihin.
@@ -680,11 +681,11 @@ Merkitään suuntaan $c$ osoittavaa yksikkövektoria $\vec{c}$.
 Lisäksi merkitään \rotr{\vec{c}} vektorin $\vec{c}$ pyöritystä $90\degree$ vastapäivään, eli $\rotr{\vecof{x,y}}=\vecof{-y,x}$.
 
 Tarkastellaan jaon \decomp{c} muodostusta.
-Yksinkertaisuuden vuoksi oletetaan vektorin $\vec{c}$ osoittavan positiivisen $y$-akselin suuntaan, eli $\vec{c}=\point{0,1}$.
-Syöte voidaan muuntaa tähän koordinaatistoon korvaamalla jokainen kärkipiste $\vec{p}$ pisteellä $\point{p\cdot\rotr{\vec{c}},p\cdot\vec{c}}$.
+Yksinkertaisuuden vuoksi oletetaan vektorin $\vec{c}$ osoittavan positiivisen $x$-akselin suuntaan, eli $\vec{c}=\point{1,0}$.
+Syöte voidaan muuntaa tähän koordinaatistoon korvaamalla jokainen kärkipiste $\vec{p}$ pisteellä $\point{p\cdot\vec{c},p\cdot\rotr{\vec{c}}}$.
 
 Jako \decomp{c} voidaan muodostaa algoritmia~\ref{alg:jako2d} muistuttavalla menetelmällä.
-Pyyhkäistään alueen \fspace yli vaakasuuntaisella suoralla.
+Pyyhkäistään alueen \fspace yli vaakasuuntaisella (eli $c$-suuntaisella) suoralla.
 Pyyhkäisy pysähtyy alueen \fspace jokaisen kärkipisteen $y$-koordinaatin kohdalla, ja pyyhkäisyviivan ja alueen \fspace leikkaukset ovat \decomp{c}:n puolisuunnikkaiden kantoja.
 
 Rektilineaarisesta tapauksesta poiketen alueen \fspace ja pyyhkäisyviivan leikkaus ei pysy vakiona pysähdyspisteiden välillä, vaan muuttuu jatkuvasti.
@@ -695,6 +696,20 @@ Jokainen binääripuussa säilytetty elementti $e$ kuvaa kahden esteen rajaama m
 Kun pyyhkäisyviiva on yhtälön $y=t$ määrittämä suora, merkitään elementin $e$ väliä \intert{t}{e}.
 Pyyhkäisyviivan saapuessa pisteeseen $p$ muodostetaan joukon \decomp{c} puolisuunnikkaat niistä binääripuun elementeistä $e$ joilla $p\in\intert{t}{e}$.
 Lisäksi puun tila päivitetään vastaamaan pistettä $p$ sivuavia estejanoja.
+
+Jokainen alueen \fspace kärkipiste $p$ on tasan kahden estejanan kärkipiste.
+Estejanat voivat olla minkä tahansa joukon $C$ suunnan mukaisia.
+Pyyhkäisyviivan tilan muutos riippuu esteiden suunnista.
+Jaetaan esteparien suunnat viiteen tapaukseen riippuen miten pyyhkäisyviivan ja alueen \fspace leikkaus muuttuu viivan ohittaessa pisteen $p$.
+
+\begin{enumerate}
+\item Estejanat jatkuvat $p$:stä ylöspäin aloittaen vapaan tilan. Tällöin leukkaukseen ilmestyy uusi väli.
+\item Janat jatkuvat $p$:stä ylöspäin aloittaen esteen. Yksi leikkauksen väleistä jakaantuu kahdeksi.
+\item Janoista toinen jatkuu $p$:stä ylös ja toinen alas. Lukuvälien määrä ei muutu.
+\item Janat jatkuvat $p$:stä alaspäin lopettaen esteen. Kaksi lukuväliä yhdistyy yhdeksi.
+\item Janat jatkuvat $p$:stä alaspäin lopettaen vapaan tilan. Tilaa vastaava lukuväli poistuu leikkauksesta.
+\end{enumerate}
+
 Algoritmin tarkempi kuvaus on seuraava.
 
 \begin{alg}\label{alg:jako2dc}
@@ -704,8 +719,13 @@ Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{c}.
 \State $P\gets\text{Alueen \fspace kärkipisteet}$
 \State Järjestä joukko $P$ kasvavaan järjestykseen $y$-koordinaatin mukaan.
 \ForAll{$p\in P$}
-	\If{$p\in T$}
+	\State $e_1,e_2 \gets \text{Estevektorit pisteestä } p$
+	\If{$\y{e_1}>0$ ja $\y{e_2}>0$}
+		\Comment Tapaus 1
+	\ElsIf{$\y{e_1}<0$ ja $\y{e_2}<0$}
+		\Comment Tapaus 2
 	\Else
+		\Comment Tapaus 3
 	\EndIf
 
 	\If{$e$ aloittaa esteen}
@@ -735,6 +755,16 @@ Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{c}.
 \EndFor
 \end{algorithmic}
 \end{alg}
+
+\begin{lem}\label{lem:jako2dct}Algoritmi~\ref{alg:jako2dc} toimii ajassa $O(n\log n)$.\end{lem}
+\begin{proof}HT\end{proof}
+
+\subsubsection{Vaiheittainen valaistus puolisuunnikkaiden joukossa}
+
+Puolisuunnikasjaon avulla voidaan toteuttaa tehokas $C$-suuntainen minimilinkkipolun haku.
+Algoritmin ensimmäisenä vaiheena muodostetaan \decomp{c} jokaiselle suunnalle $c\in C$ algoritmilla~\ref{lem:jako2dct}.
+Rektilineaarista tapausta mukaillen minimilinkkipolun haku muistuttaa leveyshakua puolisuunnikkaiden joukon $\bigcup_{c\in C}\decomp{c}$ leikkausverkossa.
+
 
 \subsection{Lyhimmän polun kartan muodostus}
 
