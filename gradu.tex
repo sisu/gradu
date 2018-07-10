@@ -1,7 +1,8 @@
-\documentclass[finnish]{tktltiki2}
+\documentclass[gradu]{tktltiki2018}
+\usepackage{epsfig}
+\usepackage{subfigure}
+\usepackage{url}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{microtype}
 \usepackage{amsfonts,amsmath,amssymb,amsthm,booktabs,color,enumitem,graphicx,mathabx}
@@ -10,27 +11,24 @@
 %\usepackage{algorithmicx}
 %\usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage[pdftex,hidelinks]{hyperref}
+%\usepackage[pdftex,hidelinks]{hyperref}
 
-\makeatletter
-\AtBeginDocument{\hypersetup{pdftitle = {\@title}, pdfauthor = {\@author}}}
-\makeatother
+\begin{document}
+%\doublespacing  joskus halutaan enemm‰n kommentointitilaa rivien v‰liin
+%\onehalfspacing joskus halutaan enemm‰n kommentointitilaa rivien v‰liin
+\onehalfspacing
+%\singlespacing
 
-\usepackage[fixlanguage]{babelbib}
-\selectbiblanguage{finnish}
-
-\usepackage[nottoc]{tocbibind}
-\settocbibname{L√§hteet}
 
 \newtheorem{lau}{Lause}
 \newtheorem{lem}[lau]{Lemma}
 \newtheorem{kor}[lau]{Korollaari}
 
 \theoremstyle{definition}
-\newtheorem{maar}[lau]{M√§√§ritelm√§}
+\newtheorem{maar}[lau]{M‰‰ritelm‰}
 \newtheorem{ong}{Ongelma}
-\newtheorem{alg}[lau]{Algoritmi}
-\newtheorem{esim}[lau]{Esimerkki}
+\newtheorem{alg}{Algoritmi}
+\newtheorem{esim}{Esimerkki}
 
 \theoremstyle{remark}
 \newtheorem*{huom}{Huomautus}
@@ -48,7 +46,7 @@
 \newcommand\fspace{\ensuremath{\mathcal{A}}\xspace}
 
 \newcommand\epts{\ensuremath{P}\xspace}
-\newcommand\inter[1]{\ensuremath{\textsc{v√§li}(#1)}\xspace}
+\newcommand\inter[1]{\ensuremath{\textsc{v‰li}(#1)}\xspace}
 \newcommand\leftc[1]{\ensuremath{\textsc{vasen}(#1)}\xspace}
 \newcommand\rightc[1]{\ensuremath{\textsc{oikea}(#1)}\xspace}
 \newcommand\reach[1]{\ensuremath{\textsc{valo}(#1)}\xspace}
@@ -74,199 +72,224 @@
 \newcommand\rotr[1]{\ensuremath{\top #1}\xspace}
 \newcommand\vecof[1]{\ensuremath{\left [#1\right ]}\xspace}
 \newcommand\sline[1]{\ensuremath{S_{#1}}\xspace}
-\newcommand\intert[2]{\ensuremath{\textsc{v√§li}_{#1}(#2)}\xspace}
+\newcommand\intert[2]{\ensuremath{\textsc{v‰li}_{#1}(#2)}\xspace}
 \newcommand\point[1]{\ensuremath{\left ({#1}\right )}\xspace}
+
 
 
 \title{Algoritmeja minimilinkkipolun ongelmaan}
 \author{Mikko Sysikaski}
 \date{\today}
 \level{Pro gradu -tutkielma}
-\abstract{
-Tutkielman aihe ovat algoritmit minimilinkkipolun etsimiseen.
-Minimilinkkipolku on on geometrinen reitinhakuongelma, jossa haettavan reitin on teht√§v√§ mahdollisimman v√§h√§n k√§√§nn√∂ksi√§.
-Ty√∂ss√§ esitell√§√§n uusia algoritmeja ongelman eri variantteihin.
-}
+
+% Uudet koulutusohjelma (2017->) n‰kym‰‰n otsikkosivulla
+\department{Tietojenk‰sittelytieteen maisteriohjelma}
+%\department{Datatieteen maisteriohjelma}
+%\department{Tietojenk‰sittelytieteen kandiohjelma}
+
+\maketitle
+
+\numberofpagesinformation{\numberofpages\ sivua + \numberofappendixpages\ liitesivua}
+
+%\classification{\protect{\ \\
+%\  General and reference $\rightarrow$ Document types  $\rightarrow$ Surveys and overviews\  \\
+%\  Applied computing  $\rightarrow$ Document management and text processing  $\rightarrow$ Document management  $\rightarrow$ Text editing\ }}
 
 \keywords{algoritmit, laskennallinen geometria}
 
-% classification according to ACM Computing Classification System (http://www.acm.org/about/class/)
-% This is probably mostly relevant for computer scientists
-% uncomment the following; contents of \classification will be printed under the abstract with a title
-% "ACM Computing Classification System (CCS):"
-% \classification{}
+\supervisors{Antti Laaksonen ja Jyrki Kivinen}
 
-% If the automatic page number counting is not working as desired in your case,
-% uncomment the following to manually set the number of pages displayed in the abstract page:
-%
-% \numberofpagesinformation{16 sivua + 10 sivua liitteiss√§}
+%oletus
+%\program{Tietojenk‰sittelytiede}
 
+%Tietojenk‰sittelytieteen maisteriohjelman (2017->) tutkielma
+%\program{Tietojenk‰sittelytieteen maisteriohjelma} 
 
-\begin{document}
+%Datatieteen maisteriohjelman (2017->) tutkielma
+%\program{Datatieteen maisteriohjelma}
 
-\frontmatter      % roman page numbering for front matter
+%Kandidaatin tutkielma
+%\level{Kandidaattitutkielma}
+%Tietojenk‰sittelytieteen kandiohjelman (2017->) tutkielma
+%\program{Tietojenk‰sittelytieteen kandiohjelma}
 
-\maketitle        % title page
-\makeabstract     % abstract page
+% Tietojenk‰sittelytieteen maisteriohjelman opintosuunnat 2017->
+%\additionalinformation{Algoritmien opintosuunnan tutkielma }
+%\additionalinformation{Hajautettujen j‰rjestelmien ja tietoliikenteen opintosuunnan tutkielma}
+%\additionalinformation{Ohjelmistoj‰rjestelmien opintosuunnan tutkielma}
 
-\tableofcontents  % table of contents
+% Tietojenk‰sittelytieteen erikoistumislinjat
+%\additionalinformation{Algoritmisen bioinformatiikan erikoistumislinjan tutkielma}
+%\additionalinformation{Algoritmien, data-analytiikan ja koneoppimisen erikoistumislinjan tutkielma}
+%\additionalinformation{Hajautettujen j‰rjestelmien ja tietoliikenteen erikoistumislinjan tutkielma}
+%\additionalinformation{Ohjelmistoj‰rjestelmien erikoistumislinjan tutkielma}
 
-\mainmatter       % clear page, start arabic page numbering
+%\level{Seminaari essee}
+%\additionalinformation{Seminaarin... essee}
+
+\begin{abstract}
+Tutkielman aihe ovat algoritmit minimilinkkipolun etsimiseen.
+Minimilinkkipolku on on geometrinen reitinhakuongelma, jossa haettavan reitin on teht‰v‰ mahdollisimman v‰h‰n k‰‰nnˆksi‰.
+Tyˆss‰ esitell‰‰n uusia algoritmeja ongelman eri variantteihin.
+\end{abstract}
+
+\mytableofcontents
+
 
 
 
 \section{Johdanto}
 
 Erilaiset reitinhakuongelmat ovat laajasti tutkittu algoritmiikan osa-alue.\cite{survey}
-Tyypillinen teht√§v√§ on l√∂yt√§√§ lyhin polku kahden verkon solmun v√§lill√§.
-Ongelman geometrisessa versiossa taas pyrit√§√§n l√∂yt√§m√§√§n polku kahden pisteen v√§lill√§ jatkuvassa avaruudessa, yleens√§ monikulmioiden rajoittamalla alueella tasossa.
-Tyypillinen ongelma on minimoida polun euklidinen pituus, mutta pituus ei ole ainoa mielek√§s mitta polun hyvyydelle.
-Esimerkiksi robotin voi olla nopeampaa liikkua suoraan kuin k√§√§ntyill√§, jolloin pitk√§ mutta yksinkertainen polku on lyhytt√§ mutkittelevaa reitti√§ parempi vaihtoehto.
+Tyypillinen teht‰v‰ on lˆyt‰‰ lyhin polku kahden verkon solmun v‰lill‰.
+Ongelman geometrisessa versiossa taas pyrit‰‰n lˆyt‰m‰‰n polku kahden pisteen v‰lill‰ jatkuvassa avaruudessa, yleens‰ monikulmioiden rajoittamalla alueella tasossa.
+Tyypillinen ongelma on minimoida polun euklidinen pituus, mutta pituus ei ole ainoa mielek‰s mitta polun hyvyydelle.
+Esimerkiksi robotin voi olla nopeampaa liikkua suoraan kuin k‰‰ntyill‰, jolloin pitk‰ mutta yksinkertainen polku on lyhytt‰ mutkittelevaa reitti‰ parempi vaihtoehto.
 
-T√§ss√§ tutkielmassa keskitymme v√§h√§n k√§√§nn√∂ksi√§ tekevien polkujen l√∂yt√§miseen.
-Kun polku koostuu √§√§rellisest√§ m√§√§r√§st√§ suoria janoja, sen \textit{linkkiet√§isyys} tarkoittaa janojen m√§√§r√§√§.
-Kahden pisteen v√§linen \textit{minimilinkkipolku} tarkoittaa polkua jonka linkkiet√§isyys on pienen mahdollinen.
+T‰ss‰ tutkielmassa keskitymme v‰h‰n k‰‰nnˆksi‰ tekevien polkujen lˆyt‰miseen.
+Kun polku koostuu ‰‰rellisest‰ m‰‰r‰st‰ suoria janoja, sen \textit{linkkiet‰isyys} tarkoittaa janojen m‰‰r‰‰.
+Kahden pisteen v‰linen \textit{minimilinkkipolku} tarkoittaa polkua jonka linkkiet‰isyys on pienen mahdollinen.
 
 Minimilinkkipolun haku on hyvin tutkittu algoritmiongelma.
-Perusidealtaa algoritmit ovat yksinkertaisia, ja muistuttavat leveyshakua: etsit√§√§n alkupisteest√§ l√§htien ensin et√§isyydell√§ 1 olevat pisteet, sitten et√§ysyydell√§ 2, ja niin edelleen, kunnes haluttu loppupiste poluta l√∂ytyy.
-Algoritmien vaikea osuus on l√∂yt√§√§ sopivat tietorakenteet, joilla yll√§pit√§√§ jo l√∂ydettyjen tason pisteiden joukkoa ja etsi√§ tehokkaasti seuraavan linkin p√§√§ss√§ olevat pisteet.
+Perusidealtaa algoritmit ovat yksinkertaisia, ja muistuttavat leveyshakua: etsit‰‰n alkupisteest‰ l‰htien ensin et‰isyydell‰ 1 olevat pisteet, sitten et‰ysyydell‰ 2, ja niin edelleen, kunnes haluttu loppupiste poluta lˆytyy.
+Algoritmien vaikea osuus on lˆyt‰‰ sopivat tietorakenteet, joilla yll‰pit‰‰ jo lˆydettyjen tason pisteiden joukkoa ja etsi‰ tehokkaasti seuraavan linkin p‰‰ss‰ olevat pisteet.
 
-Ty√∂ss√§ esitell√§√§n uusia algoritmeja ongelman 2-~ja 3-ulotteisiin variantteihin.
-Minimilinkkiongelmaan esitet√§√§n approksimaatioalgoritmi, joka on ensimm√§inen tunnettu ratkaisu, joka toimii alle neli√∂llisess√§ ajassa\cite{revisited}.
-T√§m√§n lis√§ksi tutkitaan ongelman rajoitettua versiota, jossa haettava polku saa kulkea ainoastaan tiettyihin suuntiin.
-Ongelmaan esitet√§√§n uusi algoritmi, joka toimii ajassa $O(C^2n\log n)$, kun sy√∂tepolygoni sis√§lt√§√§ $n$ k√§rkipistett√§ ja k√§ytett√§viss√§ on $C$ kulkusuuntaa\cite{revisited}.
-Lis√§ksi tutustutaan ongelman 3-ulotteiseen versioon, kun ainoat sallitut suunnat ovat koordinaattiakselien suunnat.
-3D~ongelmaan esitet√§√§n uusi algoritmi, joka toimii ajassa $O(n^2\log^2n)$, joka on merkitt√§v√§ parannus aiempaan $O(n^{2.5}\log n)$ ratkaisuun\cite{restricted}.
+Tyˆss‰ esitell‰‰n uusia algoritmeja ongelman 2-~ja 3-ulotteisiin variantteihin.
+Minimilinkkiongelmaan esitet‰‰n approksimaatioalgoritmi, joka on ensimm‰inen tunnettu ratkaisu, joka toimii alle neliˆllisess‰ ajassa\cite{revisited}.
+T‰m‰n lis‰ksi tutkitaan ongelman rajoitettua versiota, jossa haettava polku saa kulkea ainoastaan tiettyihin suuntiin.
+Ongelmaan esitet‰‰n uusi algoritmi, joka toimii ajassa $O(C^2n\log n)$, kun syˆtepolygoni sis‰lt‰‰ $n$ k‰rkipistett‰ ja k‰ytett‰viss‰ on $C$ kulkusuuntaa\cite{revisited}.
+Lis‰ksi tutustutaan ongelman 3-ulotteiseen versioon, kun ainoat sallitut suunnat ovat koordinaattiakselien suunnat.
+3D~ongelmaan esitet‰‰n uusi algoritmi, joka toimii ajassa $O(n^2\log^2n)$, joka on merkitt‰v‰ parannus aiempaan $O(n^{2.5}\log n)$ ratkaisuun\cite{restricted}.
 
 \subsection{Ongelman kuvaus}
 
-Minimilinkkipolkuongelma on m√§√§ritetty seuraavasti.
+Minimilinkkipolkuongelma on m‰‰ritetty seuraavasti.
 \begin{ong}
-Sy√∂tteen√§ on annettu alueen \fspace kuvaus sek√§ pisteet $\spt\in\fspace$ ja $\ept\in\fspace$.
-Etsi polku, jonka linkkiet√§isyys on pienin mahdollinen, pisteest√§ \spt pisteeseen \ept alueen \fspace sis√§ll√§.
+Syˆtteen‰ on annettu alueen \fspace kuvaus sek‰ pisteet $\spt\in\fspace$ ja $\ept\in\fspace$.
+Etsi polku, jonka linkkiet‰isyys on pienin mahdollinen, pisteest‰ \spt pisteeseen \ept alueen \fspace sis‰ll‰.
 \end{ong}
 
-Tyypillisesti lyhimm√§n polun hakevat algoritmit aloittavat haun alkupisteest√§ ja tutkivat aluetta kunnes loppupiste saavutetaan.
-T√§ll√∂in voidaan usein muodostaa tietorakenne, joka l√∂yt√§√§ tehokkaasti polun alkupisteen \spt ja mink√§ tahansa muun pisteen v√§lill√§.
-Siksi l√§hes samoja algoritmeja voidaan soveltaa my√∂s ongelmaan jossa \ept m√§√§ritell√§√§n vasta my√∂hemmin.
+Tyypillisesti lyhimm‰n polun hakevat algoritmit aloittavat haun alkupisteest‰ ja tutkivat aluetta kunnes loppupiste saavutetaan.
+T‰llˆin voidaan usein muodostaa tietorakenne, joka lˆyt‰‰ tehokkaasti polun alkupisteen \spt ja mink‰ tahansa muun pisteen v‰lill‰.
+Siksi l‰hes samoja algoritmeja voidaan soveltaa myˆs ongelmaan jossa \ept m‰‰ritell‰‰n vasta myˆhemmin.
 
 \begin{ong}
-Sy√∂tteen√§ on annettu alueen \fspace kuvaus sek√§ piste $\spt\in\fspace$.
-Esik√§sittele sy√∂te niin, ett√§ on tehokasta hakua polku pisteen \spt ja mink√§ tahansa annetun pisteen $\ept\in\fspace$ v√§lill√§.
+Syˆtteen‰ on annettu alueen \fspace kuvaus sek‰ piste $\spt\in\fspace$.
+Esik‰sittele syˆte niin, ett‰ on tehokasta hakua polku pisteen \spt ja mink‰ tahansa annetun pisteen $\ept\in\fspace$ v‰lill‰.
 \end{ong}
 
 \subsection{Yleiskuva algoritmeista}\label{sec:yleiskuva}
 
-Kaikki tunnetut minimilinkkipolut k√§ytt√§v√§t samaa perusideaa:
-Halutaan muodostaa minimilinkkipolku pisteest√§ $A$ pisteeseen $B$.
-Merkit√§√§n kaikki alkupisteist√§ $k$ linkill√§ saavutettavien pisteiden joukkoa \reach{k}.
-M√§√§ritet√§√§n aluksi $\reach{0}=\set{A}$, ja lasketaan iteratiivisesti joukko \reach{k+1} aina joukosta \reach{k}.
-Iteraatiota jatketaan, kunnes l√∂ytyy $k$ jolle $B\in\reach{k}$.
-Iteraatiosta k√§ytet√§√§n tyypillisesti nimityst√§ \emph{vaiheittainen valaistus}, koska joukon \reach{k+1} laskua voidaan visualisoida asettamalla valonl√§hteet kaikkiin pisteisiin \reach{k}, ja tutkimalla mitk√§ pisteet tulivat valaistuksi.
+Kaikki tunnetut minimilinkkipolut k‰ytt‰v‰t samaa perusideaa:
+Halutaan muodostaa minimilinkkipolku pisteest‰ $A$ pisteeseen $B$.
+Merkit‰‰n kaikki alkupisteist‰ $k$ linkill‰ saavutettavien pisteiden joukkoa \reach{k}.
+M‰‰ritet‰‰n aluksi $\reach{0}=\set{A}$, ja lasketaan iteratiivisesti joukko \reach{k+1} aina joukosta \reach{k}.
+Iteraatiota jatketaan, kunnes lˆytyy $k$ jolle $B\in\reach{k}$.
+Iteraatiosta k‰ytet‰‰n tyypillisesti nimityst‰ \emph{vaiheittainen valaistus}, koska joukon \reach{k+1} laskua voidaan visualisoida asettamalla valonl‰hteet kaikkiin pisteisiin \reach{k}, ja tutkimalla mitk‰ pisteet tulivat valaistuksi.
 
-Prosessi muistuttaa l√§heisesti syvyyssuuntaista hakua, mutta oleellisena erona hakua ei tehd√§ verkossa, vaan jatkuvassa avaruudessa.
-Algoritmien ep√§triviaali osuus onkin valaistun osuuden yll√§pito, ja joukon \reach{k+1} tehokas laskenta joukosta \reach{k}.
-Valaistun alueen esityst√§ voidaan helpottaa jakamalla alue aluksi yksinkertaisiin osiin.
-Kolmiointi on t√§llaisesta jaosta tyypillinen esimerkki, ja sit√§ k√§ytet√§√§n monissa geometrisissa algoritmeissa.
-Rajoitetun suuntaisten minimilinkkipolkujen tapauksessa alue on kuitenkin k√§tev√§mpi jakaa suorakulmioihin tai suunnikkaisiin.
-Luvussa~\ref{sec:jako} esitet√§√§n algoritmi reintinhakuun sopivaan alueen jakoon.
+Prosessi muistuttaa l‰heisesti syvyyssuuntaista hakua, mutta oleellisena erona hakua ei tehd‰ verkossa, vaan jatkuvassa avaruudessa.
+Algoritmien ep‰triviaali osuus onkin valaistun osuuden yll‰pito, ja joukon \reach{k+1} tehokas laskenta joukosta \reach{k}.
+Valaistun alueen esityst‰ voidaan helpottaa jakamalla alue aluksi yksinkertaisiin osiin.
+Kolmiointi on t‰llaisesta jaosta tyypillinen esimerkki, ja sit‰ k‰ytet‰‰n monissa geometrisissa algoritmeissa.
+Rajoitetun suuntaisten minimilinkkipolkujen tapauksessa alue on kuitenkin k‰tev‰mpi jakaa suorakulmioihin tai suunnikkaisiin.
+Luvussa~\ref{sec:jako} esitet‰‰n algoritmi reintinhakuun sopivaan alueen jakoon.
 
-Rajoitetun suuntaisen minimilinkkipolun laskussa alue \reach{k+1} voidaan laskea tehokkaasti alueesta \reach{k} k√§ytt√§en \emph{pyyhk√§isyviiva-algoritmeja}.
-Ideana on, ett√§ tason yli "pyyhk√§ist√§√§n" suoralla viivalla, ja pyyhk√§isyn aikana lasketaan kuinka polku voi edet√§ pyyhk√§isyviivan liikesuuntaan.
-T√§ll√§ menetelm√§ll√§ saadaan vaikea 2-ulotteinen valaistusongelma muutettua joukoksi helpompia 1-ulotteisia ongelmia.
-Pyyhk√§isyviiva-algoritmien ideaa k√§sitell√§√§n tarkemmin kappaleessa~\ref{sec:sweep}.
+Rajoitetun suuntaisen minimilinkkipolun laskussa alue \reach{k+1} voidaan laskea tehokkaasti alueesta \reach{k} k‰ytt‰en \emph{pyyhk‰isyviiva-algoritmeja}.
+Ideana on, ett‰ tason yli "pyyhk‰ist‰‰n" suoralla viivalla, ja pyyhk‰isyn aikana lasketaan kuinka polku voi edet‰ pyyhk‰isyviivan liikesuuntaan.
+T‰ll‰ menetelm‰ll‰ saadaan vaikea 2-ulotteinen valaistusongelma muutettua joukoksi helpompia 1-ulotteisia ongelmia.
+Pyyhk‰isyviiva-algoritmien ideaa k‰sitell‰‰n tarkemmin kappaleessa~\ref{sec:sweep}.
 
-Pyyhk√§isyn aikana yll√§pidet√§√§n tietoa pyyhk√§isyviivan suhteesta alueen esteisiin sek√§ joukkoon \reach{k}.
-N√§iden tietojen yll√§pit√§minen edellytt√§√§ tehokasta 1-ulotteisten intervallien k√§sittely√§.
-\emph{Segmenttipuu} on monik√§ytt√∂inen tietorakenne lukuv√§lien k√§sittelyyn, ja se mahdollistaa vaiheittaisen valaistuksen vaatimien operaatioiden tehokkaan toteutuksen.
-Segmenttipuita k√§sitell√§√§n luvussa~\ref{sec:segtree}.
+Pyyhk‰isyn aikana yll‰pidet‰‰n tietoa pyyhk‰isyviivan suhteesta alueen esteisiin sek‰ joukkoon \reach{k}.
+N‰iden tietojen yll‰pit‰minen edellytt‰‰ tehokasta 1-ulotteisten intervallien k‰sittely‰.
+\emph{Segmenttipuu} on monik‰yttˆinen tietorakenne lukuv‰lien k‰sittelyyn, ja se mahdollistaa vaiheittaisen valaistuksen vaatimien operaatioiden tehokkaan toteutuksen.
+Segmenttipuita k‰sitell‰‰n luvussa~\ref{sec:segtree}.
 
-Edell√§ mainitut ideat rajoitetun suuntaisen minimilinkkipolun hakuun voidaan yleist√§√§ my√∂s kolmiulotteiseen avaruuteen.
+Edell‰ mainitut ideat rajoitetun suuntaisen minimilinkkipolun hakuun voidaan yleist‰‰ myˆs kolmiulotteiseen avaruuteen.
 Monet yksityiskohdat ovat monimutkaisempia, mutta perusajatus pysyy samana.
-Avaruus jaetaan suorakulmioiden sijaan suorakulmaisiin s√§rmi√∂ihin, ja pyyhk√§isyviivan sijaan k√§ytet√§√§n pyyhk√§isytasoa.
-My√∂s segmenttipuut yleistyv√§t elegantisti moniulottutteiseksi rakenteeksi.
-N√§it√§ osatekij√∂it√§ yhdist√§m√§ll√§ muodostetaan kolmiulotteisen rektilineaarisen minimilinkkipolkuongelman ratkaiseva algoritmi luvussa~\ref{sec:link3d}.
+Avaruus jaetaan suorakulmioiden sijaan suorakulmaisiin s‰rmiˆihin, ja pyyhk‰isyviivan sijaan k‰ytet‰‰n pyyhk‰isytasoa.
+Myˆs segmenttipuut yleistyv‰t elegantisti moniulottutteiseksi rakenteeksi.
+N‰it‰ osatekijˆit‰ yhdist‰m‰ll‰ muodostetaan kolmiulotteisen rektilineaarisen minimilinkkipolkuongelman ratkaiseva algoritmi luvussa~\ref{sec:link3d}.
 
 
 
 \section{Segmenttipuu}\label{sec:segtree}
 
-Segmenttipuu on tietorakenne yksiulotteisten lukuv√§lien joukon k√§sittelyyn.
-Rakenne mahdollistaa laajan joukon erilaisia v√§lioperaatioita logaritmisessa ajassa, kuten esimerkiksi
+Segmenttipuu on tietorakenne yksiulotteisten lukuv‰lien joukon k‰sittelyyn.
+Rakenne mahdollistaa laajan joukon erilaisia v‰lioperaatioita logaritmisessa ajassa, kuten esimerkiksi
 \begin{itemize}
-	\item Uuden v√§lin lis√§ys ja poisto.
-	\item L√∂yd√§ kaikki v√§lit, jotka leikkaavat annettua kyselyv√§li√§.
-	\item Etsi piste joka leikkaa annettua kyselyv√§li√§ mutta ei yht√§k√§√§n v√§li√§ tietorakenteessa.
-	\item Muokkaa tietorakenteessa olevia v√§lej√§ niin, ett√§ kaikki annettua v√§li√§ koskevat osat poistuvat.
+	\item Uuden v‰lin lis‰ys ja poisto.
+	\item Lˆyd‰ kaikki v‰lit, jotka leikkaavat annettua kyselyv‰li‰.
+	\item Etsi piste joka leikkaa annettua kyselyv‰li‰ mutta ei yht‰k‰‰n v‰li‰ tietorakenteessa.
+	\item Muokkaa tietorakenteessa olevia v‰lej‰ niin, ett‰ kaikki annettua v‰li‰ koskevat osat poistuvat.
 \end{itemize}
 
-Segmenttipuu on hyvin yleisk√§ytt√∂inen rakenne, jota voi laajentaa soveltumaan moniin tarpeisiin.
-Jokaiseen v√§liin voidaan tallentaa lis√§informaatiota, kuten lis√§ysaika puuhun, jolloin puusta voidaan hakea vaikkapa viimeisin lis√§ytty v√§li joka leikkaa annettua v√§li√§.
-Lis√§informaation tallentaminen puuhun kasvattaa sen muistink√§ytt√∂√§ ja p√§ivitysoperaatioiden suoritusaikaa vakiokertoimella, joten puun tukemat operaatiot on syyt√§ valita tapauskohtaisesti.
-Esit√§mme ensin rakenteen yleiset ideat, ja tutkimme sitten niiden sovellusta minimilinkkipolun ongelman kohdalla.
+Segmenttipuu on hyvin yleisk‰yttˆinen rakenne, jota voi laajentaa soveltumaan moniin tarpeisiin.
+Jokaiseen v‰liin voidaan tallentaa lis‰informaatiota, kuten lis‰ysaika puuhun, jolloin puusta voidaan hakea vaikkapa viimeisin lis‰ytty v‰li joka leikkaa annettua v‰li‰.
+Lis‰informaation tallentaminen puuhun kasvattaa sen muistink‰yttˆ‰ ja p‰ivitysoperaatioiden suoritusaikaa vakiokertoimella, joten puun tukemat operaatiot on syyt‰ valita tapauskohtaisesti.
+Esit‰mme ensin rakenteen yleiset ideat, ja tutkimme sitten niiden sovellusta minimilinkkipolun ongelman kohdalla.
 
 Segmenttipuut toteutetaan tyypillisesti \emph{semi-dynaamisena} rakenteena.
-T√§m√§ tarkoittaa, ett√§ puuta voidaan p√§ivitt√§√§ tehokkaasti, mutta puun rakenne on m√§√§ritetty etuk√§teen.
-Semi-dynaamisuus mahdollistaa puun tallentamisen muistiin tehokkaasti taulukkona bin√§√§rikeon tapaan, mik√§ tekee puusta k√§yt√§nn√∂llisen paitsi asymptoottisten rajojen todistamiseen, my√∂s k√§yt√§nn√∂n toteutuksiin.
-Semi-dynaamisuus asettaa k√§yt√§nn√∂n rajoitteen, ett√§ kaikkien puuhun tallennettavien v√§lien k√§rkipisteiden joukko \epts on tunnettava etuk√§teen.
-Suurin osa kysely- ja p√§ivitysoperaatioista toimii ajassa $O(\log \size{\epts})$, ja puun tilavaativuus ja luontiaika ovat $O(\size{\epts})$.
+T‰m‰ tarkoittaa, ett‰ puuta voidaan p‰ivitt‰‰ tehokkaasti, mutta puun rakenne on m‰‰ritetty etuk‰teen.
+Semi-dynaamisuus mahdollistaa puun tallentamisen muistiin tehokkaasti taulukkona bin‰‰rikeon tapaan, mik‰ tekee puusta k‰yt‰nnˆllisen paitsi asymptoottisten rajojen todistamiseen, myˆs k‰yt‰nnˆn toteutuksiin.
+Semi-dynaamisuus asettaa k‰yt‰nnˆn rajoitteen, ett‰ kaikkien puuhun tallennettavien v‰lien k‰rkipisteiden joukko \epts on tunnettava etuk‰teen.
+Suurin osa kysely- ja p‰ivitysoperaatioista toimii ajassa $O(\log \size{\epts})$, ja puun tilavaativuus ja luontiaika ovat $O(\size{\epts})$.
 
 \subsection{Segmenttipuun rakenne}
 
 \begin{figure}
-\caption{Segmenttipuussa jokainen solmu vastaa lukuv√§li√§, ja lapsisolmujen v√§lit peitt√§v√§t tarkalleen vanhemman lukuv√§lin.}\label{segpuu}
+\caption{Segmenttipuussa jokainen solmu vastaa lukuv‰li‰, ja lapsisolmujen v‰lit peitt‰v‰t tarkalleen vanhemman lukuv‰lin.}\label{segpuu}
 \end{figure}
 
-Segmenttipuu on bin√§√§ripuu, jonka jokainen solmu $s$ vastaa puoliavointa lukuv√§li√§ $\inter{s}$.
-Solmun $s$ lapsisolmut $\leftc{s}$ ja $\rightc{s}$ jakavat v√§lin $\inter{s}$ kahteen pienemp√§√§n osaan: $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cup\inter{\rightc{s}}=\emptyset$.
-Puun juurisolmu vastaa suurinta mahdollista, kaikki muut v√§lit sis√§lt√§v√§t lukuv√§li√§, ja lehtisolmut pienimpi√§ mahdollisia v√§lej√§ $\range{\epts[i]}{\epts[i+1]}$.
-Esimerkki segmenttipuun rakenteesta n√§kyy kuvassa~\ref{segpuu}.
+Segmenttipuu on bin‰‰ripuu, jonka jokainen solmu $s$ vastaa puoliavointa lukuv‰li‰ $\inter{s}$.
+Solmun $s$ lapsisolmut $\leftc{s}$ ja $\rightc{s}$ jakavat v‰lin $\inter{s}$ kahteen pienemp‰‰n osaan: $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cup\inter{\rightc{s}}=\emptyset$.
+Puun juurisolmu vastaa suurinta mahdollista, kaikki muut v‰lit sis‰lt‰v‰t lukuv‰li‰, ja lehtisolmut pienimpi‰ mahdollisia v‰lej‰ $\range{\epts[i]}{\epts[i+1]}$.
+Esimerkki segmenttipuun rakenteesta n‰kyy kuvassa~\ref{segpuu}.
 
-Semi-dynaamisessa segmenttipuussa rakenne muodostetaan heti puun luontivaiheessa, eik√§ se riipu puuhun lis√§tyist√§ v√§leist√§.
-Puu on t√§ysin tasapainoinen bin√§√§ripuu, joten sen voi tallentaa taulukkoon bin√§√§rikeon tapaan: jokaista solmua vastaa taulukon indeksi $i$, ja solmun $i$ lapsisolmut ovat $2i$ ja $2i+1$.
+Semi-dynaamisessa segmenttipuussa rakenne muodostetaan heti puun luontivaiheessa, eik‰ se riipu puuhun lis‰tyist‰ v‰leist‰.
+Puu on t‰ysin tasapainoinen bin‰‰ripuu, joten sen voi tallentaa taulukkoon bin‰‰rikeon tapaan: jokaista solmua vastaa taulukon indeksi $i$, ja solmun $i$ lapsisolmut ovat $2i$ ja $2i+1$.
 Juurisolmua vastaa indeksi~1.
 
 \subsection{Kanoniset solmut}
 
-Tarkastellaan seuraavaksi mielivaltaistan v√§lien esityst√§ puussa.
-Koska k√§rkipisteiden joukko on etuk√§teen rajattu $\epts$, jokainen lis√§tty v√§li on muotoa $\range{\epts[i]}{\epts[j]}$ joillekin indekseille $i$ ja $j$.
+Tarkastellaan seuraavaksi mielivaltaistan v‰lien esityst‰ puussa.
+Koska k‰rkipisteiden joukko on etuk‰teen rajattu $\epts$, jokainen lis‰tty v‰li on muotoa $\range{\epts[i]}{\epts[j]}$ joillekin indekseille $i$ ja $j$.
 
 \begin{figure}
-\caption{Lukuv√§lin kanoniset solmut ovat pienin joukko segmenttipuun solmuja, jotka peitt√§v√§t v√§lin mutta eiv√§t mit√§√§n muuta.}\label{kanon}
+\caption{Lukuv‰lin kanoniset solmut ovat pienin joukko segmenttipuun solmuja, jotka peitt‰v‰t v‰lin mutta eiv‰t mit‰‰n muuta.}\label{kanon}
 \end{figure}
 
-Jokaista t√§llaista v√§li√§ $v$ vastaa joukko puun solmuja, joita kutsutaan $v$:n \emph{kanonisiksi solmuiksi}, $\canon{v}$.
+Jokaista t‰llaista v‰li‰ $v$ vastaa joukko puun solmuja, joita kutsutaan $v$:n \emph{kanonisiksi solmuiksi}, $\canon{v}$.
 \begin{maar}\label{def:canon}
-V√§lin $v$ kanoniset solmut ovat pienin joukko solmuja, jotka peitt√§v√§t kokonaan v√§lin $v$, mutta eiv√§t mit√§√§n muuta, eli $\bigcup_{s\in\canon{v}}\inter{s}=v$.
+V‰lin $v$ kanoniset solmut ovat pienin joukko solmuja, jotka peitt‰v‰t kokonaan v‰lin $v$, mutta eiv‰t mit‰‰n muuta, eli $\bigcup_{s\in\canon{v}}\inter{s}=v$.
 \end{maar}
 
-Kanonisten solmujen k√§site on m√§√§ritetty my√∂s \emph{pisteelle} (eli luvulle).
+Kanonisten solmujen k‰site on m‰‰ritetty myˆs \emph{pisteelle} (eli luvulle).
 Pisteen $p$ kanoniset solmut ovat kaikki solmut, joihin $p$ koskee, eli $\canonp{p}=\set{s \mid p\in\inter{s}}$.
-Kuvassa~\ref{kanon} n√§kyy esimerkki v√§lin ja pisteen kanonisista solmuista puussa.
+Kuvassa~\ref{kanon} n‰kyy esimerkki v‰lin ja pisteen kanonisista solmuista puussa.
 
-Seuraavat kaksi lemmaa auttavat segmenttipuuoperaatioiden suoritusajan m√§√§rityksess√§.
+Seuraavat kaksi lemmaa auttavat segmenttipuuoperaatioiden suoritusajan m‰‰rityksess‰.
 
-\begin{lem}\label{kanonlog}Kaikille v√§leille $v$ p√§tee $\size{\canon{v}}=O(\log\size{\epts})$\end{lem}
+\begin{lem}\label{kanonlog}Kaikille v‰leille $v$ p‰tee $\size{\canon{v}}=O(\log\size{\epts})$\end{lem}
 \begin{proof}
-Koska segmenttipuu on tasapainoinen bin√§√§ripuu, sen syvyys on $\Theta(\log\size{\epts})$.
-Voidaan osoittaa, ett√§ $\canon{v}$ sis√§lt√§√§ korkeintaan 2 solmua jokaisella syvyydell√§, josta seuraa haluttu v√§itt√§m√§.
-T√§m√§ n√§hd√§√§n helposti, sill√§ jos jollakin syvyydell√§ on 3 solmua, niist√§ keskimm√§inen voidaan korvata solmun vanhemmalla ilman ett√§ solmujen viritt√§m√§ lukuv√§li muuttuu, eli solmujoukko ei ole minimaalinen joten se ei ole kanoninen solmujoukko.
+Koska segmenttipuu on tasapainoinen bin‰‰ripuu, sen syvyys on $\Theta(\log\size{\epts})$.
+Voidaan osoittaa, ett‰ $\canon{v}$ sis‰lt‰‰ korkeintaan 2 solmua jokaisella syvyydell‰, josta seuraa haluttu v‰itt‰m‰.
+T‰m‰ n‰hd‰‰n helposti, sill‰ jos jollakin syvyydell‰ on 3 solmua, niist‰ keskimm‰inen voidaan korvata solmun vanhemmalla ilman ett‰ solmujen viritt‰m‰ lukuv‰li muuttuu, eli solmujoukko ei ole minimaalinen joten se ei ole kanoninen solmujoukko.
 \end{proof}
 
 \begin{lem}\label{kanonplog}Joukolla $\canon{v}$ on $O(\log\size{\epts})$ esivanhempaa segmenttipuussa.\end{lem}
 \begin{proof}
-Edellist√§ vastaavalla argumentilla voidaan osoittaa, ett√§ puun jokaisella tasolla on korkeintaan 2 esivanhempaa, josta seuraa j√§lleen haluttu v√§ite.
-Selv√§sti jokaiselle solmulle $s$ ja sen esivanhemmalle $p$ p√§tee $\inter{s}\in\inter{p}$.
-Siis jos jollakin puun tasolla on 3 joukon $\canon{v}$ esivanhempaa, niist√§ keskimm√§iselle solmulle $x$.
+Edellist‰ vastaavalla argumentilla voidaan osoittaa, ett‰ puun jokaisella tasolla on korkeintaan 2 esivanhempaa, josta seuraa j‰lleen haluttu v‰ite.
+Selv‰sti jokaiselle solmulle $s$ ja sen esivanhemmalle $p$ p‰tee $\inter{s}\in\inter{p}$.
+Siis jos jollakin puun tasolla on 3 joukon $\canon{v}$ esivanhempaa, niist‰ keskimm‰iselle solmulle $x$.
 \end{proof}
 
-Puun kanoniset solmut ja niiden esivanhemmat voidaan iteroida l√§pi seuraavalla algoritmilla:
+Puun kanoniset solmut ja niiden esivanhemmat voidaan iteroida l‰pi seuraavalla algoritmilla:
 
 \begin{alg}\label{alg:seghaku}
-V√§lin $v$ kanonisen solmujoukon haku segmenttipuussa.
+V‰lin $v$ kanonisen solmujoukon haku segmenttipuussa.
 \begin{algorithmic}
 \Procedure{EtsiKanoniset}{$s$}
-\Comment{Tulosta v√§lin $v$ kanoniset solmut ja niiden esivanhemmat alipuussa $s$}
+\Comment{Tulosta v‰lin $v$ kanoniset solmut ja niiden esivanhemmat alipuussa $s$}
 	\If{$\inter{s}\subseteq v$}
 		\State TulostaKanoninen($s$)
 	\ElsIf{$\inter{s}\cap v\neq\emptyset$}
@@ -278,70 +301,70 @@ V√§lin $v$ kanonisen solmujoukon haku segmenttipuussa.
 \end{algorithmic}
 \end{alg}
 
-Jos p√§√§dyt√§√§n solmuun joka ei ole kanonisen joukon esivanhempi, rekursio loppuu heti.
-Siis algoritmin suoritusaika on verrannollinen kanonisten solmujen ja niiden esivanhempien m√§√§r√§√§n, joka on lemmojen~\ref{kanonlog} ja~\ref{kanonplog} nojalla $O(\log\size{\epts})$.
+Jos p‰‰dyt‰‰n solmuun joka ei ole kanonisen joukon esivanhempi, rekursio loppuu heti.
+Siis algoritmin suoritusaika on verrannollinen kanonisten solmujen ja niiden esivanhempien m‰‰r‰‰n, joka on lemmojen~\ref{kanonlog} ja~\ref{kanonplog} nojalla $O(\log\size{\epts})$.
 
 \subsection{Operaatiot puussa}
 
-Pisteen ja v√§lin kanoniset solmut m√§√§riteltiin hyvin erilaisella tavalla.
-Seuraavaksi n√§hd√§√§n, kuinka n√§m√§ kaksi m√§√§ritelm√§√§ toimivat yhdess√§, ja sallivat v√§lioperaatioiden helpon toteutuksen.
+Pisteen ja v‰lin kanoniset solmut m‰‰riteltiin hyvin erilaisella tavalla.
+Seuraavaksi n‰hd‰‰n, kuinka n‰m‰ kaksi m‰‰ritelm‰‰ toimivat yhdess‰, ja sallivat v‰lioperaatioiden helpon toteutuksen.
 
-M√§√§ritelmist√§ n√§hd√§√§n triviaalisti, ett√§ jos piste $p$ ei ole v√§lill√§ $v$, niin $\canonp{p}\cap\canon{v}=\emptyset$. Jos piste on v√§lill√§, kanonisilla solmujoukoilla on tasan yksi yhteinen solmu.
+M‰‰ritelmist‰ n‰hd‰‰n triviaalisti, ett‰ jos piste $p$ ei ole v‰lill‰ $v$, niin $\canonp{p}\cap\canon{v}=\emptyset$. Jos piste on v‰lill‰, kanonisilla solmujoukoilla on tasan yksi yhteinen solmu.
 
 \begin{lem}\label{leikkaus1}
-Olkoon v v√§li ja p piste. Jos $p\in v$, niin $\size{\canonp{p}\cap\canon{v}}=1$.\end{lem}
+Olkoon v v‰li ja p piste. Jos $p\in v$, niin $\size{\canonp{p}\cap\canon{v}}=1$.\end{lem}
 \begin{proof}
-Koska $\bigcup_{s\in\canon{v}}\inter{s}=v$ ja $p\in v$, p√§tee $p\in s$ v√§hint√§√§n yhdelle solmulle $s\in\canon{v}$, jolloin m√§√§ritelm√§n mukaan my√∂s $s\in\canonp{p}$.
+Koska $\bigcup_{s\in\canon{v}}\inter{s}=v$ ja $p\in v$, p‰tee $p\in s$ v‰hint‰‰n yhdelle solmulle $s\in\canon{v}$, jolloin m‰‰ritelm‰n mukaan myˆs $s\in\canonp{p}$.
 Siis $\size{\canonp{p}\cap\canon{v}}\ge 1$.
 
-Koska $\canon{v}$ on minimaalinen v√§lin $v$ peitt√§v√§ joukko, mitk√§√§n sen v√§lit eiv√§t leikkaa toisiaan, joten solmuja $s$ joille p√§tee $p\in\inter{x}$ on korkeintaan 1.
+Koska $\canon{v}$ on minimaalinen v‰lin $v$ peitt‰v‰ joukko, mitk‰‰n sen v‰lit eiv‰t leikkaa toisiaan, joten solmuja $s$ joille p‰tee $p\in\inter{x}$ on korkeintaan 1.
 Siis $\size{\canonp{p}\cap\canon{v}}\le 1$.
 \end{proof}
 
-Lemman~\ref{leikkaus1} ja algoritmin~\ref{alg:seghaku} avulla on helppo toteuttaa rakenne, joka tukee v√§lien tallennusta, ja mahdollistaa tietty√§ pistett√§ leikkaavien v√§lien etsimisen.
-Tallennetaan jokaiseen puun solmuun lista siihen lis√§tyist√§ v√§leist√§, ja merkit√§√§n lis√§tt√§v√§ v√§li jokaisen kanonisen solmun listaan.
-Kyselyvaiheessa k√§yd√§√§n l√§pi kaikki pisteen kanoniset solmut, ja niiden v√§lilistat antavat pistett√§ leikkaavat v√§lit.
+Lemman~\ref{leikkaus1} ja algoritmin~\ref{alg:seghaku} avulla on helppo toteuttaa rakenne, joka tukee v‰lien tallennusta, ja mahdollistaa tietty‰ pistett‰ leikkaavien v‰lien etsimisen.
+Tallennetaan jokaiseen puun solmuun lista siihen lis‰tyist‰ v‰leist‰, ja merkit‰‰n lis‰tt‰v‰ v‰li jokaisen kanonisen solmun listaan.
+Kyselyvaiheessa k‰yd‰‰n l‰pi kaikki pisteen kanoniset solmut, ja niiden v‰lilistat antavat pistett‰ leikkaavat v‰lit.
 
-Vastaavasti voidaan vaihtaa pisteiden ja lukuv√§lien j√§rjestyst√§, ja luoda rakenne, joka tallentaa pisteit√§ ja sallii annetulla v√§lill√§ olevien pisteiden tehokkaan haun.
-Uuden pisteen lis√§ys merkitsee pisteen kaikkiin kanonisten solmujen listoihin, ja v√§lill√§ olevien pisteiden haku tarkistaa pistelistat kaikista v√§lin kanonisista solmuista.
+Vastaavasti voidaan vaihtaa pisteiden ja lukuv‰lien j‰rjestyst‰, ja luoda rakenne, joka tallentaa pisteit‰ ja sallii annetulla v‰lill‰ olevien pisteiden tehokkaan haun.
+Uuden pisteen lis‰ys merkitsee pisteen kaikkiin kanonisten solmujen listoihin, ja v‰lill‰ olevien pisteiden haku tarkistaa pistelistat kaikista v‰lin kanonisista solmuista.
 
-Jos halutaan sek√§ lis√§t√§ rakenteeseen lukuv√§lej√§, ett√§ k√§ytt√§√§ v√§lej√§ kyselyihin, tilanne ei ole yht√§ suoraviivainen.
-Toisiaan leikkaavat v√§lit v√§lit eiv√§t v√§ltt√§m√§tt√§ jaa yhteisi√§ kanonisia solmuja, tai kanonisia solmuja voi olla useita, kuten n√§kyy kuvassa~\ref{kanonfailkuva}.
+Jos halutaan sek‰ lis‰t‰ rakenteeseen lukuv‰lej‰, ett‰ k‰ytt‰‰ v‰lej‰ kyselyihin, tilanne ei ole yht‰ suoraviivainen.
+Toisiaan leikkaavat v‰lit v‰lit eiv‰t v‰ltt‰m‰tt‰ jaa yhteisi‰ kanonisia solmuja, tai kanonisia solmuja voi olla useita, kuten n‰kyy kuvassa~\ref{kanonfailkuva}.
 
 \begin{figure}
-\caption{Toisiaan leikkaavilla v√§leill√§ voi olla 0, 1, tai useampia yhteisi√§ kanonisia solmuja.}\label{kanonfailkuva}
+\caption{Toisiaan leikkaavilla v‰leill‰ voi olla 0, 1, tai useampia yhteisi‰ kanonisia solmuja.}\label{kanonfailkuva}
 \end{figure}
 
-Ongelma voidaan ratkaista k√§ytt√§en kahta segmenttipuuta.
-Toiseen tallennetaan lis√§tyt v√§lit, ja toiseen niiden alkupisteet.
-Seuraava lemma auttaa t√§m√§n yhdistelm√§n analyysiss√§.
+Ongelma voidaan ratkaista k‰ytt‰en kahta segmenttipuuta.
+Toiseen tallennetaan lis‰tyt v‰lit, ja toiseen niiden alkupisteet.
+Seuraava lemma auttaa t‰m‰n yhdistelm‰n analyysiss‰.
 
 \begin{lem}\label{segleikkaus2}Jos $\range{a}{b}\cap\orange{c}{d}\neq\emptyset$, niin joko $a\in\orange{c}{d}$ tai $c\in\range{a}{b}$, mutta ei molemmat.\end{lem}
 \begin{proof}
 Tarkastellaan kahta tapausta:
 \begin{itemize}
-\item Jos $a\le c$: Selv√§sti $a\notin\orange{c}{d}$, ja $\range{a}{b}\cap\orange{c}{d}\neq\emptyset \Leftrightarrow b>c$, jolloin $c\in\range{a}{b}$.
-\item Jos $a>c$: Sev√§sti $c\notin\range{a}{b}$, ja $\range{a}{b}\cap\orange{c}{d}\neq\emptyset \Leftrightarrow a<d$, jolloin $a\in\orange{c}{d}$.
+\item Jos $a\le c$: Selv‰sti $a\notin\orange{c}{d}$, ja $\range{a}{b}\cap\orange{c}{d}\neq\emptyset \Leftrightarrow b>c$, jolloin $c\in\range{a}{b}$.
+\item Jos $a>c$: Sev‰sti $c\notin\range{a}{b}$, ja $\range{a}{b}\cap\orange{c}{d}\neq\emptyset \Leftrightarrow a<d$, jolloin $a\in\orange{c}{d}$.
 \end{itemize}
 \end{proof}
 
-Yll√§pidet√§√§n kahta segmenttipuuta:
-Puuhun $A$ tallennetaan lukuv√§lej√§ ja tehd√§√§n kyselyj√§ pisteill√§.
-Puuhun $B$ tallennetaan pisteit√§ ja tehd√§√§n kyselyj√§ v√§leill√§.
+Yll‰pidet‰‰n kahta segmenttipuuta:
+Puuhun $A$ tallennetaan lukuv‰lej‰ ja tehd‰‰n kyselyj‰ pisteill‰.
+Puuhun $B$ tallennetaan pisteit‰ ja tehd‰‰n kyselyj‰ v‰leill‰.
 
-V√§lin $\range{a}{b}$ lis√§ys muokkaa molempia segmenttipuita:
+V‰lin $\range{a}{b}$ lis‰ys muokkaa molempia segmenttipuita:
 \begin{enumerate}
-\item Lis√§√§ v√§li $\range{a}{b}$ puuhun $A$.
-\item Lis√§√§ piste $a$ puuhun $B$.
+\item Lis‰‰ v‰li $\range{a}{b}$ puuhun $A$.
+\item Lis‰‰ piste $a$ puuhun $B$.
 \end{enumerate}
 
-V√§li√§ $\range{c}{d}$ leikkaavien v√§lien haku tehd√§√§n molemmissa puissa:
+V‰li‰ $\range{c}{d}$ leikkaavien v‰lien haku tehd‰‰n molemmissa puissa:
 \begin{enumerate}
-\item Etsi pistett√§ $c$ leikkaavat v√§lit puussa $A$.
-\item Etsi v√§liin $\range{c}{d}$ sis√§ltyv√§t pisteet puussa $B$.
+\item Etsi pistett‰ $c$ leikkaavat v‰lit puussa $A$.
+\item Etsi v‰liin $\range{c}{d}$ sis‰ltyv‰t pisteet puussa $B$.
 \end{enumerate}
 
-Lemman~\ref{segleikkaus2} nojalla kahteen puuhun teht√§vien operaatioiden ansiosta hakuoperaatio l√∂yt√§√§ jokaisen kyselyv√§li√§ leikkaavan v√§lin tasan kerran.
+Lemman~\ref{segleikkaus2} nojalla kahteen puuhun teht‰vien operaatioiden ansiosta hakuoperaatio lˆyt‰‰ jokaisen kyselyv‰li‰ leikkaavan v‰lin tasan kerran.
 
 \subsection{Laiskat puuoperaatiot}
 
@@ -349,28 +372,28 @@ Lemman~\ref{segleikkaus2} nojalla kahteen puuhun teht√§vien operaatioiden ansios
 
 \subsection{Moniulotteiset segmenttipuut}
 
-Segmenttipuu voidaan yleist√§√§ kaksi- ja useampiulotteiseksi rakenteeksi varsin suoraviivaisesti.
+Segmenttipuu voidaan yleist‰‰ kaksi- ja useampiulotteiseksi rakenteeksi varsin suoraviivaisesti.
 Kaksiulotteinen segmenttipuu mahdollistaa suorakulmioiden tallentamisen ja tehokkaat aluekyselyt suorakulmion muotoiselle alueelle.
 Vastaavasti $u$-ulotteinen segmenttipuu mahdollistaa kyselyt $u$-ulotteisessa suorakaiteessa.
 
-Moniulotteinen segmenttipuu koostuu sis√§kk√§isist√§ 1-ulotteisista segmenttipuista.
+Moniulotteinen segmenttipuu koostuu sis‰kk‰isist‰ 1-ulotteisista segmenttipuista.
 $u$-ulotteisen puun rakenne on tavallinen segmenttipuu, jonka jokaiseen solmuun on tallennettu $u-1$-ulotteinen segmenttipuu.
 
-Jokainen puun dimensio vastaa yht√§ puuhun tallennettavien suorakaiteiden koordinaattiakseleista.
-Esimerkiksi 2-ulotteisessa puussa uloin segmenttipuu vastaa $y$-koordinaatteja, ja jokainen solmuihin tallennetuista sisemmist√§ puista vastaa $x$-koordinaatteja.
-Puun lehtisolmut ovat t√§ll√∂in suorakaiteita, joiden $y$-sivun m√§√§r√§√§ lehden paikka ulommassa puussa, ja $y$-sivun m√§√§ritt√§√§ paikka sisemm√§ss√§ puussa.
+Jokainen puun dimensio vastaa yht‰ puuhun tallennettavien suorakaiteiden koordinaattiakseleista.
+Esimerkiksi 2-ulotteisessa puussa uloin segmenttipuu vastaa $y$-koordinaatteja, ja jokainen solmuihin tallennetuista sisemmist‰ puista vastaa $x$-koordinaatteja.
+Puun lehtisolmut ovat t‰llˆin suorakaiteita, joiden $y$-sivun m‰‰r‰‰ lehden paikka ulommassa puussa, ja $y$-sivun m‰‰ritt‰‰ paikka sisemm‰ss‰ puussa.
 
-Kanoniset solmujoukot m√§√§ritell√§√§n vastaavasti kuin yksiulotteisessa puussa.
-M√§√§ritelm√§√§~\ref{def:canon} mukaillen m√§√§rittelemme:
+Kanoniset solmujoukot m‰‰ritell‰‰n vastaavasti kuin yksiulotteisessa puussa.
+M‰‰ritelm‰‰~\ref{def:canon} mukaillen m‰‰rittelemme:
 \begin{maar}\label{def:canond}
-$u$-ulotteisen suorakaiteen $s$ kanoniset solmut ovat pienin joukko solmuja, jotka peitt√§v√§t kokonaan suorakaiteen $s$, mutta eiv√§t mit√§√§n muuta, eli $\bigcup_{s\in\canon{v}}\inter{s}=v$.
+$u$-ulotteisen suorakaiteen $s$ kanoniset solmut ovat pienin joukko solmuja, jotka peitt‰v‰t kokonaan suorakaiteen $s$, mutta eiv‰t mit‰‰n muuta, eli $\bigcup_{s\in\canon{v}}\inter{s}=v$.
 \end{maar}
 
-Moniulotteisten suorakaiteen $s$ kanonista joukkoa merkit√§√§n samoin kuin yksiulotteisessa tapauksessakin, $\canon{s}$.
-Merkit√§√§n suorakaiteen $s$ akselin $k$ suuntaista v√§li√§ $s_k$, ja sen kanonista joukkoa 1-ulotteisessa puussa $\canoni{s_k}{k}$.
-Kanoninen joukko voidaan m√§√§ritt√§√§ ulottuvuus kerrallaan, mit√§ valaisee seuraava lemma.
+Moniulotteisten suorakaiteen $s$ kanonista joukkoa merkit‰‰n samoin kuin yksiulotteisessa tapauksessakin, $\canon{s}$.
+Merkit‰‰n suorakaiteen $s$ akselin $k$ suuntaista v‰li‰ $s_k$, ja sen kanonista joukkoa 1-ulotteisessa puussa $\canoni{s_k}{k}$.
+Kanoninen joukko voidaan m‰‰ritt‰‰ ulottuvuus kerrallaan, mit‰ valaisee seuraava lemma.
 
-\begin{lem}$u$-ulotteiselle suorakaiteelle $s$ p√§tee
+\begin{lem}$u$-ulotteiselle suorakaiteelle $s$ p‰tee
 $$\canon{s}=\set{c_1\times c_2\times c_3\dots \mid c_1\in\canoni{s_1}{1}, c_2\in\canoni{s_2}{2}\dots}$$
 eli \canon{s} on yksiulotteisten kanonisten joukkojen karteeninen tulo
 $$\canon{s}=\bigtimes_{i=1}^u \canoni{s_i}{i}.$$
@@ -381,79 +404,79 @@ $$\canon{s}=\bigtimes_{i=1}^u \canoni{s_i}{i}.$$
 
 \section{Avaruuden jako}\label{sec:jako}
 
-Minimilinkkipolkuongelmassa reitti√§ etsit√§√§n monimutkaisen muotoisella alueella, jossa on pienempi√§ monikulmioita estein√§.
-Sy√∂te on lista monikulmioita, ja kukin monikulmio esitet√§√§n listana k√§rkipisteit√§.
-T√§m√§ muoto soveltuu heikosti reitin hakuun, sill√§ estilistasta on hidasta tarkistaa esimerkiksi voiko annetusta l√§htepisteest√§ liikkua haluttuun suuntaan.
+Minimilinkkipolkuongelmassa reitti‰ etsit‰‰n monimutkaisen muotoisella alueella, jossa on pienempi‰ monikulmioita estein‰.
+Syˆte on lista monikulmioita, ja kukin monikulmio esitet‰‰n listana k‰rkipisteit‰.
+T‰m‰ muoto soveltuu heikosti reitin hakuun, sill‰ estilistasta on hidasta tarkistaa esimerkiksi voiko annetusta l‰htepisteest‰ liikkua haluttuun suuntaan.
 
-Reitinhaun tehostamiseksi vapaa alue voidaan esitt√§√§ toisessa muodossa, kuten kolmioituna.
-Rajoitetun suuntaisten minimilinkkipolkujen haussa k√§tev√§ esitysmuoto on jakaa vapaa alue suorakaiteisiin.
-Jotta hajotelmaa voidaan k√§ytt√§√§ hakualgoritmien toteuttamiseen, tallennettan jokaisen suorakaiteen yhteyteen linkit jokaisessa suunnassa olevaan kyseist√§ suorakaidetta koskettaviin naapurisuorakaiteisiin.
-Toisin sanottuna rakenne on suuntaamaton verkko, jonka jokainen solmu on suorakaide, ja jokaisen toisiaan koskettavan suorakaideparin v√§lill√§ on kaari.
-Jos sy√∂tteen estemonikulmioissa on yhteens√§ $n$ k√§rkipistett√§, voidaan vapaa tila esitt√§√§ $O(n)$ monikulmiona niin, ett√§ naapurilinkkej√§ on yhteens√§ $O(n)$.
+Reitinhaun tehostamiseksi vapaa alue voidaan esitt‰‰ toisessa muodossa, kuten kolmioituna.
+Rajoitetun suuntaisten minimilinkkipolkujen haussa k‰tev‰ esitysmuoto on jakaa vapaa alue suorakaiteisiin.
+Jotta hajotelmaa voidaan k‰ytt‰‰ hakualgoritmien toteuttamiseen, tallennettan jokaisen suorakaiteen yhteyteen linkit jokaisessa suunnassa olevaan kyseist‰ suorakaidetta koskettaviin naapurisuorakaiteisiin.
+Toisin sanottuna rakenne on suuntaamaton verkko, jonka jokainen solmu on suorakaide, ja jokaisen toisiaan koskettavan suorakaideparin v‰lill‰ on kaari.
+Jos syˆtteen estemonikulmioissa on yhteens‰ $n$ k‰rkipistett‰, voidaan vapaa tila esitt‰‰ $O(n)$ monikulmiona niin, ett‰ naapurilinkkej‰ on yhteens‰ $O(n)$.
 
-Vastaavaa rakennetta voidaan k√§ytt√§√§ my√∂s 3-ulotteisen minimilinkkipolun haussa.
-3-ulotteisessa rektilineaarisessa tapauksessa vapaata aluetta m√§√§ritt√§v√§t monitahokkaat, joiden sivut ovat koordinaattiakselien suuntaiset, ja joilla on yhteens√§ $n$ k√§rkipistett√§.
-T√§ll√∂in vapaa alue voidaan esitt√§√§ suorakulmaisten s√§rmi√∂iden verkkona, jossa on $O(n^2)$ kaarta.
+Vastaavaa rakennetta voidaan k‰ytt‰‰ myˆs 3-ulotteisen minimilinkkipolun haussa.
+3-ulotteisessa rektilineaarisessa tapauksessa vapaata aluetta m‰‰ritt‰v‰t monitahokkaat, joiden sivut ovat koordinaattiakselien suuntaiset, ja joilla on yhteens‰ $n$ k‰rkipistett‰.
+T‰llˆin vapaa alue voidaan esitt‰‰ suorakulmaisten s‰rmiˆiden verkkona, jossa on $O(n^2)$ kaarta.
 
-\subsection{Pyyhk√§isyviiva-algoritmit}\label{sec:sweep}
+\subsection{Pyyhk‰isyviiva-algoritmit}\label{sec:sweep}
 
 \subsection{Tason jakoalgoritmi}\label{sec:jako2d}
 
-Rektilineaarinen alue voidaan jakaa suorakaiteisiin jatkamalla jokaista vaakasuoraa janaa molempiin suuntiin kunnes ne t√∂rm√§√§v√§t pystysuoraan esteeseen.
-N√§in muodostunutta rakennetta kutsutaan alueen \emph{vaakasuoraksi hajotelmaksi} \decomp{x}.
-Vastaavasti jatkamalla pystysuoria janoja kunnes ne t√∂rm√§√§v√§t vaakasuoraan esteeseen saadaan alueen \emph{pystysuora hajotelma} \decomp{y}.
-T√§m√§n rakenteen koko on $O(n)$, sill√§ jokainen jatkettu jana koskettaa korkeintaan 3:a suorakaidetta.
-Jokaisella suorakaiteella on korkeintaan 2 naapuria yl√§puolella ja 2 alapuolella.
+Rektilineaarinen alue voidaan jakaa suorakaiteisiin jatkamalla jokaista vaakasuoraa janaa molempiin suuntiin kunnes ne tˆrm‰‰v‰t pystysuoraan esteeseen.
+N‰in muodostunutta rakennetta kutsutaan alueen \emph{vaakasuoraksi hajotelmaksi} \decomp{x}.
+Vastaavasti jatkamalla pystysuoria janoja kunnes ne tˆrm‰‰v‰t vaakasuoraan esteeseen saadaan alueen \emph{pystysuora hajotelma} \decomp{y}.
+T‰m‰n rakenteen koko on $O(n)$, sill‰ jokainen jatkettu jana koskettaa korkeintaan 3:a suorakaidetta.
+Jokaisella suorakaiteella on korkeintaan 2 naapuria yl‰puolella ja 2 alapuolella.
 
-\decomp{x} voidaan muodostaa pyyhk√§isyviiva-algoritmilla.
-Alueen yli pyyhk√§ist√§√§n vaakasuoralla viivalla, joka liikkuu alhaalta yl√∂s.
-Pyyhk√§isyn aikana pidet√§√§n yll√§ pyyhk√§isyviivan ja vapaan alueen leikkausta.
-Leikkaus koostuu erillisist√§ lukuv√§leist√§, jotka tallennetaan bin√§√§rihakupuuhun v√§lien alkupisteen mukaan j√§rjestettyn√§.
+\decomp{x} voidaan muodostaa pyyhk‰isyviiva-algoritmilla.
+Alueen yli pyyhk‰ist‰‰n vaakasuoralla viivalla, joka liikkuu alhaalta ylˆs.
+Pyyhk‰isyn aikana pidet‰‰n yll‰ pyyhk‰isyviivan ja vapaan alueen leikkausta.
+Leikkaus koostuu erillisist‰ lukuv‰leist‰, jotka tallennetaan bin‰‰rihakupuuhun v‰lien alkupisteen mukaan j‰rjestettyn‰.
 
-Jokainen bin√§√§rihakupuuhun lis√§tt√§v√§ elementti on rakenteilla oleva suorakaide $a$, jolla on seuraavat kent√§t:
+Jokainen bin‰‰rihakupuuhun lis‰tt‰v‰ elementti on rakenteilla oleva suorakaide $a$, jolla on seuraavat kent‰t:
 \begin{itemize}
-\item V√§li $\xrange{a}=\range{\xranget{a}{1}}{\xranget{a}{2}}$.
-\item V√§li $\yrange{a}=\range{\yranget{a}{1}}{\yranget{a}{2}}$.
-\item Lista naapurilinkkej√§ $\nbs{a}$.
+\item V‰li $\xrange{a}=\range{\xranget{a}{1}}{\xranget{a}{2}}$.
+\item V‰li $\yrange{a}=\range{\yranget{a}{1}}{\yranget{a}{2}}$.
+\item Lista naapurilinkkej‰ $\nbs{a}$.
 \end{itemize}
 
-Pyyhk√§isy pys√§htyy jokaisen estesuorakulmion vaakasuoran rajaviivan kohdalla.
-Jokainen rajaviiva joko aloittaa tai lopettaa esteen pyyhk√§isyn liikutussuuntaan n√§hden.
-Jos viiva aloittaa esteen, niin viivan kohdalle tultaessa sen x-suuntainen v√§li sis√§ltyy kokonaan hakupuuhun, eli sit√§ koskettaa puussa tasan 1 v√§li.
-Jos viiva lopettaa esteen, sen vasen tai oikea reuna saattavat koskettaa puussa olevia v√§lej√§, eli sit√§ koskettavia v√§lej√§ puussa on 0-2.
-Kummassakin tapauksessa esteviivaa koskettavat v√§lit poistetaan puusta, ja lis√§t√§√§n mahdollisesti tilalle vakiom√§√§r√§ uusia v√§lej√§, ja lis√§t√§√§n linkit vanhojen ja uusien elementtien v√§lille.
+Pyyhk‰isy pys‰htyy jokaisen estesuorakulmion vaakasuoran rajaviivan kohdalla.
+Jokainen rajaviiva joko aloittaa tai lopettaa esteen pyyhk‰isyn liikutussuuntaan n‰hden.
+Jos viiva aloittaa esteen, niin viivan kohdalle tultaessa sen x-suuntainen v‰li sis‰ltyy kokonaan hakupuuhun, eli sit‰ koskettaa puussa tasan 1 v‰li.
+Jos viiva lopettaa esteen, sen vasen tai oikea reuna saattavat koskettaa puussa olevia v‰lej‰, eli sit‰ koskettavia v‰lej‰ puussa on 0-2.
+Kummassakin tapauksessa esteviivaa koskettavat v‰lit poistetaan puusta, ja lis‰t‰‰n mahdollisesti tilalle vakiom‰‰r‰ uusia v‰lej‰, ja lis‰t‰‰n linkit vanhojen ja uusien elementtien v‰lille.
 Algoritmin tarkempi kuvaus on seuraava.
 
 \begin{alg}\label{alg:jako2d}
 Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{x}.
 \begin{algorithmic}
-\State $T\gets \text{tyhj√§ bin√§√§rihakupuu}$
+\State $T\gets \text{tyhj‰ bin‰‰rihakupuu}$
 \State $E\gets\text{Esteiden vaakasuorat janat}$
-\State J√§rjest√§ $E$ y-koordinaatin mukaan kasvavaan j√§rjestykseen.
+\State J‰rjest‰ $E$ y-koordinaatin mukaan kasvavaan j‰rjestykseen.
 \ForAll{$e\in E$}
 	\If{$e$ aloittaa esteen}
-		\Comment Tasan 1 v√§li $T$:ss√§ koskettaa v√§li√§ \xrange{e}
-		\State $v\gets\text{V√§li√§ \xrange{e} koskettava v√§li puussa $T$}$
+		\Comment Tasan 1 v‰li $T$:ss‰ koskettaa v‰li‰ \xrange{e}
+		\State $v\gets\text{V‰li‰ \xrange{e} koskettava v‰li puussa $T$}$
 		\State $\yranget{v}{2}\gets\y{e}$
-		\State Poista v√§li $v$ puusta $T$
+		\State Poista v‰li $v$ puusta $T$
 		\ForAll{$u\gets v\setminus s$}
 			\State $\yranget{u}{1}\gets\y{e}$
-			\State Lis√§√§ $v$ listaan $\nbs{u}$
+			\State Lis‰‰ $v$ listaan $\nbs{u}$
 			\State $a\gets\text{Uusi suorakaide}$
 			\State $\xrange{a}\gets u$
 			\State $\yranget{a}{1}\gets\y{e}$
-			\State Lis√§√§ $a$ puuhun $T$
+			\State Lis‰‰ $a$ puuhun $T$
 		\EndFor
 	\Else\Comment $s$ aloittaa vapaan tilan
 		\State $a\gets\text{Uusi suorakaide}$
 		\State $\xrange{a}\gets\xrange{e}$
 		\State $\yranget{a}{1}\gets\y{e}$
-		\ForAll{$v\in $ v√§li√§ \xrange{e} koskettavat v√§lit puussa $T$}
-			\State Lis√§√§ $v$ listaan \nbs{a}
+		\ForAll{$v\in $ v‰li‰ \xrange{e} koskettavat v‰lit puussa $T$}
+			\State Lis‰‰ $v$ listaan \nbs{a}
 			\State $\xrange{a}\gets\xrange{a}\cup\xrange{v}$
 			\State Poista $v$ puusta $T$
 		\EndFor
-		\State Lis√§√§ $a$ puuhun $T$.
+		\State Lis‰‰ $a$ puuhun $T$.
 	\EndIf
 \EndFor
 \end{algorithmic}
@@ -461,39 +484,39 @@ Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{x}.
 
 Algoritmin~\ref{alg:jako2d} perusteella voimme todeta seuraavan.
 
-\begin{lem}2D-alue voidaan ajassa $O(n\log n)$ jakaa $O(n)$ suorakulmioon niin, ett√§ vierekk√§isi√§ suorakulmiopareja on $O(n)$.\end{lem}
+\begin{lem}2D-alue voidaan ajassa $O(n\log n)$ jakaa $O(n)$ suorakulmioon niin, ett‰ vierekk‰isi‰ suorakulmiopareja on $O(n)$.\end{lem}
 \begin{proof}
-Algoritmi~\ref{alg:jako2d} j√§rjest√§√§ esteiden vaakasuorat janat y-koordinaatin mukaan ajassa $O(n\log n)$, ja k√§y ne sitten l√§pi $O(n)$ askeleessa.
+Algoritmi~\ref{alg:jako2d} j‰rjest‰‰ esteiden vaakasuorat janat y-koordinaatin mukaan ajassa $O(n\log n)$, ja k‰y ne sitten l‰pi $O(n)$ askeleessa.
 
-Jokaisella askeleella tulotetaan $O(1)$ suorakaidetta ja yhteytt√§ niiden v√§lille, sek√§ tehd√§√§n $O(1)$ operaatiota bin√§√§ripuuhun.
-Bin√§√§ripuu pidet√§√§n tasapainotettuna, joten jokainen operaatio siihen voidaan suorittaa ajassa $O(\log n)$.
+Jokaisella askeleella tulotetaan $O(1)$ suorakaidetta ja yhteytt‰ niiden v‰lille, sek‰ tehd‰‰n $O(1)$ operaatiota bin‰‰ripuuhun.
+Bin‰‰ripuu pidet‰‰n tasapainotettuna, joten jokainen operaatio siihen voidaan suorittaa ajassa $O(\log n)$.
 Siis tulotettavan suorakaideverkon koko on $O(n)$ solmua ja kaarta, ja se rakennetaan ajassa $O(n\log n)$.
 \end{proof}
 
-Lis√§ksi voidaan todeta seuraava tulos, joka helpottaa jakoa k√§ytt√§vien algoritmien analyysi√§.
+Lis‰ksi voidaan todeta seuraava tulos, joka helpottaa jakoa k‰ytt‰vien algoritmien analyysi‰.
 
-\begin{lem}\label{lem:jako2do1}Algoritmin~\ref{alg:jako2d} tuottamalle jokaiselle suorakaiteelle $h$ p√§tee $\size{\nbs{h}}=O(1)$.\end{lem}
+\begin{lem}\label{lem:jako2do1}Algoritmin~\ref{alg:jako2d} tuottamalle jokaiselle suorakaiteelle $h$ p‰tee $\size{\nbs{h}}=O(1)$.\end{lem}
 \begin{proof}triv\end{proof}
 
-\subsection{3D-hajotelma suorakulmaisiin s√§rmi√∂ihin}
+\subsection{3D-hajotelma suorakulmaisiin s‰rmiˆihin}
 
-Vastaavasti kuin taso jaettiin suorakaiteisiin, voidaan 3-ulotteinen suorakulmaisten monitahokkaiden rajaama alua voidaan jakaa suorakulmaisiin s√§rmi√∂ihin.
-T√§t√§ hajotelmaa hy√∂dynnet√§√§n 3D-minimilinkkipolun laskussa luvussa~\ref{sec:link3d}.
-Polunhakualgoritmin suoritusaika riippuu vahvasti hajotelman koosta, joten on toivottavaa l√∂yt√§√§ mahdollisimman pieni hajotelma.
+Vastaavasti kuin taso jaettiin suorakaiteisiin, voidaan 3-ulotteinen suorakulmaisten monitahokkaiden rajaama alua voidaan jakaa suorakulmaisiin s‰rmiˆihin.
+T‰t‰ hajotelmaa hyˆdynnet‰‰n 3D-minimilinkkipolun laskussa luvussa~\ref{sec:link3d}.
+Polunhakualgoritmin suoritusaika riippuu vahvasti hajotelman koosta, joten on toivottavaa lˆyt‰‰ mahdollisimman pieni hajotelma.
 
-Aluetta rajaavat monitahokkaat on m√§√§ritetty sy√∂tteess√§ listaamalla jokaisen monikulmion kaikkien tahkojen k√§rkipisteet.
-Sy√∂tteen koko on k√§rkipisteiden kokonaism√§√§r√§ $n$.
+Aluetta rajaavat monitahokkaat on m‰‰ritetty syˆtteess‰ listaamalla jokaisen monikulmion kaikkien tahkojen k‰rkipisteet.
+Syˆtteen koko on k‰rkipisteiden kokonaism‰‰r‰ $n$.
 
-Edell√§ esitetyn 2D-hajotelman ideat voidaan yleist√§√§ toimimaan my√∂s 3:ssa ulottuvuudessa.
-T√§m√§ ratkaisu tuottaa $O(n^2)$ solmua ja $O(n^2)$ linkki√§ niiden v√§lille.
-Tunnetaan my√∂s tapoja jakaa 3D-alue pienemp√§√§n m√§√§r√§√§n suorakaiteita, mutta n√§iss√§ hajotelmissa solmujen v√§linen vierusverkko voi sis√§lt√§√§ ylineli√∂llisen m√§√§r√§n linkkej√§.
+Edell‰ esitetyn 2D-hajotelman ideat voidaan yleist‰‰ toimimaan myˆs 3:ssa ulottuvuudessa.
+T‰m‰ ratkaisu tuottaa $O(n^2)$ solmua ja $O(n^2)$ linkki‰ niiden v‰lille.
+Tunnetaan myˆs tapoja jakaa 3D-alue pienemp‰‰n m‰‰r‰‰n suorakaiteita, mutta n‰iss‰ hajotelmissa solmujen v‰linen vierusverkko voi sis‰lt‰‰ ylineliˆllisen m‰‰r‰n linkkej‰.
 
-Hajotelman idea on pyyhk√§ist√§ alueen l√§pi tasolla joka on kohtisuorassa $z$-akselia kohti, ja tarkastella tason ja esteiden leikkausta pyyhk√§isyn aikana.
+Hajotelman idea on pyyhk‰ist‰ alueen l‰pi tasolla joka on kohtisuorassa $z$-akselia kohti, ja tarkastella tason ja esteiden leikkausta pyyhk‰isyn aikana.
 Alueen ja tason leikkausta kutsutaan alueen \emph{poikkileikkaukseksi}.
-Idea on muodostaa 2D-hajotelma jokaisessa uniikissa poikkileikkauksessa, ja venytt√§√§ n√§in saatuja $xy$-tason suorakaiteita $z$-akselin suunnassa jotta ne peitt√§v√§t koko 3-ulotteisen alueen.
+Idea on muodostaa 2D-hajotelma jokaisessa uniikissa poikkileikkauksessa, ja venytt‰‰ n‰in saatuja $xy$-tason suorakaiteita $z$-akselin suunnassa jotta ne peitt‰v‰t koko 3-ulotteisen alueen.
 
 \begin{algorithmic}\label{jako3d}
-\State $L \gets \text{tyhj√§ lista}$
+\State $L \gets \text{tyhj‰ lista}$
 \ForAll{Este-suorakaide $t$ kohtisuorassa $z$-akselia vastaan}
 	\If $t$ aloittaa esteen
 	\Else
@@ -506,129 +529,129 @@ Idea on muodostaa 2D-hajotelma jokaisessa uniikissa poikkileikkauksessa, ja veny
 
 \section{Rajoitetun suuntaiset minimilinkkipolut tasossa}\label{sec:limited2d}
 
-Tarkastellaan minimilinkkipolun hakua rajoitteella, ett√§ polku saa k√§ytt√§√§ vain tietyn suuntaisia linkkej√§.
-Lis√§ksi my√∂s esteiden reunat ovat rajoitettu kulkusuuntien mukaisesti.
+Tarkastellaan minimilinkkipolun hakua rajoitteella, ett‰ polku saa k‰ytt‰‰ vain tietyn suuntaisia linkkej‰.
+Lis‰ksi myˆs esteiden reunat ovat rajoitettu kulkusuuntien mukaisesti.
 Luvussa~\ref{subsec:rect2d} tutustutaan rektilineaariseen tapaukseen, jossa kulkusuunnat vastaavat koordinaattiakselien suuntia.
-Rektilineaarisen ongelman ratkaisun pohjalta kehitet√§√§n luvussa~\ref{subsec:c2d} ratkaisu tapaukseen, jossa mahdollisten kulkusuuntien joukko $C$ on m√§√§ritetty osana sy√∂tett√§.
+Rektilineaarisen ongelman ratkaisun pohjalta kehitet‰‰n luvussa~\ref{subsec:c2d} ratkaisu tapaukseen, jossa mahdollisten kulkusuuntien joukko $C$ on m‰‰ritetty osana syˆtett‰.
 
 \subsection{Rektilineaariset minimilinkkipolut}\label{subsec:rect2d}
 
 Tarkastellaan aluksi minimilinkkipolun ongelman \emph{rektilineaarista} versiosta.
-T√§ss√§ versiossa sek√§ hakualueen monikulmiot ett√§ tuotettava reitti on rajattu koostumaan koordinaattiakselien suuntaisista janoista.
-Esit√§mme ongelmaan $O(n \log n)$ ajassa toimivan ratkaisun, jonka ideat toimivat pohjana monimutkaisempien tapausten ratkaisuissa.
+T‰ss‰ versiossa sek‰ hakualueen monikulmiot ett‰ tuotettava reitti on rajattu koostumaan koordinaattiakselien suuntaisista janoista.
+Esit‰mme ongelmaan $O(n \log n)$ ajassa toimivan ratkaisun, jonka ideat toimivat pohjana monimutkaisempien tapausten ratkaisuissa.
 
 \subsubsection{Leikkausverkko}
 
 Reitinhaku etenee kappaleessa~\ref{sec:yleiskuva} esitetyn vaiheittaisen valaistuksen mukaisesti.
-Siis aluksi m√§√§ritet√§√§n \reach{0} vastaamaan alupistett√§, ja iteratiivisesti lasketaan \reach{k+1} joukon \reach{k} perusteella.
-Prosessia jatketaan kunnes haettu loppupiste l√∂ytyy.
+Siis aluksi m‰‰ritet‰‰n \reach{0} vastaamaan alupistett‰, ja iteratiivisesti lasketaan \reach{k+1} joukon \reach{k} perusteella.
+Prosessia jatketaan kunnes haettu loppupiste lˆytyy.
 
-On helppo n√§hd√§, ett√§ miss√§ tahansa minimilinkkipolussa joka toinen linkki on pystysuuntainen, ja joka toinen vaakasuuntainen.
-Jaetaan ongelma kahteen osaan, riippuen onko ensimm√§inen linkki pysty- vai vaakasuuntainen.
-Lyhin polku voidaan l√∂yt√§√§ ratkaisemalla molemmat osaongelmat, ja valitsemalla l√∂ydetyist√§ poluista lyhyempi.
+On helppo n‰hd‰, ett‰ miss‰ tahansa minimilinkkipolussa joka toinen linkki on pystysuuntainen, ja joka toinen vaakasuuntainen.
+Jaetaan ongelma kahteen osaan, riippuen onko ensimm‰inen linkki pysty- vai vaakasuuntainen.
+Lyhin polku voidaan lˆyt‰‰ ratkaisemalla molemmat osaongelmat, ja valitsemalla lˆydetyist‰ poluista lyhyempi.
 
-Tarkastellaan tapausta, jossa ensimm√§inen linkki on vaakasuuntainen.
-Jos $k$ on parillinen, mink√§ tahansa minimilinkkipolun linkki $k$ (0-indeksoituna) on vaakasuuntainen, joten \reach{k+1} muodostuu pisteist√§, joihin joukosta \reach{k} p√§√§see liikkumalla vaakasuunnassa.
-Vastaavasti parittomalla $k$ voidaan joukko \reach{k+1} muodostaa liikkumalla pystysuunnassa l√§htien joukosta \reach{k}.
-N√§in valaistut alueet liittyv√§t l√§heisesti luvussa~\ref{sec:jako2d} esitettyyn alueen vakasuoraan ja pystysuoraan hajotelmaan, mit√§ havainnollistaa seuraava lemma.
+Tarkastellaan tapausta, jossa ensimm‰inen linkki on vaakasuuntainen.
+Jos $k$ on parillinen, mink‰ tahansa minimilinkkipolun linkki $k$ (0-indeksoituna) on vaakasuuntainen, joten \reach{k+1} muodostuu pisteist‰, joihin joukosta \reach{k} p‰‰see liikkumalla vaakasuunnassa.
+Vastaavasti parittomalla $k$ voidaan joukko \reach{k+1} muodostaa liikkumalla pystysuunnassa l‰htien joukosta \reach{k}.
+N‰in valaistut alueet liittyv‰t l‰heisesti luvussa~\ref{sec:jako2d} esitettyyn alueen vakasuoraan ja pystysuoraan hajotelmaan, mit‰ havainnollistaa seuraava lemma.
 
 \begin{lem}\label{lem:valaisu}
-Jos $k>0$ on parillinen, alue \reach{k+1} muodostuu tasan niist√§ joukon \decomp{x} suorakaiteista $h$, joille p√§tee $h\cap\reach{k}\neq\emptyset$.
-Jos $k>0$ on pariton, p√§tee vastaava v√§ite hajotelmalle \decomp{y}.
+Jos $k>0$ on parillinen, alue \reach{k+1} muodostuu tasan niist‰ joukon \decomp{x} suorakaiteista $h$, joille p‰tee $h\cap\reach{k}\neq\emptyset$.
+Jos $k>0$ on pariton, p‰tee vastaava v‰ite hajotelmalle \decomp{y}.
 \end{lem}
 \begin{proof}
-Joukko \reach{k} on muodostettu valaisemalla joukko \reach{k-1} pystysuunnassa, eli jos $p\in\reach{k}$, niin my√∂s jokainen $q\in\reach{k}$ jolle p√§tee $q_x=p_x$ ja pisteiden $q$ ja $p$ v√§lill√§ ei ole estett√§.
-Siis jos $p\in h\cap\reach{k}$ jollekin $h\in\decomp{x}$, koko pystysuora jana pisteen $p$ l√§pi suorakaiteen $h$ sis√§ll√§ on joukossa \reach{k}.
-\reach{k+1} muodostetaan valaisemalla vaakasuunnassa joukosta \reach{k}, joten suorakaiteen $h$ l√§vist√§v√§ pystysuora jana valaisee koko suorakaiteen, eli $h\subseteq\reach{k+1}$.
+Joukko \reach{k} on muodostettu valaisemalla joukko \reach{k-1} pystysuunnassa, eli jos $p\in\reach{k}$, niin myˆs jokainen $q\in\reach{k}$ jolle p‰tee $q_x=p_x$ ja pisteiden $q$ ja $p$ v‰lill‰ ei ole estett‰.
+Siis jos $p\in h\cap\reach{k}$ jollekin $h\in\decomp{x}$, koko pystysuora jana pisteen $p$ l‰pi suorakaiteen $h$ sis‰ll‰ on joukossa \reach{k}.
+\reach{k+1} muodostetaan valaisemalla vaakasuunnassa joukosta \reach{k}, joten suorakaiteen $h$ l‰vist‰v‰ pystysuora jana valaisee koko suorakaiteen, eli $h\subseteq\reach{k+1}$.
 
-Jokaisen suorakaiteen $h\in\decomp{x}$ vasen ja oikea reuna sis√§ltyv√§t esteen reunaan, joten jos $h\cap\reach{k}=\emptyset$, niin alueelta \reach{k} ei voida vaakasuunnassa siirtym√§ll√§ p√§√§ty√§ suorakaiteeseen $h$.
+Jokaisen suorakaiteen $h\in\decomp{x}$ vasen ja oikea reuna sis‰ltyv‰t esteen reunaan, joten jos $h\cap\reach{k}=\emptyset$, niin alueelta \reach{k} ei voida vaakasuunnassa siirtym‰ll‰ p‰‰ty‰ suorakaiteeseen $h$.
 Siis $h\cap\reach{k+1}\emptyset$.
 
-Jos $k$ on pariton, joukko \reach{k} on muodostettu valaisemalla joukko \reach{k-1} vaakasuunnassa, ja vastaava todistus p√§tee joukolle \decomp{y}.
+Jos $k$ on pariton, joukko \reach{k} on muodostettu valaisemalla joukko \reach{k-1} vaakasuunnassa, ja vastaava todistus p‰tee joukolle \decomp{y}.
 \end{proof}
 
-Geometristen kappaleiden joukon \emph{leikkausverkko} tarkoittaa verkkoa, jonka solmuja ovat kappaleet, ja solmujen v√§lill√§ on kaari, jos vastaavien kappaleiden leikkaus on ep√§tyhj√§.
+Geometristen kappaleiden joukon \emph{leikkausverkko} tarkoittaa verkkoa, jonka solmuja ovat kappaleet, ja solmujen v‰lill‰ on kaari, jos vastaavien kappaleiden leikkaus on ep‰tyhj‰.
 Tarkastellaan joukon $\decomp{x}\cup\decomp{y}$ leikkausverkkoa.
-T√§m√§n verkon solmuja ovat suorakaiteet, ja toisiaan leikkaavat joukon \decomp{x} ja \decomp{y} suorakaiteet on yhdistetty kaarella.
-Lemman~\ref{lem:valaisu} perusteella jos suorakaiteelle $h\in\decomp{x}$ p√§tee $h\subseteq\reach{2k}$, niin kaikille solmun $h$ naapureille $n$ leikkausverkossa p√§tee $n\subseteq\reach{2k+1}$.
-Siis vaiheittainen valaistus l√∂yt√§√§ suorakaiteet tasan samassa j√§rjestyksess√§ kuin leveyssuuntainen haku leikkausverkossa.
+T‰m‰n verkon solmuja ovat suorakaiteet, ja toisiaan leikkaavat joukon \decomp{x} ja \decomp{y} suorakaiteet on yhdistetty kaarella.
+Lemman~\ref{lem:valaisu} perusteella jos suorakaiteelle $h\in\decomp{x}$ p‰tee $h\subseteq\reach{2k}$, niin kaikille solmun $h$ naapureille $n$ leikkausverkossa p‰tee $n\subseteq\reach{2k+1}$.
+Siis vaiheittainen valaistus lˆyt‰‰ suorakaiteet tasan samassa j‰rjestyksess‰ kuin leveyssuuntainen haku leikkausverkossa.
 
-Rektilineaarinen minimilinkkipolun ongelma voidaan siis ratkaista muodostamalla leikkausverkko, ja etsim√§ll√§ siin√§ lyhin polku alku- ja loppupisteen sis√§lt√§vien suorakaiteiden v√§lill√§ leveyshakua k√§ytt√§en.
-Leikkausverkko on kuitenkin neli√∂llisen kokoinen, eli sen eksplisiittisesti muodostava algoritmi ei voi toimia alle neli√∂llisess√§ ajassa.
+Rektilineaarinen minimilinkkipolun ongelma voidaan siis ratkaista muodostamalla leikkausverkko, ja etsim‰ll‰ siin‰ lyhin polku alku- ja loppupisteen sis‰lt‰vien suorakaiteiden v‰lill‰ leveyshakua k‰ytt‰en.
+Leikkausverkko on kuitenkin neliˆllisen kokoinen, eli sen eksplisiittisesti muodostava algoritmi ei voi toimia alle neliˆllisess‰ ajassa.
 Varsinainen haaste onkin leveyshaun tehokas toteuttaminen leikkausverkossa muodostamatta itse verkkoa eksplisiittisesti.
 
 \subsubsection{Leveyshaku leikkausverkossa}
 
-Tarkastellaan j√§lleen tapausta, jossa polun ensimm√§inen linkki on vaakasuuntainen.
+Tarkastellaan j‰lleen tapausta, jossa polun ensimm‰inen linkki on vaakasuuntainen.
 Muodostetaan aluksi vaakasuuntainen hajotelma algoritmilla~\ref{alg:jako2d}.
-Pystysuuntaista hajotelmaa ei ole tarvetta muodostaa eksplisiittisesti, vaan sen ja vaakasuuntaisen hajotelman leikkausverkkoa k√§ytet√§√§n ainoastaan implisiittisen√§ rakenteena.
+Pystysuuntaista hajotelmaa ei ole tarvetta muodostaa eksplisiittisesti, vaan sen ja vaakasuuntaisen hajotelman leikkausverkkoa k‰ytet‰‰n ainoastaan implisiittisen‰ rakenteena.
 
-\reach{0} on alkupisteest√§ muodostuva alue $\set{\spt}$, ja \reach{1} pistett√§ v√§vist√§v√§ vaakasuora suorakaide.
+\reach{0} on alkupisteest‰ muodostuva alue $\set{\spt}$, ja \reach{1} pistett‰ v‰vist‰v‰ vaakasuora suorakaide.
 Reitinhaku toimii toistamalla vuorotellen kahta vaihetta:
 
 \begin{enumerate}
-\item Kun $k$ on pariton, \reach{k} esitet√§√§n joukkona suorakaiteita $H_k\subseteq\decomp{x}$. Jokaisesta suorakaiteesta $h\in H_k$ tutkitaan mitk√§ uudet suorakaiteet ovat n√§kyviss√§ pystysuorassa suunnassa $h$:sta l√§htien, ja saadaan n√§in uusi joukko $\hat{H}_{k+1}=\set{h \mid h\in\decomp{x}, h\cap\reach{k+1}\neq\emptyset}$.
+\item Kun $k$ on pariton, \reach{k} esitet‰‰n joukkona suorakaiteita $H_k\subseteq\decomp{x}$. Jokaisesta suorakaiteesta $h\in H_k$ tutkitaan mitk‰ uudet suorakaiteet ovat n‰kyviss‰ pystysuorassa suunnassa $h$:sta l‰htien, ja saadaan n‰in uusi joukko $\hat{H}_{k+1}=\set{h \mid h\in\decomp{x}, h\cap\reach{k+1}\neq\emptyset}$.
 \item Kun $k$ on parillinen, voidaan lemman~\ref{lem:valaisu} perusteella triviaalisti muodostaa $H_{k+1}=\hat{H}_k$, jolloin $\reach{k+1}=\bigcup_{h\in H_{k+1}}h$.
 \end{enumerate}
 
-N√§it√§ vaiheita toistetaan kunnes piste~\ept saavutetaan jommassakummassa vaiheessa.
+N‰it‰ vaiheita toistetaan kunnes piste~\ept saavutetaan jommassakummassa vaiheessa.
 
-Algoritmin suorituskyvyn kannalta on my√∂s oleellista v√§ltt√§√§ tutkimasta useaan kertaan samoja alueita.
-Koska jokainen aluetta \reach{k} koskettava suorakaide $h$ sis√§ltyy kokonaan joukkoon \reach{k+1}, kuuluu jokainen $h$:sta n√§kyv√§ piste joukkoon \reach{k+2}.
-Jos suorakaiteen osa valaisteen algoritmin askeleella $k$, niin askeleeta $k+2$ l√§htien sit√§ voidaan k√§sitell√§ kuin estett√§, sill√§ kaikki sen l√§pi kulkevat lyhimm√§t polut on jo l√∂ydetty.
+Algoritmin suorituskyvyn kannalta on myˆs oleellista v‰ltt‰‰ tutkimasta useaan kertaan samoja alueita.
+Koska jokainen aluetta \reach{k} koskettava suorakaide $h$ sis‰ltyy kokonaan joukkoon \reach{k+1}, kuuluu jokainen $h$:sta n‰kyv‰ piste joukkoon \reach{k+2}.
+Jos suorakaiteen osa valaisteen algoritmin askeleella $k$, niin askeleeta $k+2$ l‰htien sit‰ voidaan k‰sitell‰ kuin estett‰, sill‰ kaikki sen l‰pi kulkevat lyhimm‰t polut on jo lˆydetty.
 
-Tarkastellaan pystysuoraa valaisuoperaatiota l√§htien suorakaiteiden joukosta $H\subseteq\decomp{x}$.
-Uusi valaistu alue haetaan kahden pyyhk√§isyn avulla, suuntiin $+y$ ja $-y$.
-Merkit√§√§n alueesta $A$ suuntaan $s$ suoritettavan pyyhk√§isyn tulosta \sweep{A}{s}.
+Tarkastellaan pystysuoraa valaisuoperaatiota l‰htien suorakaiteiden joukosta $H\subseteq\decomp{x}$.
+Uusi valaistu alue haetaan kahden pyyhk‰isyn avulla, suuntiin $+y$ ja $-y$.
+Merkit‰‰n alueesta $A$ suuntaan $s$ suoritettavan pyyhk‰isyn tulosta \sweep{A}{s}.
 Tarkemmin
 $$\sweep{A}{s}=\set{p+\alpha s \mid p\in A, \alpha\ge 0, p+\beta s\in\fspace \text{ kaikille } \beta\in\crange{0}{\alpha}}.$$
-Selv√§sti $\reach{k+1}=\sweep{\reach{k}}{+y}\cup\sweep{\reach{k}}{-y}$ kun $k$ on pariton.
+Selv‰sti $\reach{k+1}=\sweep{\reach{k}}{+y}\cup\sweep{\reach{k}}{-y}$ kun $k$ on pariton.
 
-Pyyhk√§isyn aikana yll√§pidet√§√§n tietoa pyyhk√§isyviivan sek√§ uuden valaistavan alueen \reach{k+1} poikkileikkauksesta.
-Poikkileikkaus muodostuu toisiaan leikkaamattomista yksiulotteisesta lukuv√§leist√§.
-Tietoa s√§ilytet√§√§n tasapainotetussa bin√§√§ripuussa, joka on j√§rjestetty lukuv√§lien vasemman k√§rkipisteen mukaan.
-Jokainen puuhun tallennettu v√§li $v$ sis√§lt√§√§ seuraavat kent√§t:
+Pyyhk‰isyn aikana yll‰pidet‰‰n tietoa pyyhk‰isyviivan sek‰ uuden valaistavan alueen \reach{k+1} poikkileikkauksesta.
+Poikkileikkaus muodostuu toisiaan leikkaamattomista yksiulotteisesta lukuv‰leist‰.
+Tietoa s‰ilytet‰‰n tasapainotetussa bin‰‰ripuussa, joka on j‰rjestetty lukuv‰lien vasemman k‰rkipisteen mukaan.
+Jokainen puuhun tallennettu v‰li $v$ sis‰lt‰‰ seuraavat kent‰t:
 \begin{itemize}
 \item HT
 \end{itemize}
 
-Pyyhk√§isyalgoritmi pys√§htyy joukon $H$ sek√§ jokaisen uuden valaistun suorakaiteiden kohdalla.
-Suorakaiteita s√§ilytet√§√§n prioriteettijonossa, joka on j√§rjestetty suorakaiteiden alimman pisteen (eli sen joka pyyhk√§isyviiva saavuttaa ensimm√§isen√§) mukaan.
+Pyyhk‰isyalgoritmi pys‰htyy joukon $H$ sek‰ jokaisen uuden valaistun suorakaiteiden kohdalla.
+Suorakaiteita s‰ilytet‰‰n prioriteettijonossa, joka on j‰rjestetty suorakaiteiden alimman pisteen (eli sen joka pyyhk‰isyviiva saavuttaa ensimm‰isen‰) mukaan.
 
 \begin{alg}\label{alg:light2d}
 Laske $\sweep{\bigcup_{h\in H}h}{+y}$.
 \begin{algorithmic}
-\State $Q\gets\text{Joukon $H$ sis√§lt√§v√§ prioriteettijono}$.
-\State $T\gets\text{Tyhj√§ bin√§√§rihakupuu}$.
-\While{$Q$ ei ole tyhj√§}
+\State $Q\gets\text{Joukon $H$ sis‰lt‰v‰ prioriteettijono}$.
+\State $T\gets\text{Tyhj‰ bin‰‰rihakupuu}$.
+\While{$Q$ ei ole tyhj‰}
 	\State $h\gets \texttt{pop}(Q)$
 	\If{$h\in H$}
-		\State Lis√§√§ \xrange{h} puuhun $T$.
+		\State Lis‰‰ \xrange{h} puuhun $T$.
 	\EndIf
 	\State $r\gets\xrange{h}$
 	\ForAll{$n\in\nbsd{h}{+y}$}
 		\State $r\gets r\setminus\xrange{n}$
 		\If{$\xrange{n}\cap T\neq\emptyset$}
 			\If{$n\notin Q$}
-				\State Lis√§√§ $n$ jonoon $Q$.
+				\State Lis‰‰ $n$ jonoon $Q$.
 			\EndIf
 		\EndIf
 	\EndFor
-	\State Poista v√§li $r$ puusta $T$.
+	\State Poista v‰li $r$ puusta $T$.
 \EndWhile
 \end{algorithmic}
 \end{alg}
 
-\begin{lem}\label{lem:light2dtime}Algoritmi~\ref{alg:light2d} toimii ajassa $O(m\log m)$, miss√§ $m$ on l√∂ydettyjen suorakaiteiden m√§√§r√§.\end{lem}
+\begin{lem}\label{lem:light2dtime}Algoritmi~\ref{alg:light2d} toimii ajassa $O(m\log m)$, miss‰ $m$ on lˆydettyjen suorakaiteiden m‰‰r‰.\end{lem}
 \begin{proof}
-P√§√§silmukan jokaisella iteraatiolla k√§sitell√§√§n l√∂ydetty suorakaide, joten silmukkaa suoritetaan tasan $m$ iteraatiota.
-Lemman~\ref{lem:jako2do1} perusteella $\size{\nbs{h}=O(1)}$, joten algoritmin sisemp√§√§ silmukkaa suoritetaan $O(1)$ iteraatiota.
-Siis jokaisella iteraatiolla tehd√§√§n $O(1)$ operaatiota prioriteettijonoon $Q$ sek√§ bin√§√§rihakupuuhun $T$.
-Jokainen n√§ist√§ operaatioista voidaan suorittaa ajassa $O(\log m)$, joten algoritmin suoritusaika on $O(m\log m)$.
+P‰‰silmukan jokaisella iteraatiolla k‰sitell‰‰n lˆydetty suorakaide, joten silmukkaa suoritetaan tasan $m$ iteraatiota.
+Lemman~\ref{lem:jako2do1} perusteella $\size{\nbs{h}=O(1)}$, joten algoritmin sisemp‰‰ silmukkaa suoritetaan $O(1)$ iteraatiota.
+Siis jokaisella iteraatiolla tehd‰‰n $O(1)$ operaatiota prioriteettijonoon $Q$ sek‰ bin‰‰rihakupuuhun $T$.
+Jokainen n‰ist‰ operaatioista voidaan suorittaa ajassa $O(\log m)$, joten algoritmin suoritusaika on $O(m\log m)$.
 \end{proof}
 
 \begin{alg}\label{alg:minlink2d}
-Laske minimilinkkipolku pisteest√§ \spt pisteeseen \ept alueen \fspace sis√§ll√§.
+Laske minimilinkkipolku pisteest‰ \spt pisteeseen \ept alueen \fspace sis‰ll‰.
 \begin{algorithmic}
 \State Muodosta \decomp{x} alueesta \fspace.
 \State $H\gets\set{h\in\decomp{x} \mid \spt\in h}$
@@ -638,7 +661,7 @@ Laske minimilinkkipolku pisteest√§ \spt pisteeseen \ept alueen \fspace sis√§ll√§
 		\State Lopeta haku.
 	\EndIf
 	\ForAll{$h\in H$}
-		\If{$\stepof{h}$ ei m√§√§ritelty}
+		\If{$\stepof{h}$ ei m‰‰ritelty}
 			\State $\stepof{h}\gets k$
 		\ElsIf{$\stepof{h} \le k+2$}
 			\ForAll{$n\in\nbs{h}$}
@@ -653,7 +676,7 @@ Laske minimilinkkipolku pisteest√§ \spt pisteeseen \ept alueen \fspace sis√§ll√§
 	\State $k\gets k+1$
 \EndWhile
 \If{$\ept\notin H$}
-	\State Alue \fspace ei ole yhten√§inen. \spt ja \ept kuuluvat sen eri osiin.
+	\State Alue \fspace ei ole yhten‰inen. \spt ja \ept kuuluvat sen eri osiin.
 \EndIf
 \end{algorithmic}
 \end{alg}
@@ -666,48 +689,48 @@ Laske minimilinkkipolku pisteest√§ \spt pisteeseen \ept alueen \fspace sis√§ll√§
 
 \subsection{$C$-suuntaiset minimilinkkipolut}\label{subsec:c2d}
 
-Tarkastellaan seuraavaksi rektilineaarisen minimilinkkipolun ongelman yleistyst√§.
-Rektilineaarisessa ongelmassa sek√§ aluetta \fspace rajaavat esteet, ett√§ tulostettava polku koostuvat koordinaattiakselien suuntaisista janoista.
-$C$-suuntaisessa minimilinkkipolun ongelmassa m√§√§ritet√§√§n sy√∂tteess√§ joukko suuntia $C$, ja sek√§ esteiden reunat ett√§ haettavan polun linkit ovat kaikki $C$:n suuntaisia.
-Esit√§mme ongelmaan ajassa $O(\size{C}^2n\log n)$ ja tilassa $O(\size{C}n)$ toimivan algoritmin, joka perustuu edell√§ esitetyn rektilineaarisen algoritmin ideoihin.
+Tarkastellaan seuraavaksi rektilineaarisen minimilinkkipolun ongelman yleistyst‰.
+Rektilineaarisessa ongelmassa sek‰ aluetta \fspace rajaavat esteet, ett‰ tulostettava polku koostuvat koordinaattiakselien suuntaisista janoista.
+$C$-suuntaisessa minimilinkkipolun ongelmassa m‰‰ritet‰‰n syˆtteess‰ joukko suuntia $C$, ja sek‰ esteiden reunat ett‰ haettavan polun linkit ovat kaikki $C$:n suuntaisia.
+Esit‰mme ongelmaan ajassa $O(\size{C}^2n\log n)$ ja tilassa $O(\size{C}n)$ toimivan algoritmin, joka perustuu edell‰ esitetyn rektilineaarisen algoritmin ideoihin.
 
 \subsubsection{Alueen jako puolisuunnikkaisiin}
 
-Yleistet√§√§n aluksi kappaleessa~\ref{sec:jako} esitetty avaruuden jakomenetelm√§ toimimaan $C$-suuntaisella alueella.
-Hajotelmat \decomp{x} ja \decomp{y} m√§√§ritettiin jatkamalla $x$- ja $y$-suuntaisia esteiden reunoja kunnes ne t√∂rm√§√§v√§t toisiin esteisiin.
-Vastaavasti jokaiselle suunnalle $c\in C$ voidaan m√§√§ritt√§√§ hajotelma \decomp{c} piirt√§m√§ll√§ mahdollisimman pitk√§ $c$-suuntainen jana jokaisen alueen \fspace k√§rkipisteen l√§pi.
+Yleistet‰‰n aluksi kappaleessa~\ref{sec:jako} esitetty avaruuden jakomenetelm‰ toimimaan $C$-suuntaisella alueella.
+Hajotelmat \decomp{x} ja \decomp{y} m‰‰ritettiin jatkamalla $x$- ja $y$-suuntaisia esteiden reunoja kunnes ne tˆrm‰‰v‰t toisiin esteisiin.
+Vastaavasti jokaiselle suunnalle $c\in C$ voidaan m‰‰ritt‰‰ hajotelma \decomp{c} piirt‰m‰ll‰ mahdollisimman pitk‰ $c$-suuntainen jana jokaisen alueen \fspace k‰rkipisteen l‰pi.
 
-Merkit√§√§n suuntaan $c$ osoittavaa yksikk√∂vektoria $\vec{c}$.
-Lis√§ksi merkit√§√§n \rotr{\vec{c}} vektorin $\vec{c}$ py√∂rityst√§ $90\degree$ vastap√§iv√§√§n, eli $\rotr{\vecof{x,y}}=\vecof{-y,x}$.
+Merkit‰‰n suuntaan $c$ osoittavaa yksikkˆvektoria $\vec{c}$.
+Lis‰ksi merkit‰‰n \rotr{\vec{c}} vektorin $\vec{c}$ pyˆrityst‰ $90\degree$ vastap‰iv‰‰n, eli $\rotr{\vecof{x,y}}=\vecof{-y,x}$.
 
 Tarkastellaan jaon \decomp{c} muodostusta.
 Yksinkertaisuuden vuoksi oletetaan vektorin $\vec{c}$ osoittavan positiivisen $x$-akselin suuntaan, eli $\vec{c}=\point{1,0}$.
-Sy√∂te voidaan muuntaa t√§h√§n koordinaatistoon korvaamalla jokainen k√§rkipiste $\vec{p}$ pisteell√§ $\point{p\cdot\vec{c},p\cdot\rotr{\vec{c}}}$.
+Syˆte voidaan muuntaa t‰h‰n koordinaatistoon korvaamalla jokainen k‰rkipiste $\vec{p}$ pisteell‰ $\point{p\cdot\vec{c},p\cdot\rotr{\vec{c}}}$.
 
-Jako \decomp{c} voidaan muodostaa algoritmia~\ref{alg:jako2d} muistuttavalla menetelm√§ll√§.
-Pyyhk√§ist√§√§n alueen \fspace yli vaakasuuntaisella (eli $c$-suuntaisella) suoralla.
-Pyyhk√§isy pys√§htyy alueen \fspace jokaisen k√§rkipisteen $y$-koordinaatin kohdalla, ja pyyhk√§isyviivan ja alueen \fspace leikkaukset ovat \decomp{c}:n puolisuunnikkaiden kantoja.
+Jako \decomp{c} voidaan muodostaa algoritmia~\ref{alg:jako2d} muistuttavalla menetelm‰ll‰.
+Pyyhk‰ist‰‰n alueen \fspace yli vaakasuuntaisella (eli $c$-suuntaisella) suoralla.
+Pyyhk‰isy pys‰htyy alueen \fspace jokaisen k‰rkipisteen $y$-koordinaatin kohdalla, ja pyyhk‰isyviivan ja alueen \fspace leikkaukset ovat \decomp{c}:n puolisuunnikkaiden kantoja.
 
-Rektilineaarisesta tapauksesta poiketen alueen \fspace ja pyyhk√§isyviivan leikkaus ei pysy vakiona pys√§hdyspisteiden v√§lill√§, vaan muuttuu jatkuvasti.
-Leikkaus koostuu yksiulotteisista lukuv√§leist√§, joiden p√§√§tepisteet liikkuvat vakionopeudella pyyhk√§isyviivan liikkuessa.
-P√§√§tepisteiden reitit eiv√§t leikkaa toisiaan, joten lukuv√§lit voidaan s√§ilytt√§√§ j√§rjestyksess√§ tavallissa bin√§√§rihakupuussa.
+Rektilineaarisesta tapauksesta poiketen alueen \fspace ja pyyhk‰isyviivan leikkaus ei pysy vakiona pys‰hdyspisteiden v‰lill‰, vaan muuttuu jatkuvasti.
+Leikkaus koostuu yksiulotteisista lukuv‰leist‰, joiden p‰‰tepisteet liikkuvat vakionopeudella pyyhk‰isyviivan liikkuessa.
+P‰‰tepisteiden reitit eiv‰t leikkaa toisiaan, joten lukuv‰lit voidaan s‰ilytt‰‰ j‰rjestyksess‰ tavallissa bin‰‰rihakupuussa.
 
-Jokainen bin√§√§ripuussa s√§ilytetty elementti $e$ kuvaa kahden esteen rajaama muuttuvaa lukuv√§li√§.
-Kun pyyhk√§isyviiva on yht√§l√∂n $y=t$ m√§√§ritt√§m√§ suora, merkit√§√§n elementin $e$ v√§li√§ \intert{t}{e}.
-Pyyhk√§isyviivan saapuessa pisteeseen $p$ muodostetaan joukon \decomp{c} puolisuunnikkaat niist√§ bin√§√§ripuun elementeist√§ $e$ joilla $p\in\intert{t}{e}$.
-Lis√§ksi puun tila p√§ivitet√§√§n vastaamaan pistett√§ $p$ sivuavia estejanoja.
+Jokainen bin‰‰ripuussa s‰ilytetty elementti $e$ kuvaa kahden esteen rajaama muuttuvaa lukuv‰li‰.
+Kun pyyhk‰isyviiva on yht‰lˆn $y=t$ m‰‰ritt‰m‰ suora, merkit‰‰n elementin $e$ v‰li‰ \intert{t}{e}.
+Pyyhk‰isyviivan saapuessa pisteeseen $p$ muodostetaan joukon \decomp{c} puolisuunnikkaat niist‰ bin‰‰ripuun elementeist‰ $e$ joilla $p\in\intert{t}{e}$.
+Lis‰ksi puun tila p‰ivitet‰‰n vastaamaan pistett‰ $p$ sivuavia estejanoja.
 
-Jokainen alueen \fspace k√§rkipiste $p$ on tasan kahden estejanan k√§rkipiste.
-Estejanat voivat olla mink√§ tahansa joukon $C$ suunnan mukaisia.
-Pyyhk√§isyviivan tilan muutos riippuu esteiden suunnista.
-Jaetaan esteparien suunnat viiteen tapaukseen riippuen miten pyyhk√§isyviivan ja alueen \fspace leikkaus muuttuu viivan ohittaessa pisteen $p$.
+Jokainen alueen \fspace k‰rkipiste $p$ on tasan kahden estejanan k‰rkipiste.
+Estejanat voivat olla mink‰ tahansa joukon $C$ suunnan mukaisia.
+Pyyhk‰isyviivan tilan muutos riippuu esteiden suunnista.
+Jaetaan esteparien suunnat viiteen tapaukseen riippuen miten pyyhk‰isyviivan ja alueen \fspace leikkaus muuttuu viivan ohittaessa pisteen $p$.
 
 \begin{enumerate}
-\item Estejanat jatkuvat $p$:st√§ yl√∂sp√§in aloittaen vapaan tilan. T√§ll√∂in leukkaukseen ilmestyy uusi v√§li.
-\item Janat jatkuvat $p$:st√§ yl√∂sp√§in aloittaen esteen. Yksi leikkauksen v√§leist√§ jakaantuu kahdeksi.
-\item Janoista toinen jatkuu $p$:st√§ yl√∂s ja toinen alas. Lukuv√§lien m√§√§r√§ ei muutu.
-\item Janat jatkuvat $p$:st√§ alasp√§in lopettaen esteen. Kaksi lukuv√§li√§ yhdistyy yhdeksi.
-\item Janat jatkuvat $p$:st√§ alasp√§in lopettaen vapaan tilan. Tilaa vastaava lukuv√§li poistuu leikkauksesta.
+\item Estejanat jatkuvat $p$:st‰ ylˆsp‰in aloittaen vapaan tilan. T‰llˆin leukkaukseen ilmestyy uusi v‰li.
+\item Janat jatkuvat $p$:st‰ ylˆsp‰in aloittaen esteen. Yksi leikkauksen v‰leist‰ jakaantuu kahdeksi.
+\item Janoista toinen jatkuu $p$:st‰ ylˆs ja toinen alas. Lukuv‰lien m‰‰r‰ ei muutu.
+\item Janat jatkuvat $p$:st‰ alasp‰in lopettaen esteen. Kaksi lukuv‰li‰ yhdistyy yhdeksi.
+\item Janat jatkuvat $p$:st‰ alasp‰in lopettaen vapaan tilan. Tilaa vastaava lukuv‰li poistuu leikkauksesta.
 \end{enumerate}
 
 Algoritmin tarkempi kuvaus on seuraava.
@@ -715,11 +738,11 @@ Algoritmin tarkempi kuvaus on seuraava.
 \begin{alg}\label{alg:jako2dc}
 Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{c}.
 \begin{algorithmic}
-\State $T\gets \text{tyhj√§ bin√§√§rihakupuu}$
-\State $P\gets\text{Alueen \fspace k√§rkipisteet}$
-\State J√§rjest√§ joukko $P$ kasvavaan j√§rjestykseen $y$-koordinaatin mukaan.
+\State $T\gets \text{tyhj‰ bin‰‰rihakupuu}$
+\State $P\gets\text{Alueen \fspace k‰rkipisteet}$
+\State J‰rjest‰ joukko $P$ kasvavaan j‰rjestykseen $y$-koordinaatin mukaan.
 \ForAll{$p\in P$}
-	\State $e_1,e_2 \gets \text{Estevektorit pisteest√§ } p$
+	\State $e_1,e_2 \gets \text{Estevektorit pisteest‰ } p$
 	\If{$\y{e_1}>0$ ja $\y{e_2}>0$}
 		\Comment Tapaus 1
 	\ElsIf{$\y{e_1}<0$ ja $\y{e_2}<0$}
@@ -729,28 +752,28 @@ Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{c}.
 	\EndIf
 
 	\If{$e$ aloittaa esteen}
-		\Comment Tasan 1 v√§li $T$:ss√§ koskettaa v√§li√§ \xrange{e}
-		\State $v\gets\text{V√§li√§ \xrange{e} koskettava v√§li puussa $T$}$
+		\Comment Tasan 1 v‰li $T$:ss‰ koskettaa v‰li‰ \xrange{e}
+		\State $v\gets\text{V‰li‰ \xrange{e} koskettava v‰li puussa $T$}$
 		\State $\yranget{v}{2}\gets\y{e}$
-		\State Poista v√§li $v$ puusta $T$
+		\State Poista v‰li $v$ puusta $T$
 		\ForAll{$u\gets v\setminus s$}
 			\State $\yranget{u}{1}\gets\y{e}$
-			\State Lis√§√§ $v$ listaan $\nbs{u}$
+			\State Lis‰‰ $v$ listaan $\nbs{u}$
 			\State $a\gets\text{Uusi suorakaide}$
 			\State $\xrange{a}\gets u$
 			\State $\yranget{a}{1}\gets\y{e}$
-			\State Lis√§√§ $a$ puuhun $T$
+			\State Lis‰‰ $a$ puuhun $T$
 		\EndFor
 	\Else\Comment $s$ aloittaa vapaan tilan
 		\State $a\gets\text{Uusi suorakaide}$
 		\State $\xrange{a}\gets\xrange{e}$
 		\State $\yranget{a}{1}\gets\y{e}$
-		\ForAll{$v\in $ v√§li√§ \xrange{e} koskettavat v√§lit puussa $T$}
-			\State Lis√§√§ $v$ listaan \nbs{a}
+		\ForAll{$v\in $ v‰li‰ \xrange{e} koskettavat v‰lit puussa $T$}
+			\State Lis‰‰ $v$ listaan \nbs{a}
 			\State $\xrange{a}\gets\xrange{a}\cup\xrange{v}$
 			\State Poista $v$ puusta $T$
 		\EndFor
-		\State Lis√§√§ $a$ puuhun $T$.
+		\State Lis‰‰ $a$ puuhun $T$.
 	\EndIf
 \EndFor
 \end{algorithmic}
@@ -762,13 +785,13 @@ Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{c}.
 \subsubsection{Vaiheittainen valaistus puolisuunnikkaiden joukossa}
 
 Puolisuunnikasjaon avulla voidaan toteuttaa tehokas $C$-suuntainen minimilinkkipolun haku.
-Algoritmin ensimm√§isen√§ vaiheena muodostetaan \decomp{c} jokaiselle suunnalle $c\in C$ algoritmilla~\ref{lem:jako2dct}.
+Algoritmin ensimm‰isen‰ vaiheena muodostetaan \decomp{c} jokaiselle suunnalle $c\in C$ algoritmilla~\ref{lem:jako2dct}.
 Rektilineaarista tapausta mukaillen minimilinkkipolun haku muistuttaa leveyshakua puolisuunnikkaiden joukon $\bigcup_{c\in C}\decomp{c}$ leikkausverkossa.
 
 
-\subsection{Lyhimm√§n polun kartan muodostus}
+\subsection{Lyhimm‰n polun kartan muodostus}
 
-\begin{lau}Ajassa $O(n\log n)$ voidaan muodostaa lyhimm√§n polun kartta, joka kertoo annetulle pisteelle \ept lyhimm√§n polun pituuden ajassa $O(\log n)$, ja tulostaa lyhimm√§n polun ajassa $O(\log n + k)$, miss√§ $k$ on polun pituus.\end{lau}
+\begin{lau}Ajassa $O(n\log n)$ voidaan muodostaa lyhimm‰n polun kartta, joka kertoo annetulle pisteelle \ept lyhimm‰n polun pituuden ajassa $O(\log n)$, ja tulostaa lyhimm‰n polun ajassa $O(\log n + k)$, miss‰ $k$ on polun pituus.\end{lau}
 \begin{proof}HT\end{proof}
 
 
@@ -781,7 +804,27 @@ Rektilineaarista tapausta mukaillen minimilinkkipolun haku muistuttaa leveyshaku
 
 
 
-\bibliographystyle{babplain-lf}
+% Sitten alkaa l‰hdeluettelo
+%
+
+
+\nocite{*}
+% yksi n‰ist‰ tai ...
+%\bibliographystyle{plain}
+%\bibliographystyle{acm}
+\bibliographystyle{ieeetr}
+
+% ... tai t‰m‰ 
+%\bibliographystyle{apalike}
+
 \bibliography{ref}
+
+\lastpage
+
+\appendices
+
+\pagestyle{empty}
+
+%\internalappendix{1}{Malli ABC}
 
 \end{document}
