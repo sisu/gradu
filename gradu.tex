@@ -14,10 +14,7 @@
 %\usepackage[pdftex,hidelinks]{hyperref}
 
 \begin{document}
-%\doublespacing  joskus halutaan enemmän kommentointitilaa rivien väliin
-%\onehalfspacing joskus halutaan enemmän kommentointitilaa rivien väliin
 \onehalfspacing
-%\singlespacing
 
 
 \newtheorem{lau}{Lause}
@@ -50,6 +47,7 @@
 \newcommand\leftc[1]{\ensuremath{\textsc{vasen}(#1)}\xspace}
 \newcommand\rightc[1]{\ensuremath{\textsc{oikea}(#1)}\xspace}
 \newcommand\reach[1]{\ensuremath{\textsc{valo}(#1)}\xspace}
+\newcommand\reachd[2]{\ensuremath{\textsc{valo}_{2}(#1)}\xspace}
 \newcommand\canon[1]{\ensuremath{\bar{\textsc{c}}(#1)}\xspace}
 \newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
 \newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
@@ -787,6 +785,25 @@ Tason vapaan tilan jako suorakaiteiden joukoksi \decomp{c}.
 Puolisuunnikasjaon avulla voidaan toteuttaa tehokas $C$-suuntainen minimilinkkipolun haku.
 Algoritmin ensimmäisenä vaiheena muodostetaan \decomp{c} jokaiselle suunnalle $c\in C$ algoritmilla~\ref{lem:jako2dct}.
 Rektilineaarista tapausta mukaillen minimilinkkipolun haku muistuttaa leveyshakua puolisuunnikkaiden joukon $\bigcup_{c\in C}\decomp{c}$ leikkausverkossa.
+
+Askeleella $k$ valaistu tila \reach{k} on yhdistelmä eri joukkojen \decomp{c} puolisuunnikkaista.
+Valaistua aluetta ei voida kuvata täydellisesti unionina hajotelmien \decomp{c} osajoukoista, sillä jotkut puolisuunnikkaat ovat valaistu osittain.
+Tällöin voidaan esittää jakamalla osa puolisuunnikkaista kahteen tai kolmeen osaan kantojen suuntaisilla janoilla.
+
+Olkoon \reachd{k}{c} niiden pisteiden joukko jotka voidaan saavuttaa $k$ linkillä, kun viimeinen linkki on $c$-suuntainen.
+Luonnollisesti $\reach{k}=\bigcup_{c\in C}\reachd{c}{k}$.
+Vaiheittaisen valaistun aikana aluetta \reach{k} ylläpidetään tässä muodossa, yhdistelmänä joukkoja \reachd{k}{c} kaikille suunnille $c$.
+
+Jokainen vaiheittaisen valaisun askel $k$ muodostaa alueen \reach{k+1} alueesta \reach{k}.
+Jokainen alue \reachd{k+1}{c} lasketaan $\size{C}-1$ pyyhkäisyllä, lähtien kaikista joukoista \reachd{k}{d} missä $c\neq d\in C$.
+Täten jokaisella askeleella suoritetaan yhteensä $\frac{\size{C}(\size{C}-1)}{2}$ pyyhkäisyä.
+
+
+\begin{lau}\label{lau:clinkt}$C$-suuntainen minimilinkkipolku voidaan laskea ajassa $O(C^2n\log n)$.\end{lau}
+\begin{proof}HT\end{proof}
+
+\begin{kor}\label{lau:clinkappr}$C$-suuntaisen minimilinkkipolun 2-approksimaatio voidaan laskea ajassa $O(Cn\log n)$.\end{kor}
+\begin{proof}HT\end{proof}
 
 
 \subsection{Lyhimmän polun kartan muodostus}
