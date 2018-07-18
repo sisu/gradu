@@ -47,7 +47,7 @@
 \newcommand\leftc[1]{\ensuremath{\textsc{vasen}(#1)}\xspace}
 \newcommand\rightc[1]{\ensuremath{\textsc{oikea}(#1)}\xspace}
 \newcommand\reach[1]{\ensuremath{\textsc{valo}(#1)}\xspace}
-\newcommand\reachd[2]{\ensuremath{\textsc{valo}_{2}(#1)}\xspace}
+\newcommand\reachd[2]{\ensuremath{\textsc{valo}_{#2}(#1)}\xspace}
 \newcommand\canon[1]{\ensuremath{\bar{\textsc{c}}(#1)}\xspace}
 \newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
 \newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
@@ -602,7 +602,9 @@ Tarkastellaan pystysuoraa valaisuoperaatiota l‰htien suorakaiteiden joukosta $H\
 Uusi valaistu alue haetaan kahden pyyhk‰isyn avulla, suuntiin $+y$ ja $-y$.
 Merkit‰‰n alueesta $A$ suuntaan $s$ suoritettavan pyyhk‰isyn tulosta \sweep{A}{s}.
 Tarkemmin
-$$\sweep{A}{s}=\set{p+\alpha s \mid p\in A, \alpha\ge 0, p+\beta s\in\fspace \text{ kaikille } \beta\in\crange{0}{\alpha}}.$$
+\begin{equation}\label{eq:sweep}
+\sweep{A}{s}=\set{p+\alpha s \mid p\in A, \alpha\ge 0, p+\beta s\in\fspace \text{ kaikille } \beta\in\crange{0}{\alpha}}.
+\end{equation}
 Selv‰sti $\reach{k+1}=\sweep{\reach{k}}{+y}\cup\sweep{\reach{k}}{-y}$ kun $k$ on pariton.
 
 Pyyhk‰isyn aikana yll‰pidet‰‰n tietoa pyyhk‰isyviivan sek‰ uuden valaistavan alueen \reach{k+1} poikkileikkauksesta.
@@ -794,10 +796,16 @@ Olkoon \reachd{k}{c} niiden pisteiden joukko jotka voidaan saavuttaa $k$ linkill
 Luonnollisesti $\reach{k}=\bigcup_{c\in C}\reachd{c}{k}$.
 Vaiheittaisen valaistun aikana aluetta \reach{k} yll‰pidet‰‰n t‰ss‰ muodossa, yhdistelm‰n‰ joukkoja \reachd{k}{c} kaikille suunnille $c$.
 
-Jokainen vaiheittaisen valaisun askel $k$ muodostaa alueen \reach{k+1} alueesta \reach{k}.
-Jokainen alue \reachd{k+1}{c} lasketaan $\size{C}-1$ pyyhk‰isyll‰, l‰htien kaikista joukoista \reachd{k}{d} miss‰ $c\neq d\in C$.
-T‰ten jokaisella askeleella suoritetaan yhteens‰ $\frac{\size{C}(\size{C}-1)}{2}$ pyyhk‰isy‰.
+Vaiheittaisen valaisun askel $k$ muodostaa alueen \reach{k+1} alueesta \reach{k}.
+Alue \reachd{k+1}{c} lasketaan tutkimalla mihin pisteisiin p‰‰st‰‰n siirtym‰ll‰ suunnassa $c$ l‰htien kaikista joukoista \reachd{k}{d}, miss‰ $c\neq d$.
+Siis uusi alue lasketaan kaavalla
+\begin{equation}\label{eq:reachck}
+\reachd{k+1}{c}=\bigcup_{d\neq c} \sweep{\reachd{k}{d}}{c}
+\end{equation}
+miss‰ \sweep{A}{c} on m‰‰ritetty kaavan~\eqref{eq:sweep} mukaisesti.
+Alue~\sweep{A}{c} voidaan laskea pyyhk‰isyalgoritmia k‰ytt‰en, joten koko kaava~\eqref{eq:reachck} voidaan evaluoida $\size{C}-1$ pyyhk‰isyll‰.
 
+Yhdell‰ pyyhk‰isyll‰ lasketaan.
 
 \begin{lau}\label{lau:clinkt}$C$-suuntainen minimilinkkipolku voidaan laskea ajassa $O(C^2n\log n)$.\end{lau}
 \begin{proof}HT\end{proof}
