@@ -41,6 +41,7 @@
 \newcommand\spt{\ensuremath{\dot{s}}\xspace}
 \newcommand\ept{\ensuremath{\dot{t}}\xspace}
 \newcommand\fspace{\ensuremath{\mathcal{A}}\xspace}
+\newcommand\dirs{\ensuremath{\mathcal{C}}\xspace}
 
 \newcommand\epts{\ensuremath{P}\xspace}
 \newcommand\inter[1]{\ensuremath{\textsc{v‰li}(#1)}\xspace}
@@ -52,6 +53,8 @@
 \newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
 \newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
 \newcommand\canoni[2]{\ensuremath{\textsc{c}_{#2}(#1)}\xspace}
+
+\newcommand\pop[1]{\ensuremath{\texttt{pop}(#1)}\xspace}
 
 \newcommand\y[1]{\ensuremath{{#1}_y}\xspace}
 \newcommand\x[1]{\ensuremath{{#1}_x}\xspace}
@@ -624,7 +627,7 @@ Laske $\sweep{\bigcup_{h\in H}h}{+y}$.
 \State $Q\gets\text{Joukon $H$ sis‰lt‰v‰ prioriteettijono}$.
 \State $T\gets\text{Tyhj‰ bin‰‰rihakupuu}$.
 \While{$Q$ ei ole tyhj‰}
-	\State $h\gets \texttt{pop}(Q)$
+	\State $h\gets\pop{q}$
 	\If{$h\in H$}
 		\State Lis‰‰ \xrange{h} puuhun $T$.
 	\EndIf
@@ -803,9 +806,34 @@ Siis uusi alue lasketaan kaavalla
 \reachd{k+1}{c}=\bigcup_{d\neq c} \sweep{\reachd{k}{d}}{c}
 \end{equation}
 miss‰ \sweep{A}{c} on m‰‰ritetty kaavan~\eqref{eq:sweep} mukaisesti.
-Alue~\sweep{A}{c} voidaan laskea pyyhk‰isyalgoritmia k‰ytt‰en, joten koko kaava~\eqref{eq:reachck} voidaan evaluoida $\size{C}-1$ pyyhk‰isyll‰.
 
-Yhdell‰ pyyhk‰isyll‰ lasketaan.
+Kaavan~\eqref{eq:reachck} osa \sweep{\reachd{k}{d}}{c} voidaan laskea k‰ytt‰en pyyhk‰isyyn perustuvaa algoritmia.
+Alue \reach{k}{d} esitet‰‰n hajotelman \decomp{d} osajoukkona $D$, jossa osa puolisuunnikkaista on leikattu pienemmiksi.
+Haluttu alue koostuu joukon \decomp{c} kokonaisista ja leikatuista puolisuunnikkaista, jotka koskettavat aluetta \reach{k}{d}.
+On helppo n‰hd‰, ett‰ jos jokin puolisuunnikas $d\in D$ l‰vist‰‰ puolisuunnikkaan $c\in\decomp{c}$, niin $c\subseteq\sweep{D}{c}$.
+Jos $d$ leikkaa $c$:t‰ mutta ei v‰vist‰ sit‰, niin $c$:st‰ v‰hint‰‰n leikattu osa sis‰ltyy ratkaisuun.
+
+Haetaan aluetta \reach{k}{d} koskettavat joukon \decomp{c} puolisuunnikkaat k‰ytt‰en pyyhk‰isyviivamenetelm‰‰.
+Pyyhk‰isyviiva on $c$:n suuntainen, ja liikkuu suuntaan $\rotr{\vec{c}}$.
+Esityksen selkeytt‰miseksi oletetaan j‰lleen, ett‰ suunta $c$ vastaa $x$-akselia ja $\rotr{\vec{c}}$ osoittaa positiiviseen $y$-akselin suuntaan.
+
+$d$-suuntaisia puolisuunnikkaita leikkaavien $c$-suuntaisten puolisuunnikkaiden haku muistuttaa algoritmin~\ref{alg:light2d} rektilineaarista pyyhk‰isy‰.
+Merkitt‰v‰n‰ erona on, ett‰ joukkojen \decomp{c} ja \decomp{d} k‰rkipisteet eiv‰t ole samat, ja pyyhk‰isyviivan on pys‰hdytt‰v‰ niiss‰ molemmissa.
+Jokainen lˆydetty joukon \decomp{c} puolisuunnikas valaistaan joko kokonaan tai osittain.
+Osittaisessa tapauksessa puolisuunnikkaaseen kirjataan sit‰ pisimm‰lle l‰vist‰v‰ $d$-suuntainen puolisuunnikas ylh‰‰lt‰ ja alhaalta (TODO:fig).
+Huomaa, ett‰ ylh‰‰lt‰ ja alhaalta osittain valaistu puolisuunnikas voi tulla yhteens‰ kokonaan valaistuksi (TODO:fig).
+Algoritmin tarkempi kuvaus on seuraava.
+
+\begin{alg}\label{alg:sweepc}
+Laske \sweep{D}{c}, eli $c$-suuntaiset puolisuunnikkaat jotka leikkaavat jotakin $d$-suuntaisten puolisuunnikkaiden joukon $D$ alkiota.
+\begin{algorithmic}
+\State $Q\gets\text{Joukon $D$ k‰rkipisteet sis‰lt‰v‰ prioriteettijono, j‰rjestetty $y$-koordinaatin mukaan}$.
+\State $T\gets\text{Tyhj‰ bin‰‰rihakupuu}$.
+\While{$Q$ ei ole tyhj‰}
+	\State $p\gets\pop{q}$
+\EndWhile
+\end{algorithmic}
+\end{alg}
 
 \begin{lau}\label{lau:clinkt}$C$-suuntainen minimilinkkipolku voidaan laskea ajassa $O(C^2n\log n)$.\end{lau}
 \begin{proof}HT\end{proof}
