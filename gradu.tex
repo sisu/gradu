@@ -83,10 +83,7 @@
 \date{\today}
 \level{Pro gradu -tutkielma}
 
-% Uudet koulutusohjelma (2017->) näkymään otsikkosivulla
 \department{Tietojenkäsittelytieteen maisteriohjelma}
-%\department{Datatieteen maisteriohjelma}
-%\department{Tietojenkäsittelytieteen kandiohjelma}
 
 \maketitle
 
@@ -165,7 +162,7 @@ Lisäksi tutustutaan ongelman 3-ulotteiseen versioon, kun ainoat sallitut suunnat
 \subsection{Ongelman kuvaus}
 
 Minimilinkkipolkuongelma on määritetty seuraavasti.
-\begin{ong}
+\begin{ong}\label{ong:path}
 Syötteenä on annettu alueen \fspace kuvaus sekä pisteet $\spt\in\fspace$ ja $\ept\in\fspace$.
 Etsi polku, jonka linkkietäisyys on pienin mahdollinen, pisteestä \spt pisteeseen \ept alueen \fspace sisällä.
 \end{ong}
@@ -174,7 +171,7 @@ Tyypillisesti lyhimmän polun hakevat algoritmit aloittavat haun alkupisteestä ja
 Tällöin voidaan usein muodostaa tietorakenne, joka löytää tehokkaasti polun alkupisteen \spt ja minkä tahansa muun pisteen välillä.
 Siksi lähes samoja algoritmeja voidaan soveltaa myös ongelmaan jossa \ept määritellään vasta myöhemmin.
 
-\begin{ong}
+\begin{ong}\label{ong:map}
 Syötteenä on annettu alueen \fspace kuvaus sekä piste $\spt\in\fspace$.
 Esikäsittele syöte niin, että on tehokasta hakua polku pisteen \spt ja minkä tahansa annetun pisteen $\ept\in\fspace$ välillä.
 \end{ong}
@@ -499,7 +496,8 @@ Lisäksi voidaan todeta seuraava tulos, joka helpottaa jakoa käyttävien algoritmi
 \begin{lem}\label{lem:jako2do1}Algoritmin~\ref{alg:jako2d} tuottamalle jokaiselle suorakaiteelle $h$ pätee $\size{\nbs{h}}=O(1)$.\end{lem}
 \begin{proof}triv\end{proof}
 
-\subsection{3D-hajotelma suorakulmaisiin särmiöihin}
+
+\subsection{3D-hajotelma suorakulmaisiin särmiöihin}\label{sec:jako3d}
 
 Vastaavasti kuin taso jaettiin suorakaiteisiin, voidaan 3-ulotteinen suorakulmaisten monitahokkaiden rajaama alua voidaan jakaa suorakulmaisiin särmiöihin.
 Tätä hajotelmaa hyödynnetään 3D-minimilinkkipolun laskussa luvussa~\ref{sec:link3d}.
@@ -516,7 +514,7 @@ Hajotelman idea on pyyhkäistä alueen läpi tasolla joka on kohtisuorassa $z$-akse
 Alueen ja tason leikkausta kutsutaan alueen \emph{poikkileikkaukseksi}.
 Idea on muodostaa 2D-hajotelma jokaisessa uniikissa poikkileikkauksessa, ja venyttää näin saatuja $xy$-tason suorakaiteita $z$-akselin suunnassa jotta ne peittävät koko 3-ulotteisen alueen.
 
-\begin{algorithmic}\label{jako3d}
+\begin{algorithmic}\label{alg:jako3d}
 \State $L \gets \text{tyhjä lista}$
 \ForAll{Este-suorakaide $t$ kohtisuorassa $z$-akselia vastaan}
 	\If $t$ aloittaa esteen
@@ -849,7 +847,22 @@ Laske \sweep{D}{c}, eli $c$-suuntaiset puolisuunnikkaat jotka leikkaavat jotakin
 
 
 
-\section{3D-minimilinkkipolut}\label{sec:link3d}
+\section{Rektilineaariset 3D-minimilinkkipolut}\label{sec:link3d}
+
+Tutustumme nyt ongelman~\ref{ong:path} tapaukseen, jossa vapaa alue \fspace on 3-ulotteinen avaruus.
+Keskitymme rektilineaariseen tapaukseen, eli aluetta rajaavat estekappaleet, joiden särmät ovat koordinaattiakselien suuntaisia, ja myös haettavan polun linkkien on oltava koordinaattiakselien suuntaisia.
+
+Kaksiulotteisen rektilineaarisen minimilinkkipolkualgoritmin perusideat soveltuvat myös 3-ulotteisen tapauksen ratkaisun pohjaksi:
+polku muodostetaan käyttäen vaiheittaista valaistusta, ja jokaisella askeleella \reach{k+1} lasketaan alueesta \reach{k} käyttäen pyyhkäisyyn perustuvaa algoritmia.
+Sen sijaan vaikeampi kysymys on, kuinka esittää alue \reach{k} sekä laskea sen perusteella \reach{k+1} tehokkaasti.
+
+Valaistun alueen esittämisessä käytetään kappaleessa~\ref{sec:jako3d} esitettyä hajotelmaa suorakulmaisiin särmiöihin.
+Toisin kuin kaksiulotteisessa tapauksessa, algoritmi ei perustu minkään tietyn hajotelman ominaisuuksiin, vaan mikä tahansa hajotelma toimii.
+Algoritmin suoritusaika riippuu hajotelman koosta, joten on eduksi käyttää pienintä mahdollista hajotelmaa.
+
+Hajotelmaa käytetään toteuttamaan pyyhkäisytasoalgoritmi, jonka avulla alue \reach{k+1} muodostetaan alueesta \reach{k}.
+Jokaisella askeleella suoritetaan 6 pyyhkäisyä, yksi kuhunkin suuntaan $\pm x,\pm y,\pm z$.
+Pyyhkäisy suuntaan $d$ laskee alueen \sweep{\reach{k}}{d}, ja yhdistämällä pyyhkäisyt kaikkiin suuntiin saadaan muodostettua koko alue \reach{k+1}.
 
 
 
@@ -857,17 +870,10 @@ Laske \sweep{D}{c}, eli $c$-suuntaiset puolisuunnikkaat jotka leikkaavat jotakin
 
 
 
-% Sitten alkaa lähdeluettelo
-%
-
-
 \nocite{*}
-% yksi näistä tai ...
 %\bibliographystyle{plain}
 %\bibliographystyle{acm}
 \bibliographystyle{ieeetr}
-
-% ... tai tämä 
 %\bibliographystyle{apalike}
 
 \bibliography{ref}
