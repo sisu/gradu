@@ -3,6 +3,9 @@
 \usepackage{subfigure}
 \usepackage{url}
 
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
 \usepackage{lmodern}
 \usepackage{microtype}
 \usepackage{amsfonts,amsmath,amssymb,amsthm,booktabs,color,enumitem,graphicx,mathabx}
@@ -75,6 +78,10 @@
 \newcommand\sline[1]{\ensuremath{S_{#1}}\xspace}
 \newcommand\intert[2]{\ensuremath{\textsc{v‰li}_{#1}(#2)}\xspace}
 \newcommand\point[1]{\ensuremath{\left ({#1}\right )}\xspace}
+
+\newcommand\cellevt{\ensuremath{\texttt{SoluTapahtuma}}\xspace}
+\newcommand\obsevt{\ensuremath{\texttt{EsteTapahtuma}}\xspace}
+\newcommand\addrectevt{\ensuremath{\texttt{Lis‰ysTapahtuma}}\xspace}
 
 
 
@@ -863,7 +870,16 @@ Algoritmin suoritusaika riippuu hajotelman koosta, joten on eduksi k‰ytt‰‰ pieni
 Hajotelmaa k‰ytet‰‰n toteuttamaan pyyhk‰isytasoalgoritmi, jonka avulla alue \reach{k+1} muodostetaan alueesta \reach{k}.
 Jokaisella askeleella suoritetaan 6 pyyhk‰isy‰, yksi kuhunkin suuntaan $\pm x,\pm y,\pm z$.
 Pyyhk‰isy suuntaan $d$ laskee alueen \sweep{\reach{k}}{d}, ja yhdist‰m‰ll‰ pyyhk‰isyt kaikkiin suuntiin saadaan muodostettua koko alue \reach{k+1}.
+Pyyhk‰isyoperaatiolla on kaksi teht‰v‰‰:
+lˆyt‰‰ ja merkit‰ uusi valaistu alue, sek‰ valmistella tietorakenteet seuraavia (alueen \reach{k+2} laskevia) pyyhk‰isyj‰ varten.
 
+Tarkastellaan $+z$-suuntaista pyyhk‰isy‰ $xy$-suuntaisella pyyhk‰isytasolla.
+Pyyhk‰isytaso pys‰htyy tapahtumien kohdalla, joita on kolme tyyppi‰:
+\begin{itemize}
+\item \cellevt tapahtuu kun pyyhk‰isytaso koskettaa solua ensimm‰isen kerran.
+\item \obsevt tapahtuu kun taso kohtaa estetahkon jonka normaali osoittaa suuntaan $-z$.
+\item \addrectevt, jonka kohdalla aiemmalla askeleella lˆydetty valaistu alue lis‰t‰‰n pyyhk‰isytasoon.
+\end{itemize}
 
 
 \section{Yhteenveto}
