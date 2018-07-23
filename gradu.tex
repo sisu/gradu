@@ -870,14 +870,22 @@ Pyyhk‰isy suuntaan $d$ laskee alueen \sweep{\reach{k}}{d}, ja yhdist‰m‰ll‰ pyyhk
 Pyyhk‰isyoperaatiolla on kaksi teht‰v‰‰:
 lˆyt‰‰ ja merkit‰ uusi valaistu alue, sek‰ valmistella tietorakenteet seuraavia (alueen \reach{k+2} laskevia) pyyhk‰isyj‰ varten.
 
+\subsection{Valaisu tasopyyhk‰isyll‰}
+
 Tarkastellaan $+z$-suuntaista pyyhk‰isy‰ $xy$-suuntaisella pyyhk‰isytasolla.
+Pyyhk‰isyn aikana yll‰pidet‰‰n tietoa mitk‰ pyyhk‰isytason osat tulevat valaistuksi, sek‰ prioriteettijonoa tapahtumista.
 Pyyhk‰isytaso pys‰htyy tapahtumien kohdalla, joita on kolme tyyppi‰:
+
 \begin{itemize}
-\item \cellevt tapahtuu kun pyyhk‰isytaso koskettaa solua ensimm‰isen kerran.
-\item \obsevt tapahtuu kun taso kohtaa estetahkon jonka normaali osoittaa suuntaan $-z$.
 \item \addrectevt, jonka kohdalla aiemmalla askeleella lˆydetty valaistu alue lis‰t‰‰n pyyhk‰isytasoon.
+\item \cellevt tapahtuu kun pyyhk‰isytaso saavuttaa solun \emph{suurimman} $z$-koordinaatin.
+\item \obsevt tapahtuu kun taso kohtaa estetahkon jonka normaali osoittaa suuntaan $-z$.
 \end{itemize}
 
+Tapahtumassa \cellevt jokaiselle naapurille $+z$-suunnassa tarkistetaan, koskettaako naapurin pyyhk‰isytason valaistuja suorakaiteita, ja lis‰t‰‰n uusi \cellevt jokaiselle valaistulle naapurille.
+Lis‰ksi jokaiselle esteelle $+z$-suunnassa lis‰t‰‰n \obsevt.
+
+Tapahtumassa \obsevt esteen alue poistetaan pyyhk‰isytasosta, ja valaistujen osien reunoista muodostetaan uusia \addrectevt-olioita, joita k‰ytet‰‰n seuraavalla askeleella laskemaan \sweep{\reach{k+1}}{\pm x} ja \sweep{\reach{k+1}}{\pm y}.
 
 \section{Yhteenveto}
 
