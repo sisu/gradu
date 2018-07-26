@@ -368,11 +368,11 @@ V‰li‰ $\range{c}{d}$ leikkaavien v‰lien haku tehd‰‰n molemmissa puissa:
 
 Lemman~\ref{segleikkaus2} nojalla kahteen puuhun teht‰vien operaatioiden ansiosta hakuoperaatio lˆyt‰‰ jokaisen kyselyv‰li‰ leikkaavan v‰lin tasan kerran.
 
-\subsection{Laiskat puuoperaatiot}
+\subsection{Laiskat puuoperaatiot}\label{sec:lazyseg}
 
-\subsection{Persistentit segmenttipuut}
+\subsection{Persistentit segmenttipuut}\label{sec:perseg}
 
-\subsection{Moniulotteiset segmenttipuut}
+\subsection{Moniulotteiset segmenttipuut}\label{sec:segd}
 
 Segmenttipuu voidaan yleist‰‰ kaksi- ja useampiulotteiseksi rakenteeksi varsin suoraviivaisesti.
 Kaksiulotteinen segmenttipuu mahdollistaa suorakulmioiden tallentamisen ja tehokkaat aluekyselyt suorakulmion muotoiselle alueelle.
@@ -882,10 +882,20 @@ Pyyhk‰isytaso pys‰htyy tapahtumien kohdalla, joita on kolme tyyppi‰:
 \item \obsevt tapahtuu kun taso kohtaa estetahkon jonka normaali osoittaa suuntaan $-z$.
 \end{itemize}
 
-Tapahtumassa \cellevt jokaiselle naapurille $+z$-suunnassa tarkistetaan, koskettaako naapurin pyyhk‰isytason valaistuja suorakaiteita, ja lis‰t‰‰n uusi \cellevt jokaiselle valaistulle naapurille.
+Tapahtumassa \cellevt jokaiselle naapurille $+z$-suunnassa tarkistetaan, koskettaako naapuri pyyhk‰isytason valaistuja suorakaiteita, ja lis‰t‰‰n uusi \cellevt jokaiselle valaistulle naapurille.
 Lis‰ksi jokaiselle esteelle $+z$-suunnassa lis‰t‰‰n \obsevt.
-
 Tapahtumassa \obsevt esteen alue poistetaan pyyhk‰isytasosta, ja valaistujen osien reunoista muodostetaan uusia \addrectevt-olioita, joita k‰ytet‰‰n seuraavalla askeleella laskemaan \sweep{\reach{k+1}}{\pm x} ja \sweep{\reach{k+1}}{\pm y}.
+
+Pyyhk‰isyn aikana s‰ilytet‰‰n tietoa valaistavista osisista kappaleessa~\ref{sec:segd} esitetyss‰ kaksiulotteisessa segmenttipuussa.
+Jokainen \addrectevt merkitsee uuden valaistavan alueen segmenttipuuhun.
+Valaistun alueen kanonisiin suorakaiteisiin merkit‰‰n tieto, mik‰ \addrectevt sen valaisi.
+Jos samaa kanonista suorakaidetta valaisee useampi \addrectevt, s‰ilytet‰‰n niist‰ ensimm‰isen‰ lis‰tty.
+
+Kun saavutetaan \obsevt, tapahtumaa vastaava suorakaide merkit‰‰n j‰lleen tyhj‰ksi segmenttipuussa.
+Koska segmenttipuun tyhjennys vaatii lineaarisen tyˆn, k‰ytet‰‰n kappaleessa~\ref{sec:lazyseg} esitetty‰ laiskaa rakennetta.
+Tyhjennyksen yhteydess‰ muodostetaan seuraavalla valaisuaskeleella k‰ytett‰vi‰ \addrectevt-olioita poistettavan valaistun alueen reunoille.
+
+
 
 \section{Yhteenveto}
 
