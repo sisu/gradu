@@ -44,6 +44,7 @@
 \newcommand\dirs{\ensuremath{\mathcal{C}}\xspace}
 
 \newcommand\epts{\ensuremath{P}\xspace}
+\newcommand\segsize{\ensuremath{m}\xspace}
 \newcommand\inter[1]{\ensuremath{\textsc{v‰li}(#1)}\xspace}
 \newcommand\leftc[1]{\ensuremath{\textsc{vasen}(#1)}\xspace}
 \newcommand\rightc[1]{\ensuremath{\textsc{oikea}(#1)}\xspace}
@@ -53,8 +54,10 @@
 \newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
 \newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
 \newcommand\canoni[2]{\ensuremath{\textsc{c}_{#2}(#1)}\xspace}
+\newcommand\visitp{\ensuremath{\textsc{VieraileVanhempi}}\xspace}
+\newcommand\visitc{\ensuremath{\textsc{VieraileKanoninen}}\xspace}
 
-\newcommand\pop[1]{\ensuremath{\texttt{pop}(#1)}\xspace}
+\newcommand\pop[1]{\ensuremath{\textsc{pop}(#1)}\xspace}
 
 \newcommand\y[1]{\ensuremath{{#1}_y}\xspace}
 \newcommand\x[1]{\ensuremath{{#1}_x}\xspace}
@@ -269,16 +272,17 @@ Kanonisten solmujen k‰site on m‰‰ritetty myˆs \emph{pisteelle} (eli luvulle).
 Pisteen $p$ kanoniset solmut ovat kaikki solmut, joihin $p$ koskee, eli $\canonp{p}=\set{s \mid p\in\inter{s}}$.
 Kuvassa~\ref{kanon} n‰kyy esimerkki v‰lin ja pisteen kanonisista solmuista puussa.
 
+Olkoon $\segsize=\size{\epts}$.
 Seuraavat kaksi lemmaa auttavat segmenttipuuoperaatioiden suoritusajan m‰‰rityksess‰.
 
-\begin{lem}\label{kanonlog}Kaikille v‰leille $v$ p‰tee $\size{\canon{v}}=O(\log\size{\epts})$\end{lem}
+\begin{lem}\label{kanonlog}Kaikille v‰leille $v$ p‰tee $\size{\canon{v}}=O(\log\segsize)$\end{lem}
 \begin{proof}
-Koska segmenttipuu on tasapainoinen bin‰‰ripuu, sen syvyys on $\Theta(\log\size{\epts})$.
+Koska segmenttipuu on tasapainoinen bin‰‰ripuu, sen syvyys on $\Theta(\log\segsize)$.
 Voidaan osoittaa, ett‰ $\canon{v}$ sis‰lt‰‰ korkeintaan 2 solmua jokaisella syvyydell‰, josta seuraa haluttu v‰itt‰m‰.
 T‰m‰ n‰hd‰‰n helposti, sill‰ jos jollakin syvyydell‰ on 3 solmua, niist‰ keskimm‰inen voidaan korvata solmun vanhemmalla ilman ett‰ solmujen viritt‰m‰ lukuv‰li muuttuu, eli solmujoukko ei ole minimaalinen joten se ei ole kanoninen solmujoukko.
 \end{proof}
 
-\begin{lem}\label{kanonplog}Joukolla $\canon{v}$ on $O(\log\size{\epts})$ esivanhempaa segmenttipuussa.\end{lem}
+\begin{lem}\label{kanonplog}Joukolla $\canon{v}$ on $O(\log\segsize)$ esivanhempaa segmenttipuussa.\end{lem}
 \begin{proof}
 Edellist‰ vastaavalla argumentilla voidaan osoittaa, ett‰ puun jokaisella tasolla on korkeintaan 2 esivanhempaa, josta seuraa j‰lleen haluttu v‰ite.
 Selv‰sti jokaiselle solmulle $s$ ja sen esivanhemmalle $p$ p‰tee $\inter{s}\in\inter{p}$.
@@ -291,11 +295,11 @@ Puun kanoniset solmut ja niiden esivanhemmat voidaan iteroida l‰pi seuraavalla a
 V‰lin $v$ kanonisen solmujoukon haku segmenttipuussa.
 \begin{algorithmic}
 \Procedure{EtsiKanoniset}{$s$}
-\Comment{Tulosta v‰lin $v$ kanoniset solmut ja niiden esivanhemmat alipuussa $s$}
+\Comment{Vieraile v‰lin $v$ kanonisissa solmuissa ja niiden esivanhemmissa alipuussa $s$}
 	\If{$\inter{s}\subseteq v$}
-		\State TulostaKanoninen($s$)
+		\State \visitc($s$)
 	\ElsIf{$\inter{s}\cap v\neq\emptyset$}
-		\State TulostaEsivanhempi($s$)
+		\State \visitp($s$)
 		\State EtsiKanoniset($\leftc{s}$)
 		\State EtsiKanoniset($\rightc{s}$)
 	\EndIf
@@ -303,8 +307,9 @@ V‰lin $v$ kanonisen solmujoukon haku segmenttipuussa.
 \end{algorithmic}
 \end{alg}
 
+Algoritmia~\ref{alg:seghaku} voidaan k‰ytt‰‰ segmenttipuuoperaatioiden toteuttamiseen m‰‰rittelem‰ll‰ kutsutut funktiot \visitc ja \visitp vastaamaan haluttua operaatiota, kuten v‰lin lis‰yst‰ solmuun.
 Jos p‰‰dyt‰‰n solmuun joka ei ole kanonisen joukon esivanhempi, rekursio loppuu heti.
-Siis algoritmin suoritusaika on verrannollinen kanonisten solmujen ja niiden esivanhempien m‰‰r‰‰n, joka on lemmojen~\ref{kanonlog} ja~\ref{kanonplog} nojalla $O(\log\size{\epts})$.
+Siis algoritmin suoritusaika on verrannollinen kanonisten solmujen ja niiden esivanhempien m‰‰r‰‰n, joka on lemmojen~\ref{kanonlog} ja~\ref{kanonplog} nojalla $O(\log\segsize)$.
 
 \subsection{Operaatiot puussa}
 
@@ -368,31 +373,59 @@ V‰li‰ $\range{c}{d}$ leikkaavien v‰lien haku tehd‰‰n molemmissa puissa:
 
 Lemman~\ref{segleikkaus2} nojalla kahteen puuhun teht‰vien operaatioiden ansiosta hakuoperaatio lˆyt‰‰ jokaisen kyselyv‰li‰ leikkaavan v‰lin tasan kerran.
 
-\subsection{Laiskat puuoperaatiot}\label{sec:lazyseg}
+\subsubsection{V‰lin poisto}\label{sec:lazyseg}
+
+V‰lin $v$ poisto puusta tarkoittaa, ett‰ jokainen puuhun lis‰tty v‰li $u$ leikataan muotoon $u\setminus v$, mahdollisesti jakaen v‰li kahteen osaan.
+Operaatio voidaan toteuttaa hakemalla kanoniset solmut algoritmilla~\ref{alg:seghaku}, ja k‰ytt‰m‰ll‰ seuraavia m‰‰ritelmi‰ operaatioille \visitc ja \visitp.
+\begin{alg}\label{alg:segrm}
+Poista v‰li $v$ segmenttipuusta.
+\begin{algorithmic}
+\Procedure{VieraileVanhempi}{$s$}
+	\State Kopioi solmuun $s$ tallennetut v‰lit solmuihin \leftc{s} ja \rightc{s}.
+	\State Poista v‰lit solmusta $s$.
+\EndProcedure
+\Procedure{VieraileKanoninen}{$s$}
+	\State Tyhjenn‰ alipuu $s$
+\EndProcedure
+\end{algorithmic}
+\end{alg}
+
+Operaatiossa \visitc teht‰v‰ alipuun tyhjennys edellytt‰‰ koko alipuun l‰pik‰ynti‰.
+Suurimmillaan t‰m‰ voi tarkoittaa koko puun l‰pik‰ynti‰, eli operaatio toimii ajassa $O(\segsize)$.
+
+Poisto-operaatiota voidaan tehostaa suorittamalla alipuun tyhjennys \emph{laiskasti}.
+Segmenttipuun jokaiseen solmuun tallennetaan lis‰bitti, joka kertoo, onko t‰m‰ alipuu m‰‰r‰ tyhjent‰‰ laiskasti.
+T‰llˆin algoritmin~\ref{alg:segrm} alipuuntyhjennys voidaan suorittaa pelk‰st‰‰n merkitsem‰ll‰ t‰m‰ bitti todeksi.
+T‰m‰n lis‰ksi muokataan puun l‰pik‰yntialgoritmia~\ref{alg:seghaku} niin, ett‰ jokaiseen solmuun $s$ saavuttaessa tarkistetaan, onko alipuu tyhjennett‰v‰ksi.
+Jos $s$ on tyhjennett‰v‰, poistetaan kyseiseen solmuun tallennettu sis‰ltˆ, ja merkit‰‰n lasten \leftc{s} ja \rightc{s} alipuut tyhjennett‰viksi.
+
+Ratkaisu kasvattaa kaikkien puuoperaatioiden tyˆm‰‰r‰‰ vakiokertoimella; jokaisen puun l‰pik‰ynnin yhteydess‰ on tarkistettava mitk‰ alipuut on merkitty tyhjennett‰viksi, ja propagoitava tyhjennysoperaatio lapsiin.
+Siis muiden operaatioiden asymptoottinen suoritusaika ei muutu, ja algoritmi~\ref{alg:segrm} toimii ajassa $O(\log\segsize)$.
 
 \subsection{Persistentit segmenttipuut}\label{sec:perseg}
+
 
 \subsection{Moniulotteiset segmenttipuut}\label{sec:segd}
 
 Segmenttipuu voidaan yleist‰‰ kaksi- ja useampiulotteiseksi rakenteeksi varsin suoraviivaisesti.
 Kaksiulotteinen segmenttipuu mahdollistaa suorakulmioiden tallentamisen ja tehokkaat aluekyselyt suorakulmion muotoiselle alueelle.
-Vastaavasti $u$-ulotteinen segmenttipuu mahdollistaa kyselyt $u$-ulotteisessa suorakaiteessa.
+Vastaavasti $u$-ulotteinen segmenttipuu mahdollistaa kyselyt $u$-ulotteisessa suorakulmaisessa s‰rmissˆ, eli lyhyemmin $u$-s‰rmiˆss‰.
 
 Moniulotteinen segmenttipuu koostuu sis‰kk‰isist‰ 1-ulotteisista segmenttipuista.
 $u$-ulotteisen puun rakenne on tavallinen segmenttipuu, jonka jokaiseen solmuun on tallennettu $u-1$-ulotteinen segmenttipuu.
 
-Jokainen puun dimensio vastaa yht‰ puuhun tallennettavien suorakaiteiden koordinaattiakseleista.
+Jokainen puun dimensio vastaa yht‰ puuhun tallennettavien s‰rmiˆiden koordinaattiakseleista.
 Esimerkiksi 2-ulotteisessa puussa uloin segmenttipuu vastaa $y$-koordinaatteja, ja jokainen solmuihin tallennetuista sisemmist‰ puista vastaa $x$-koordinaatteja.
-Puun lehtisolmut ovat t‰llˆin suorakaiteita, joiden $y$-sivun m‰‰r‰‰ lehden paikka ulommassa puussa, ja $y$-sivun m‰‰ritt‰‰ paikka sisemm‰ss‰ puussa.
+Puun lehtisolmut ovat t‰llˆin $u$-s‰rmiˆit‰, joiden $y$-sivun m‰‰r‰‰ lehden paikka ulommassa puussa, ja $y$-sivun m‰‰ritt‰‰ paikka sisemm‰ss‰ puussa.
 
 Kanoniset solmujoukot m‰‰ritell‰‰n vastaavasti kuin yksiulotteisessa puussa.
 M‰‰ritelm‰‰~\ref{def:canon} mukaillen m‰‰rittelemme:
 \begin{maar}\label{def:canond}
-$u$-ulotteisen suorakaiteen $s$ kanoniset solmut ovat pienin joukko solmuja, jotka peitt‰v‰t kokonaan suorakaiteen $s$, mutta eiv‰t mit‰‰n muuta, eli $\bigcup_{s\in\canon{v}}\inter{s}=v$.
+$u$-s‰rmiˆn $s$ kanoniset solmut ovat pienin joukko solmuja, jotka peitt‰v‰t kokonaan s‰rmiˆn $s$, mutta eiv‰t mit‰‰n muuta, eli $\bigcup_{s\in\canon{v}}\inter{s}=v$.
 \end{maar}
 
-Moniulotteisten suorakaiteen $s$ kanonista joukkoa merkit‰‰n samoin kuin yksiulotteisessa tapauksessakin, $\canon{s}$.
-Merkit‰‰n suorakaiteen $s$ akselin $k$ suuntaista v‰li‰ $s_k$, ja sen kanonista joukkoa 1-ulotteisessa puussa $\canoni{s_k}{k}$.
+$u$-s‰rmiˆn $s$ kanonista joukkoa merkit‰‰n samoin kuin yksiulotteisessa tapauksessakin, $\canon{s}$.
+Merkit‰‰n $u$-s‰rmiˆn $s$ akselin $k$ suuntaista v‰li‰ $s_k$, ja sen kanonista joukkoa 1-ulotteisessa puussa $\canoni{s_k}{k}$.
 Kanoninen joukko voidaan m‰‰ritt‰‰ ulottuvuus kerrallaan, mit‰ valaisee seuraava lemma.
 
 \begin{lem}$u$-ulotteiselle suorakaiteelle $s$ p‰tee
@@ -402,6 +435,14 @@ $$\canon{s}=\bigtimes_{i=1}^u \canoni{s_i}{i}.$$
 %$$\size{\canon{s}}=O(\prod_{i=1}^u \log\size{\epts_i}).$$
 \end{lem}
 \begin{proof}HT\end{proof}
+
+Yksiulotteisen segmenttipuun ideoita k‰ytettyjen voidaan muodostaa $u$-ulotteinen tietorakenne, joka tukee seuraavia operaatioita:
+\begin{itemize}
+\item $u$-s‰rmiˆn lis‰ys.
+\item $u$-s‰rmiˆn tyhjennys.
+\item Tarkistus, koskettaako annettu $u$-s‰rmiˆ mit‰‰n tietorakenteen s‰rmiˆist‰.
+\end{itemize}
+
 
 
 \section{Avaruuden jako}\label{sec:jako}
@@ -891,8 +932,8 @@ Jokainen \addrectevt merkitsee uuden valaistavan alueen segmenttipuuhun.
 Valaistun alueen kanonisiin suorakaiteisiin merkit‰‰n tieto, mik‰ \addrectevt sen valaisi.
 Jos samaa kanonista suorakaidetta valaisee useampi \addrectevt, s‰ilytet‰‰n niist‰ ensimm‰isen‰ lis‰tty.
 
-Kun saavutetaan \obsevt, tapahtumaa vastaava suorakaide merkit‰‰n j‰lleen tyhj‰ksi segmenttipuussa.
-Koska segmenttipuun tyhjennys vaatii lineaarisen tyˆn, k‰ytet‰‰n kappaleessa~\ref{sec:lazyseg} esitetty‰ laiskaa rakennetta.
+Kun saavutetaan \obsevt, tapahtumaa vastaava suorakaide tyhjennet‰‰n segmenttipuussa.
+%Koska segmenttipuun tyhjennys vaatii lineaarisen tyˆn, k‰ytet‰‰n kappaleessa~\ref{sec:lazyseg} esitetty‰ laiskaa poistoa.
 Tyhjennyksen yhteydess‰ muodostetaan seuraavalla valaisuaskeleella k‰ytett‰vi‰ \addrectevt-olioita poistettavan valaistun alueen reunoille.
 
 
