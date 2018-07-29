@@ -54,6 +54,8 @@
 \newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
 \newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
 \newcommand\canoni[2]{\ensuremath{\textsc{c}_{#2}(#1)}\xspace}
+\newcommand\canonpar[1]{\ensuremath{\textsc{p}_{\textsc{c}}(#1)}\xspace}
+\newcommand\epar[1]{\ensuremath{\textsc{p}(#1)}\xspace}
 \newcommand\visitp{\ensuremath{\textsc{VieraileVanhempi}}\xspace}
 \newcommand\visitc{\ensuremath{\textsc{VieraileKanoninen}}\xspace}
 
@@ -275,14 +277,14 @@ Kuvassa~\ref{kanon} n‰kyy esimerkki v‰lin ja pisteen kanonisista solmuista puuss
 Olkoon $\segsize=\size{\epts}$.
 Seuraavat kaksi lemmaa auttavat segmenttipuuoperaatioiden suoritusajan m‰‰rityksess‰.
 
-\begin{lem}\label{kanonlog}Kaikille v‰leille $v$ p‰tee $\size{\canon{v}}=O(\log\segsize)$\end{lem}
+\begin{lem}\label{lem:kanonlog}Kaikille v‰leille $v$ p‰tee $\size{\canon{v}}=O(\log\segsize)$\end{lem}
 \begin{proof}
 Koska segmenttipuu on tasapainoinen bin‰‰ripuu, sen syvyys on $\Theta(\log\segsize)$.
 Voidaan osoittaa, ett‰ $\canon{v}$ sis‰lt‰‰ korkeintaan 2 solmua jokaisella syvyydell‰, josta seuraa haluttu v‰itt‰m‰.
 T‰m‰ n‰hd‰‰n helposti, sill‰ jos jollakin syvyydell‰ on 3 solmua, niist‰ keskimm‰inen voidaan korvata solmun vanhemmalla ilman ett‰ solmujen viritt‰m‰ lukuv‰li muuttuu, eli solmujoukko ei ole minimaalinen joten se ei ole kanoninen solmujoukko.
 \end{proof}
 
-\begin{lem}\label{kanonplog}Joukolla $\canon{v}$ on $O(\log\segsize)$ esivanhempaa segmenttipuussa.\end{lem}
+\begin{lem}\label{lem:kanonplog}Joukolla $\canon{v}$ on $O(\log\segsize)$ esivanhempaa segmenttipuussa.\end{lem}
 \begin{proof}
 Edellist‰ vastaavalla argumentilla voidaan osoittaa, ett‰ puun jokaisella tasolla on korkeintaan 2 esivanhempaa, josta seuraa j‰lleen haluttu v‰ite.
 Selv‰sti jokaiselle solmulle $s$ ja sen esivanhemmalle $p$ p‰tee $\inter{s}\in\inter{p}$.
@@ -309,7 +311,7 @@ V‰lin $v$ kanonisen solmujoukon haku segmenttipuussa.
 
 Algoritmia~\ref{alg:seghaku} voidaan k‰ytt‰‰ segmenttipuuoperaatioiden toteuttamiseen m‰‰rittelem‰ll‰ kutsutut funktiot \visitc ja \visitp vastaamaan haluttua operaatiota, kuten v‰lin lis‰yst‰ solmuun.
 Jos p‰‰dyt‰‰n solmuun joka ei ole kanonisen joukon esivanhempi, rekursio loppuu heti.
-Siis algoritmin suoritusaika on verrannollinen kanonisten solmujen ja niiden esivanhempien m‰‰r‰‰n, joka on lemmojen~\ref{kanonlog} ja~\ref{kanonplog} nojalla $O(\log\segsize)$.
+Siis algoritmin suoritusaika on verrannollinen kanonisten solmujen ja niiden esivanhempien m‰‰r‰‰n, joka on lemmojen~\ref{lem:kanonlog} ja~\ref{lem:kanonplog} nojalla $O(\log\segsize)$.
 
 \subsection{Operaatiot puussa}
 
@@ -428,7 +430,8 @@ $u$-s‰rmiˆn $s$ kanonista joukkoa merkit‰‰n samoin kuin yksiulotteisessa tapauks
 Merkit‰‰n $u$-s‰rmiˆn $s$ akselin $k$ suuntaista v‰li‰ $s_k$, ja sen kanonista joukkoa 1-ulotteisessa puussa $\canoni{s_k}{k}$.
 Kanoninen joukko voidaan m‰‰ritt‰‰ ulottuvuus kerrallaan, mit‰ valaisee seuraava lemma.
 
-\begin{lem}$u$-ulotteiselle suorakaiteelle $s$ p‰tee
+\begin{lem}\label{lem:canond}
+Jokaiselle $u$-s‰rmiˆlle $s$ p‰tee
 $$\canon{s}=\set{c_1\times c_2\times c_3\dots \mid c_1\in\canoni{s_1}{1}, c_2\in\canoni{s_2}{2}\dots}$$
 eli \canon{s} on yksiulotteisten kanonisten joukkojen karteeninen tulo
 $$\canon{s}=\bigtimes_{i=1}^u \canoni{s_i}{i}.$$
@@ -436,12 +439,53 @@ $$\canon{s}=\bigtimes_{i=1}^u \canoni{s_i}{i}.$$
 \end{lem}
 \begin{proof}HT\end{proof}
 
+Lemman~\ref{lem:canond} ja lemman~\ref{lem:kanonlog} yhdistelm‰ll‰ voidaan helposti rajata kanonisen solmujoukon koko.
+
+\begin{kor}Jokaiselle $u$-s‰rmiˆlle $s$ p‰tee $\size{\canon{s}}=O(\log^u\segsize$).\end{kor}
+\begin{proof}
+$$
+\size{\canon{s}} = \size{\bigtimes_{i=1}^u \canoni{s_i}{i}}
+= \prod_{i=1}^u \size{\canoni{s_i}{i}}
+= \prod_{i=1}^u O(\log\segsize)
+= O(\log^u\segsize).
+$$
+\end{proof}
+
+Lemman~\ref{lem:canond} avulla mink‰ tahansa $u$-s‰rmiˆn kanoninen joukko voidaan laskea soveltamalla algoritmia~\ref{alg:seghaku} jokaisen koordinaattiakselin suunnassa erikseen;
+haetaan uloimman segmenttipuun kanoniset solmut algoritmilla~\ref{alg:seghaku}, ja jokaisessa solmussa suoritetaan rekursiivisesti haku solmun $(u-1)$-ulotteisessa puussa.
+
+Yksiulotteisessa segmenttipuussa solmun $s$ esivanhemmat ovat tasan ne solmut $t$, joille p‰tee $\inter{s}\subsetneq\inter{t}$.
+Moniulotteisessa tapauksessa osa solmuista voi peitt‰‰ kokonaan solmun $s$ olematta kuitenkaan $s$:n vanhempi puussa, kuten selvi‰‰ kuvasta~TODO.
+M‰‰rittelemm‰ \emph{laajennetun esivanhempien joukon} $\epar{s}$, joka sis‰lt‰‰ kaikki solmut $t$ joille $\inter{s}\subsetneq\inter{t}$.
+Laajennettu esivanhempien joukko voidaan laskea kanonisen solmujoukon tavoin ulottuvuus kerrallaan, kuten selvi‰‰ seuraavasta lemmasa.
+
+\begin{lem}
+Merkit‰‰n $I(S) = \set{\inter{x} \mid x\in S}$.
+Jokaiselle $u$-ulotteisen segmenttipuun solmulle $s$ p‰tee
+$$I(\epar{s}) = \bigtimes_{i=1}^u I(\epar{s_i}).$$
+\end{lem}
+\begin{proof}HT\end{proof}
+
+
+
 Yksiulotteisen segmenttipuun ideoita k‰ytettyjen voidaan muodostaa $u$-ulotteinen tietorakenne, joka tukee seuraavia operaatioita:
 \begin{itemize}
 \item $u$-s‰rmiˆn lis‰ys.
 \item $u$-s‰rmiˆn tyhjennys.
 \item Tarkistus, koskettaako annettu $u$-s‰rmiˆ mit‰‰n tietorakenteen s‰rmiˆist‰.
 \end{itemize}
+
+%Puun rakenne on seuraava.
+%Jokaisen 
+
+\begin{lem}Jos $a\cap b\neq\emptyset$, niin v‰hint‰‰n yksi seuraavista p‰tee:
+\begin{itemize}
+\item $\canon{a}\cap\canon{b}\neq\emptyset$.
+\item $\canonpar{a}\cap\canon{b}\neq\emptyset$.
+\item $\canon{a}\cap\canonpar{b}\neq\emptyset$.
+\end{itemize}
+\end{lem}
+\begin{proof}HT\end{proof}
 
 
 
@@ -571,7 +615,7 @@ Idea on muodostaa 2D-hajotelma jokaisessa uniikissa poikkileikkauksessa, ja veny
 
 
 
-\section{Rajoitetun suuntaiset minimilinkkipolut tasossa}\label{sec:limited2d}
+\section{Minimilinkkipolut tasossa}\label{sec:limited2d}
 
 Tarkastellaan minimilinkkipolun hakua rajoitteella, ett‰ polku saa k‰ytt‰‰ vain tietyn suuntaisia linkkej‰.
 Lis‰ksi myˆs esteiden reunat ovat rajoitettu kulkusuuntien mukaisesti.
