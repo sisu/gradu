@@ -13,14 +13,21 @@ struct Cell {
 };
 template<int D>
 std::ostream& operator<<(std::ostream& o, const Cell<D>& c) {
-	return o<<c.box;
+	return o<<"Cell{"<<c.box<<"}";
 }
 
 template<int D>
 using Decomposition = std::vector<Cell<D>>;
 
 template<int D>
-using Obstacle = Box<D>;
+struct Obstacle {
+	Box<D> box;
+	int direction = 0;
+};
+template<int D>
+std::ostream& operator<<(std::ostream& o, const Obstacle<D>& x) {
+	return o<<"Obs{"<<x.box<<' '<<x.direction<<"}";
+}
 
 template<int D>
 using ObstacleSet = std::vector<Obstacle<D>>;

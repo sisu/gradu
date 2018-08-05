@@ -13,4 +13,5 @@ std::ostream& operator<<(std::ostream& o, const std::vector<T>& v) {
 		o<<t;
 	}
 	o<<']';
+	return o;
 }

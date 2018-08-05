@@ -36,7 +36,7 @@ $(TOBJ): $(ODIR)/%.o: %.cpp
 	$(CC) $< -c -o "$@" $(TFLAGS)
 
 $(TBIN): %: %.o
-	$(CC) $^ -o $@ $(TFLAGS) -lgtest -lgtest_main -lgmock
+	$(CC) $^ -o $@ $(TFLAGS) -lgtest -lgtest_main -lgmock -pthread
 	"./$@"
 
 $(ODIR)/./decompositionTest: $(ODIR)/./decomposition.o
