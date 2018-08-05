@@ -2,50 +2,50 @@
 #include <ostream>
 
 struct Range {
-	Range(int x1, int x2): x1(x1), x2(x2) {}
+	Range(int from, int to): from(from), to(to) {}
 
-	int x1=-1,x2=-1;
+	int from=-1,to=-1;
 	bool operator<(const Range& r) const {
-		return x1<r.x1;
+		return from<r.from;
 	}
 	bool operator<(int i) const {
-		return x1<i;
+		return from<i;
 	}
 	int size() const {
-		return x2-x1;
+		return to-from;
 	}
 	int middle() const {
-		return (x1+x2)>>1;
+		return (from+to)>>1;
 	}
 	bool empty() const {
-		return x1==x2;
+		return from==to;
 	}
 	bool unit() const {
-		return x1+1==x2;
+		return from+1==to;
 	}
 	bool contains(int x) const {
-		return x>=x1 && x<x2;
+		return x>=from && x<to;
 	}
 	bool intersects(Range r) const {
-		return x2>r.x1 && r.x2>x1;
+		return to>r.from && r.to>from;
 	}
 	bool contains(Range r) const {
-		return r.x1>=x1 && r.x2<=x2;
+		return r.from>=from && r.to<=to;
 	}
 	Range intersection(Range r) const {
-		return {std::max(x1, r.x1), std::min(x2, r.x2)};
+		return {std::max(from, r.from), std::min(to, r.to)};
 	}
 
-	int operator[](int i) const { return i==0 ? x1 : x2; }
-	int& operator[](int i) { return i==0 ? x1 : x2; }
+	int operator[](int i) const { return i==0 ? from : to; }
+	int& operator[](int i) { return i==0 ? from : to; }
 
 	bool operator==(const Range& r) const {
-		return x1==r.x1 && x2==r.x2;
+		return from==r.from && to==r.to;
 	}
 	bool operator!=(const Range& r) const {
 		return !(*this == r);
 	}
 };
 inline std::ostream& operator<<(std::ostream& o, Range r) {
-	return o<<'('<<r.x1<<".."<<r.x2<<')';
+	return o<<'('<<r.from<<".."<<r.to<<')';
 }

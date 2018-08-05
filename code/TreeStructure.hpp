@@ -13,7 +13,7 @@ struct TreeStructure {
 
 	int rangeToIndex(Range r) const {
 		int bits = __builtin_ffs(r.size()) - 1;
-		return ((size>>1) | r.x1) >> bits;
+		return ((size>>1) | r.from) >> bits;
 	}
 
 	int size = 0;

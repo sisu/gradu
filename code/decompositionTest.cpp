@@ -1,5 +1,4 @@
 #include "decomposition.hpp"
-#include "Vector.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock-more-matchers.h>
 
@@ -11,7 +10,7 @@ constexpr int DOWN = 1;
 constexpr int LEFT = 2;
 constexpr int RIGHT = 3;
 
-Vector<2> dir2[4] = {
+Point<2> dir2[4] = {
 	{{0, -1}},
 	{{0, 1}},
 	{{-1, 0}},
@@ -70,11 +69,14 @@ ObstacleSet<2> makeObstaclesForPlane(const vector<string>& area) {
 
 TEST(DecompositionTest, Decompose2Empty) {
 	ObstacleSet<2> obs;
-	EXPECT_THAT(decomposeFreeSpace<2>(obs), IsEmpty());
+	EXPECT_THAT(decomposeFreeSpace(obs), IsEmpty());
 }
 
 TEST(DecompositionTest, Decompose2SingleCell) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({"###", "#.#", "###"});
 	cout<<"obs: "<<obs<<'\n';
-	EXPECT_THAT(decomposeFreeSpace<2>(obs), IsEmpty());
+	Decomposition<2> result = decomposeFreeSpace(obs);
+	EXPECT_THAT(result, SizeIs(1));
+	Box<2> expected = {{{1,2}, {1,2}}};
+	EXPECT_EQ(result[0].box, expected);
 }
