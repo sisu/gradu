@@ -37,48 +37,45 @@ vector<string> addBorderAroundArea(const vector<string>& area) {
 void addObstaclesOnLine(
 		ObstacleSet<2>& result,
 		const vector<string>& area,
-		int x, int y, int dir) {
-	const int h = area.size();
+		int y, int dir) {
 	const int w = area[0].size();
 	const auto& dv = dir2[dir];
 	const int dx = dv[0], dy = dv[1];
-	const int ex = abs(dy), ey = abs(dx);
-	const int len = ex ? w : h;
-	int keep = ex ? y : x;
-	if (dx>0 || dy>0) keep++;
+	int yy = dy > 0 ? y+1 : y;
 	int count = 0;
-	for(int i=0; i<len; ++i, x+=ex, y+=ey) {
+	for(int x=0; x<w; ++x) {
 		if (area[y][x]==USED && area[y+dy][x+dx]!=USED) {
 			count++;
 		} else {
 			if (count) {
-				if (ex) {
-					result.push_back({
-							{{{i-count, i}, {keep, keep}}},
-							dir});
-				} else {
-					result.push_back({
-							{{{keep, keep}, {i-count, i}}},
-							dir});
-				}
+				result.push_back({
+						{{{x-count, x}, {yy, yy}}},
+						dir});
 			}
 			count = 0;
 		}
 	}
 	if (count) {
-		if (ex) {
-			result.push_back({
-					{{{len-count, len}, {keep, keep}}},
-					dir});
-		} else {
-			result.push_back({
-					{{{keep, keep}, {len-count, len}}},
-					dir});
-		}
+		result.push_back({
+				{{{w-count, w}, {yy, yy}}},
+				dir});
 	}
 }
 
 ObstacleSet<2> makeObstaclesForPlane(const vector<string>& area0) {
+	const vector<string> area = addBorderAroundArea(area0);
+	ObstacleSet<2> result;
+	if (area.empty()) return result;
+	int h = area.size();
+	for(int i=0; i+1<h; ++i) {
+		addObstaclesOnLine(result, area, i+1, UP);
+		addObstaclesOnLine(result, area, i, DOWN);
+	}
+	return result;
+}
+
+#if 0
+ObstacleSet<3> makeObstaclesForVolume(const vector<vector<string>>& volume0) {
 	const vector<string> area = addBorderAroundArea(area0);
 	ObstacleSet<2> result;
 	if (area.empty()) return result;
@@ -94,6 +91,8 @@ ObstacleSet<2> makeObstaclesForPlane(const vector<string>& area0) {
 	}
 	return result;
 }
+#endif
+
 
 template<int D>
 vector<Box<D>> getBoxes(const vector<Cell<D>>& cells) {
@@ -107,6 +106,9 @@ vector<Box<D>> getBoxes(const vector<Cell<D>>& cells) {
 
 Box<2> box2(Range x, Range y) {
 	return {{x, y}};
+}
+Box<3> box3(Range x, Range y, Range z) {
+	return {{x, y, z}};
 }
 
 TEST(DecompositionTest2D, DecomposeEmpty) {
@@ -152,5 +154,19 @@ TEST(DecompositionTest2D, DecomposeManyCells) {
 				box2({3, 6}, {4, 5})
 			));
 }
+
+TEST(DecompositionTest3D, DecomposeEmpty) {
+	ObstacleSet<3> obs;
+	EXPECT_THAT(decomposeFreeSpace(obs), IsEmpty());
+}
+
+#if 0
+TEST(DecompositionTest3D, DecomposeSingleCell) {
+	ObstacleSet<3> obs = makeObstaclesForPlane({"."});
+	cout<<"obs: "<<obs<<'\n';
+	Decomposition<3> result = decomposeFreeSpace(obs);
+	EXPECT_THAT(getBoxes(result), ElementsAre(box3({1,2}, {1,2}, {1,2})));
+}
+#endif
 
 } // namespace
