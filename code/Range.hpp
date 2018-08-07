@@ -35,6 +35,9 @@ struct Range {
 	Range intersection(Range r) const {
 		return {std::max(from, r.from), std::min(to, r.to)};
 	}
+	Range union_(Range r) const {
+		return {std::min(from, r.from), std::max(to, r.to)};
+	}
 
 	int operator[](int i) const { return i==0 ? from : to; }
 	int& operator[](int i) { return i==0 ? from : to; }

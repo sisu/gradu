@@ -103,12 +103,12 @@ vector<Box<D>> getBoxes(const vector<Cell<D>>& cells) {
 	return result;
 }
 
-TEST(DecompositionTest, Decompose2Empty) {
+TEST(DecompositionTest2D, DecomposeEmpty) {
 	ObstacleSet<2> obs;
 	EXPECT_THAT(decomposeFreeSpace(obs), IsEmpty());
 }
 
-TEST(DecompositionTest, Decompose2SingleCell) {
+TEST(DecompositionTest2D, DecomposeSingleCell) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({"."});
 	cout<<"obs: "<<obs<<'\n';
 	Decomposition<2> result = decomposeFreeSpace(obs);
@@ -116,13 +116,33 @@ TEST(DecompositionTest, Decompose2SingleCell) {
 	EXPECT_THAT(getBoxes(result), ElementsAre(expected));
 }
 
-#if 1
-TEST(DecompositionTest, Decompose2TwoCells) {
+TEST(DecompositionTest2D, DecomposeTwoCells1) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({".#", ".."});
 	cout<<"obs: "<<obs<<'\n';
 	Decomposition<2> result = decomposeFreeSpace(obs);
 	Box<2> ex1 = {{{1,2}, {1,2}}};
 	Box<2> ex2 = {{{1,3}, {2,3}}};
+	EXPECT_THAT(getBoxes(result), ElementsAre(ex1, ex2));
+}
+TEST(DecompositionTest2D, DecomposeTwoCells2) {
+	ObstacleSet<2> obs = makeObstaclesForPlane({"..", "#."});
+	cout<<"obs: "<<obs<<'\n';
+	Decomposition<2> result = decomposeFreeSpace(obs);
+	Box<2> ex1 = {{{1,3}, {1,2}}};
+	Box<2> ex2 = {{{2,3}, {2,3}}};
+	EXPECT_THAT(getBoxes(result), ElementsAre(ex1, ex2));
+}
+#if 0
+TEST(DecompositionTest2D, DecomposeManyCells) {
+	ObstacleSet<2> obs = makeObstaclesForPlane({
+			"..#.."
+			"#.##."
+			"...#."
+			"##..."});
+	cout<<"obs: "<<obs<<'\n';
+	Decomposition<2> result = decomposeFreeSpace(obs);
+	Box<2> ex1 = {{{1,3}, {1,2}}};
+	Box<2> ex2 = {{{2,3}, {2,3}}};
 	EXPECT_THAT(getBoxes(result), ElementsAre(ex1, ex2));
 }
 #endif
