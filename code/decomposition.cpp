@@ -12,10 +12,10 @@ using namespace std;
 struct Event {
 	int pos = -1;
 	int idx = -1;
-	bool add = false;
+	bool startObstacle = false;
 
 	bool operator<(const Event& e) const {
-		if (pos==e.pos) return add>e.add;
+		if (pos==e.pos) return startObstacle>e.startObstacle;
 		return pos<e.pos;
 	}
 };
@@ -46,6 +46,7 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	vector<Event> events;
 	for(int i=0; i<(int)obstacles.size(); ++i) {
 		const auto& obs = obstacles[i];
+		cout<<"obs "<<obs<<' '<<obs.box[X_AXIS].size()<<'\n';
 		if (obs.box[X_AXIS].size() == 0) continue;
 		events.push_back({obs.box[Y_AXIS].from, i, obs.direction == UP});
 	}
@@ -55,7 +56,8 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	Decomposition<2> decomposition;
 	for(Event event : events) {
 		const Range range = obstacles[event.idx].box[X_AXIS];
-		if (event.add) {
+		cout<<"evt "<<event.idx<<' '<<range<<' '<<event.pos<<" : "<<event.startObstacle<<'\n';
+		if (event.startObstacle) {
 			auto it = nodeSet.upper_bound(range.from);
 			assert(it != nodeSet.begin());
 			--it;
