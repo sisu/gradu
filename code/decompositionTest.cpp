@@ -34,6 +34,20 @@ vector<string> addBorderAroundArea(const vector<string>& area) {
 	return res;
 }
 
+vector<vector<string>> addBorderAroundVolume(const vector<vector<string>>& volume) {
+	int n = volume.size();
+	int h = volume[0].size();
+	int w = volume[0][0].size();
+	vector<vector<string>> res;
+	res.reserve(n+2);
+	res.emplace_back(vector<string>(h+2, string(w+2, '#')));
+	for(int i=0; i<n; ++i) {
+		res.push_back(addBorderAroundArea(volume[i]));
+	}
+	res.emplace_back(vector<string>(h+2, string(w+2, '#')));
+	return res;
+}
+
 void addObstaclesOnLine(
 		ObstacleSet<2>& result,
 		const vector<string>& area,
@@ -65,7 +79,6 @@ void addObstaclesOnLine(
 ObstacleSet<2> makeObstaclesForPlane(const vector<string>& area0) {
 	const vector<string> area = addBorderAroundArea(area0);
 	ObstacleSet<2> result;
-	if (area.empty()) return result;
 	int h = area.size();
 	for(int i=0; i+1<h; ++i) {
 		addObstaclesOnLine(result, area, i+1, UP);
@@ -74,24 +87,24 @@ ObstacleSet<2> makeObstaclesForPlane(const vector<string>& area0) {
 	return result;
 }
 
-#if 0
-ObstacleSet<3> makeObstaclesForVolume(const vector<vector<string>>& volume0) {
-	const vector<string> area = addBorderAroundArea(area0);
-	ObstacleSet<2> result;
-	if (area.empty()) return result;
-	int h = area.size();
-	int w = area[0].size();
-	for(int i=0; i+1<h; ++i) {
-		addObstaclesOnLine(result, area, 0, i+1, UP);
-		addObstaclesOnLine(result, area, 0, i, DOWN);
-	}
-	for(int i=0; i+1<w; ++i) {
-		addObstaclesOnLine(result, area, i+1, 0, LEFT);
-		addObstaclesOnLine(result, area, i, 0, RIGHT);
+ObstacleSet<3> makeObstaclesForVolume(vector<vector<string>> volume) {
+	volume = addBorderAroundVolume(volume);
+	ObstacleSet<3> result;
+	int n = volume.size();
+	int h = volume[0].size();
+	int w = volume[0][0].size();
+	ObstacleSet<2> planeSet, oldSet;
+	for(int i=0; i+1<n; ++i) {
+		oldSet = move(planeSet);
+		planeSet.clear();
+		const auto& area = volume[i];
+		for(int j=0; j+1<h; ++j) {
+			addObstaclesOnLine(planeSet, area, j+1, UP);
+			addObstaclesOnLine(planeSet, area, j, DOWN);
+		}
 	}
 	return result;
 }
-#endif
 
 
 template<int D>
