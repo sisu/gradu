@@ -6,7 +6,9 @@
 namespace {
 
 using namespace std;
-using namespace testing;
+
+using testing::ElementsAre;
+using testing::IsEmpty;
 
 constexpr int UP = 0;
 constexpr int DOWN = 1;
@@ -103,6 +105,10 @@ vector<Box<D>> getBoxes(const vector<Cell<D>>& cells) {
 	return result;
 }
 
+Box<2> box2(Range x, Range y) {
+	return {{x, y}};
+}
+
 TEST(DecompositionTest2D, DecomposeEmpty) {
 	ObstacleSet<2> obs;
 	EXPECT_THAT(decomposeFreeSpace(obs), IsEmpty());
@@ -112,39 +118,39 @@ TEST(DecompositionTest2D, DecomposeSingleCell) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({"."});
 	cout<<"obs: "<<obs<<'\n';
 	Decomposition<2> result = decomposeFreeSpace(obs);
-	Box<2> expected = {{{1,2}, {1,2}}};
-	EXPECT_THAT(getBoxes(result), ElementsAre(expected));
+	EXPECT_THAT(getBoxes(result), ElementsAre(box2({1,2}, {1,2})));
 }
 
 TEST(DecompositionTest2D, DecomposeTwoCells1) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({".#", ".."});
 	cout<<"obs: "<<obs<<'\n';
 	Decomposition<2> result = decomposeFreeSpace(obs);
-	Box<2> ex1 = {{{1,2}, {1,2}}};
-	Box<2> ex2 = {{{1,3}, {2,3}}};
-	EXPECT_THAT(getBoxes(result), ElementsAre(ex1, ex2));
+	EXPECT_THAT(getBoxes(result), ElementsAre(
+				box2({1,2}, {1,2}), box2({1,3}, {2,3})));
 }
 TEST(DecompositionTest2D, DecomposeTwoCells2) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({"..", "#."});
 	cout<<"obs: "<<obs<<'\n';
 	Decomposition<2> result = decomposeFreeSpace(obs);
-	Box<2> ex1 = {{{1,3}, {1,2}}};
-	Box<2> ex2 = {{{2,3}, {2,3}}};
-	EXPECT_THAT(getBoxes(result), ElementsAre(ex1, ex2));
+	EXPECT_THAT(getBoxes(result), ElementsAre(
+				box2({1,3}, {1,2}), box2({2,3}, {2,3})));
 }
-#if 0
 TEST(DecompositionTest2D, DecomposeManyCells) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({
-			"..#.."
-			"#.##."
-			"...#."
+			"..#..",
+			"#.##.",
+			"...#.",
 			"##..."});
 	cout<<"obs: "<<obs<<'\n';
 	Decomposition<2> result = decomposeFreeSpace(obs);
-	Box<2> ex1 = {{{1,3}, {1,2}}};
-	Box<2> ex2 = {{{2,3}, {2,3}}};
-	EXPECT_THAT(getBoxes(result), ElementsAre(ex1, ex2));
+	EXPECT_THAT(getBoxes(result), ElementsAre(
+				box2({1, 3}, {1, 2}),
+				box2({4, 6}, {1, 2}),
+				box2({2, 3}, {2, 3}),
+				box2({1, 4}, {3, 4}),
+				box2({5, 6}, {2, 4}),
+				box2({3, 6}, {4, 5})
+			));
 }
-#endif
 
 } // namespace

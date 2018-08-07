@@ -61,9 +61,13 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 			auto it = nodeSet.upper_bound(range.from);
 			assert(it != nodeSet.begin());
 			--it;
+			cout<<"it: "<<it->xRange<<'\n';
 			Range oldRange = it->xRange;
-			Box<2> box{oldRange, {it->yStart, event.pos}};
-			decomposition.emplace_back(box);
+			if (it->yStart < event.pos) {
+				Box<2> box{oldRange, {it->yStart, event.pos}};
+				decomposition.emplace_back(box);
+				cout<<"emit at obstacle: "<<box<<'\n';
+			}
 			it = nodeSet.erase(it);
 			if (oldRange.from < range.from) {
 				DecomposeNode node{{oldRange.from, range.from}, event.pos};
@@ -80,12 +84,19 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 				--it;
 			}
 			while(it != nodeSet.end() && it->xRange.from <= totalRange.to) {
-				Box<2> box{it->xRange, {it->yStart, event.pos}};
-				decomposition.emplace_back(box);
+				if (it->xRange.to < totalRange.from) {
+					++it;
+					continue;
+				}
+				if (it->yStart < event.pos) {
+					Box<2> box{it->xRange, {it->yStart, event.pos}};
+					decomposition.emplace_back(box);
+				}
 				totalRange = totalRange.union_(it->xRange);
 				it = nodeSet.erase(it);
 			}
 			DecomposeNode node{totalRange, event.pos};
+			cout<<"insert to nodeset "<<totalRange<<'\n';
 			nodeSet.insert(std::move(node));
 		}
 	}
