@@ -22,6 +22,7 @@ struct Event {
 
 constexpr int X_AXIS = 0;
 constexpr int Y_AXIS = 1;
+constexpr int Z_AXIS = 2;
 
 constexpr int UP = 0;
 constexpr int DOWN = 1;
@@ -105,6 +106,23 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 
 template<int D>
 Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
+	vector<int> depths;
+	for(const auto& obs: obstacles) {
+		if (obs.box[Z_AXIS].size() == 0) {
+			depths.push_back(obs.box[Z_AXIS].from);
+		}
+	}
+	sort(depths.begin(), depths.end());
+	depths.erase(unique(depths.begin(), depths.end()), depths.end());
+	for(int z: depths) {
+		ObstacleSet<D-1> crossSection;
+		for(const auto& obs: obstacles) {
+			if (obs.box[Z_AXIS].contains(z)) {
+				crossSection.push_back({obs.box.project(), obs.direction});
+			}
+		}
+		Decomposition<D-1> curPlane = decomposeFreeSpace(crossSection);
+	}
 	return {};
 }
 

@@ -2,6 +2,7 @@
 #include <ostream>
 
 struct Range {
+	Range() {}
 	Range(int from, int to): from(from), to(to) {}
 
 	int from=-1,to=-1;
