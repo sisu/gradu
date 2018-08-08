@@ -87,23 +87,112 @@ ObstacleSet<2> makeObstaclesForPlane(const vector<string>& area0) {
 	return result;
 }
 
-ObstacleSet<3> makeObstaclesForVolume(vector<vector<string>> volume) {
-	volume = addBorderAroundVolume(volume);
-	ObstacleSet<3> result;
+int compare(const Obstacle<2>& a, const Obstacle<3>& b) {
+	if (a.direction != b.direction) return a.direction - b.direction;
+	for(int i=0; i<2; ++i) {
+		for(int j=0; j<2; ++j) {
+			if (a.box[i][j] != b.box[i][j])
+				return a.box[i][j] - b.box[i][j];
+		}
+	}
+	return 0;
+}
+
+void addObstaclesForVolume(ObstacleSet<3>& result,
+		const vector<vector<string>>& volume) {
 	int n = volume.size();
 	int h = volume[0].size();
-	int w = volume[0][0].size();
 	ObstacleSet<2> curPlane;
 	ObstacleSet<3> activeRects, newRects;
-	for(int i=0; i+1<n; ++i) {
+	for(int i=0; i<n; ++i) {
 		curPlane.clear();
 		const auto& area = volume[i];
 		for(int j=0; j+1<h; ++j) {
 			addObstaclesOnLine(curPlane, area, j+1, UP);
 			addObstaclesOnLine(curPlane, area, j, DOWN);
 		}
+
+		newRects.clear();
+		size_t a=0, b=0;
+		while(a < curPlane.size() && b < activeRects.size()) {
+			const auto& curP = curPlane[a];
+			const auto& actP = activeRects[a];
+			int c = compare(curP, actP);
+			if (c <= 0) {
+				int start = c<0 ? i : actP.box[2].from;
+				Box<3> box{{curP.box[0], curP.box[1], {start, i+1}}};
+				newRects.push_back({box, curP.direction});
+				a++;
+				if (c==0) b++;
+			} else {
+				result.push_back(actP);
+				b++;
+			}
+		}
+		for(;a < curPlane.size(); ++a) {
+			const auto& curP = curPlane[a];
+			Box<3> box{{curP.box[0], curP.box[1], {i, i+1}}};
+			newRects.push_back({box, curP.direction});
+		}
+		result.insert(result.end(), activeRects.begin()+b, activeRects.end());
+		activeRects = move(newRects);
 	}
 	result.insert(result.end(), activeRects.begin(), activeRects.end());
+}
+
+vector<string> swapXY(const vector<string>& area) {
+	int h = area.size();
+	int w = area[0].size();
+	vector<string> res(w, string(h, '#'));
+	for(int i=0; i<h; ++i) {
+		for(int j=0; j<w; ++j) {
+			res[j][i] = area[i][j];
+		}
+	}
+	return res;
+}
+vector<vector<string>> swapXY(const vector<vector<string>>& volume) {
+	int n = volume.size();
+	vector<vector<string>> res;
+	res.reserve(n);
+	for(int i=0; i<n; ++i) res.push_back(swapXY(volume[i]));
+	return res;
+}
+vector<vector<string>> swapYZ(const vector<vector<string>>& volume) {
+	int n = volume[0].size();
+	int h = volume[0].size();
+	int w = volume[0][0].size();
+	vector<vector<string>> res;
+	res.reserve(h);
+	for(int i=0; i<h; ++i) res.emplace_back(n, string(w, '#'));
+	for(int i=0; i<n; ++i) {
+		for(int j=0; j<h; ++j) {
+			for(int k=0; k<w; ++k) {
+				res[j][i][k] = volume[i][j][k];
+			}
+		}
+	}
+	return res;
+}
+
+ObstacleSet<3> makeObstaclesForVolume(vector<vector<string>> volume) {
+	volume = addBorderAroundVolume(volume);
+	ObstacleSet<3> result;
+	addObstaclesForVolume(result, volume);
+	int n = result.size();
+	auto xy = swapXY(volume);
+	addObstaclesForVolume(result, xy);
+	for(size_t i=n; i<result.size(); ++i) {
+		swap(result[i].box[0], result[i].box[1]);
+		result[i].direction += 2;
+	}
+	n = result.size();
+	auto yz = swapYZ(volume);
+	addObstaclesForVolume(result, yz);
+	for(size_t i=n; i<result.size(); ++i) {
+		swap(result[i].box[1], result[i].box[2]);
+		result[i].direction += 4;
+	}
 	return result;
 }
 

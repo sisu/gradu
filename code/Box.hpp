@@ -18,8 +18,8 @@ struct Box {
 
 	Box<D-1> project(int rm=D-1) const {
 		Box<D-1> res;
-		for(int i=0; i<rm; ++i) for(int j=0; j<2; ++j) res[i][j]=(*this)[i][j];
-		for(int i=rm+1; i<D; ++i) for(int j=0; j<2; ++j) res[i-1][j]=(*this)[i][j];
+		for(int i=0; i<rm; ++i) res[i]=(*this)[i];
+		for(int i=rm+1; i<D; ++i) res[i-1]=(*this)[i];
 		return res;
 	}
 	bool operator==(const Box& b) const {
