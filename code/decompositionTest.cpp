@@ -93,16 +93,17 @@ ObstacleSet<3> makeObstaclesForVolume(vector<vector<string>> volume) {
 	int n = volume.size();
 	int h = volume[0].size();
 	int w = volume[0][0].size();
-	ObstacleSet<2> planeSet, oldSet;
+	ObstacleSet<2> curPlane;
+	ObstacleSet<3> activeRects, newRects;
 	for(int i=0; i+1<n; ++i) {
-		oldSet = move(planeSet);
-		planeSet.clear();
+		curPlane.clear();
 		const auto& area = volume[i];
 		for(int j=0; j+1<h; ++j) {
-			addObstaclesOnLine(planeSet, area, j+1, UP);
-			addObstaclesOnLine(planeSet, area, j, DOWN);
+			addObstaclesOnLine(curPlane, area, j+1, UP);
+			addObstaclesOnLine(curPlane, area, j, DOWN);
 		}
 	}
+	result.insert(result.end(), activeRects.begin(), activeRects.end());
 	return result;
 }
 
@@ -173,13 +174,11 @@ TEST(DecompositionTest3D, DecomposeEmpty) {
 	EXPECT_THAT(decomposeFreeSpace(obs), IsEmpty());
 }
 
-#if 0
 TEST(DecompositionTest3D, DecomposeSingleCell) {
-	ObstacleSet<3> obs = makeObstaclesForPlane({"."});
+	ObstacleSet<3> obs = makeObstaclesForVolume({{"."}});
 	cout<<"obs: "<<obs<<'\n';
 	Decomposition<3> result = decomposeFreeSpace(obs);
 	EXPECT_THAT(getBoxes(result), ElementsAre(box3({1,2}, {1,2}, {1,2})));
 }
-#endif
 
 } // namespace
