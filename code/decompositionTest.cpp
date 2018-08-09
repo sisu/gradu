@@ -87,9 +87,11 @@ ObstacleSet<2> makeObstaclesForPlane(const vector<string>& area0) {
 	return result;
 }
 
-int compare(const Obstacle<2>& a, const Obstacle<3>& b) {
+template<int A, int B>
+int compare(const Obstacle<A>& a, const Obstacle<B>& b) {
 	if (a.direction != b.direction) return a.direction - b.direction;
-	for(int i=0; i<2; ++i) {
+	int n = min(A,B);
+	for(int i=0; i<n; ++i) {
 		for(int j=0; j<2; ++j) {
 			if (a.box[i][j] != b.box[i][j])
 				return a.box[i][j] - b.box[i][j];
@@ -111,6 +113,15 @@ void addObstaclesForVolume(ObstacleSet<3>& result,
 			addObstaclesOnLine(curPlane, area, j+1, UP);
 			addObstaclesOnLine(curPlane, area, j, DOWN);
 		}
+
+		sort(curPlane.begin(), curPlane.end(),
+				[](const Obstacle<2>& a, const Obstacle<2>& b) {
+					return compare(a, b)<0;
+				});
+		sort(activeRects.begin(), activeRects.end(),
+				[](const Obstacle<3>& a, const Obstacle<3>& b) {
+					return compare(a, b)<0;
+				});
 
 		newRects.clear();
 		size_t a=0, b=0;

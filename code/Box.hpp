@@ -45,6 +45,7 @@ struct Box {
 		return true;
 	}
 };
+
 namespace std {
 	template<int D>
 	struct hash<Box<D>> {
