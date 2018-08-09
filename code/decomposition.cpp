@@ -105,6 +105,17 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 }
 
 template<int D>
+void mergePlaneResults(Decomposition<D>& result,
+		Decomposition<D>& activeCells,
+		Decomposition<D-1>& plane) {
+	Decomposition<D> newCells;
+	size_t i=0, j=0;
+	while(i < activeCells.size() && j < plane.size()) {
+	}
+	activeCells = move(newCells);
+}
+
+template<int D>
 Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 	vector<int> depths;
 	for(const auto& obs: obstacles) {
@@ -114,6 +125,8 @@ Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 	}
 	sort(depths.begin(), depths.end());
 	depths.erase(unique(depths.begin(), depths.end()), depths.end());
+	Decomposition<D> result;
+	Decomposition<D> activeCells;
 	for(int z: depths) {
 		ObstacleSet<D-1> crossSection;
 		for(const auto& obs: obstacles) {
@@ -122,8 +135,10 @@ Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 			}
 		}
 		Decomposition<D-1> curPlane = decomposeFreeSpace(crossSection);
+
 	}
-	return {};
+	result.insert(result.end(), activeCells.begin(), activeCells.end());
+	return result;
 }
 
 template
