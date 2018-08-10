@@ -8,19 +8,22 @@ namespace {
 using namespace std;
 
 using testing::ElementsAre;
+using testing::ElementsAreArray;
 using testing::IsEmpty;
 
-constexpr int UP = 0;
-constexpr int DOWN = 1;
-constexpr int LEFT = 2;
-constexpr int RIGHT = 3;
+constexpr int LEFT = 0;
+constexpr int RIGHT = 1;
+constexpr int UP = 2;
+constexpr int DOWN = 3;
+constexpr int ZMINUS = 4;
+constexpr int ZPLUS = 5;
 
-Point<2> dir2[4] = {
-	{{0, -1}},
-	{{0, 1}},
-	{{-1, 0}},
-	{{1, 0}},
-};
+template<int D>
+Point<D> dirVec(int dir) {
+	Point<2> pt;
+	pt[dir>>1] = (dir&1)*2 - 1;
+	return pt;
+}
 
 constexpr char USED = '#';
 
@@ -53,7 +56,7 @@ void addObstaclesOnLine(
 		const vector<string>& area,
 		int y, int dir) {
 	const int w = area[0].size();
-	const auto& dv = dir2[dir];
+	const auto& dv = dirVec<2>(dir);
 	const int dx = dv[0], dy = dv[1];
 	int yy = dy > 0 ? y+1 : y;
 	int count = 0;
@@ -194,14 +197,14 @@ ObstacleSet<3> makeObstaclesForVolume(vector<vector<string>> volume) {
 	addObstaclesForVolume(result, xy);
 	for(size_t i=n; i<result.size(); ++i) {
 		swap(result[i].box[0], result[i].box[1]);
-		result[i].direction += 2;
+		result[i].direction += LEFT - UP;
 	}
 	n = result.size();
 	auto yz = swapYZ(volume);
 	addObstaclesForVolume(result, yz);
 	for(size_t i=n; i<result.size(); ++i) {
 		swap(result[i].box[1], result[i].box[2]);
-		result[i].direction += 4;
+		result[i].direction += ZMINUS - UP;
 	}
 	return result;
 }
@@ -224,6 +227,38 @@ Box<3> box3(Range x, Range y, Range z) {
 	return {{x, y, z}};
 }
 
+template<int D>
+vector<int> getLinksInDir(const Decomposition<D>& dec, size_t index, int dir) {
+	Box<D> target = dec[index].box;
+	Point<D> vdir = dirVec<D>(dir);
+	for(int i=0; i<D; ++i) {
+		if (vdir[i] < 0) {
+			target[i] = {target[i].from-1, target[i].from};
+		} else if (vdir[i] > 0) {
+			target[i] = {target[i].to, target[i].to+1};
+		}
+	}
+	vector<int> res;
+	for(size_t i=0; i<dec.size(); ++i) {
+		if (i != index && target.intersects(dec[i].box)) {
+			res.push_back(i);
+		}
+	}
+	return res;
+}
+
+
+template<int D>
+void checkLinks(const Decomposition<D>& dec) {
+	for(size_t i=0; i<dec.size(); ++i) {
+		for(int j=0; j<2*D; ++j) {
+			EXPECT_THAT(dec[i].neighbors[i], ElementsAreArray(getLinksInDir(dec, i, j)));
+		}
+	}
+}
+
+
+
 TEST(DecompositionTest2D, DecomposeEmpty) {
 	ObstacleSet<2> obs;
 	EXPECT_THAT(decomposeFreeSpace(obs), IsEmpty());
@@ -242,6 +277,7 @@ TEST(DecompositionTest2D, DecomposeTwoCells1) {
 	Decomposition<2> result = decomposeFreeSpace(obs);
 	EXPECT_THAT(getBoxes(result), ElementsAre(
 				box2({1,2}, {1,2}), box2({1,3}, {2,3})));
+	checkLinks(result);
 }
 TEST(DecompositionTest2D, DecomposeTwoCells2) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({"..", "#."});

@@ -1,9 +1,13 @@
 #pragma once
 #include "Range.hpp"
 #include <ostream>
+#include <cstring>
 
 template<int D>
 struct Point {
+	Point() {
+		memset(data,0,sizeof(data));
+	}
 	int data[D];
 	int& operator[](int i) { return data[i]; }
 	int operator[](int i) const { return data[i]; }

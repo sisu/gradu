@@ -24,8 +24,8 @@ constexpr int X_AXIS = 0;
 constexpr int Y_AXIS = 1;
 constexpr int Z_AXIS = 2;
 
-constexpr int UP = 0;
-constexpr int DOWN = 1;
+constexpr int UP = 2;
+constexpr int DOWN = 3;
 
 struct DecomposeNode {
 	Range xRange;
