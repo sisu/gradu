@@ -252,7 +252,7 @@ template<int D>
 void checkLinks(const Decomposition<D>& dec) {
 	for(size_t i=0; i<dec.size(); ++i) {
 		for(int j=0; j<2*D; ++j) {
-			EXPECT_THAT(dec[i].neighbors[i], ElementsAreArray(getLinksInDir(dec, i, j)));
+			EXPECT_THAT(dec[i].links[j], ElementsAreArray(getLinksInDir(dec, i, j))) << i<<' '<<j<<' '<<dec[i].box;
 		}
 	}
 }
@@ -303,6 +303,24 @@ TEST(DecompositionTest2D, DecomposeManyCells) {
 				box2({3, 6}, {4, 5})
 				));
 }
+
+TEST(DecompositionTest2D, ManyChangesOnSingleLevel) {
+	ObstacleSet<2> obs = makeObstaclesForPlane({
+			".#.#.",
+			".....",
+			"#.#.#"});
+	cout<<"obs: "<<obs<<'\n';
+	Decomposition<2> result = decomposeFreeSpace(obs);
+	EXPECT_THAT(getBoxes(result), ElementsAre(
+				box2({1, 2}, {1, 2}),
+				box2({3, 4}, {1, 2}),
+				box2({5, 6}, {1, 2}),
+				box2({1, 6}, {2, 3}),
+				box2({2, 3}, {3, 4}),
+				box2({4, 5}, {3, 4})
+				));
+}
+
 
 TEST(DecompositionTest3D, DecomposeEmpty) {
 	ObstacleSet<3> obs;

@@ -8,7 +8,7 @@ struct Cell {
 	Cell(Box<D> b): box(b) {}
 
 	Box<D> box;
-	std::vector<int> neighbors[2*D];
+	std::vector<int> links[2*D];
 	std::vector<int> obstacles[2*D];
 };
 template<int D>
