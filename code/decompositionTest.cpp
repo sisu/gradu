@@ -113,21 +113,20 @@ void addObstaclesForVolume(ObstacleSet<3>& result,
 			addObstaclesOnLine(curPlane, area, j+1, UP);
 			addObstaclesOnLine(curPlane, area, j, DOWN);
 		}
-
 		sort(curPlane.begin(), curPlane.end(),
 				[](const Obstacle<2>& a, const Obstacle<2>& b) {
-					return compare(a, b)<0;
+				return compare(a, b)<0;
 				});
 		sort(activeRects.begin(), activeRects.end(),
 				[](const Obstacle<3>& a, const Obstacle<3>& b) {
-					return compare(a, b)<0;
+				return compare(a, b)<0;
 				});
 
 		newRects.clear();
 		size_t a=0, b=0;
 		while(a < curPlane.size() && b < activeRects.size()) {
 			const auto& curP = curPlane[a];
-			const auto& actP = activeRects[a];
+			const auto& actP = activeRects[b];
 			int c = compare(curP, actP);
 			if (c <= 0) {
 				int start = c<0 ? i : actP.box[2].from;
@@ -266,7 +265,7 @@ TEST(DecompositionTest2D, DecomposeManyCells) {
 				box2({1, 4}, {3, 4}),
 				box2({5, 6}, {2, 4}),
 				box2({3, 6}, {4, 5})
-			));
+				));
 }
 
 TEST(DecompositionTest3D, DecomposeEmpty) {
@@ -279,6 +278,20 @@ TEST(DecompositionTest3D, DecomposeSingleCell) {
 	cout<<"obs: "<<obs<<'\n';
 	Decomposition<3> result = decomposeFreeSpace(obs);
 	EXPECT_THAT(getBoxes(result), ElementsAre(box3({1,2}, {1,2}, {1,2})));
+}
+
+TEST(DecompositionTest3D, DecomposeTwoCells) {
+	ObstacleSet<3> obs = makeObstaclesForVolume(
+			{
+			{"#.", ".."},
+			{"##", ".."},
+			});
+	cout<<"obs: "<<obs<<'\n';
+	Decomposition<3> result = decomposeFreeSpace(obs);
+	EXPECT_THAT(getBoxes(result), ElementsAre(
+				box3({2,3}, {1,2}, {1,2}),
+				box3({1,3}, {2,3}, {1,3})
+				));
 }
 
 } // namespace
