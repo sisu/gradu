@@ -285,6 +285,7 @@ TEST(DecompositionTest2D, DecomposeTwoCells2) {
 	Decomposition<2> result = decomposeFreeSpace(obs);
 	EXPECT_THAT(getBoxes(result), ElementsAre(
 				box2({1,3}, {1,2}), box2({2,3}, {2,3})));
+	checkLinks(result);
 }
 TEST(DecompositionTest2D, DecomposeManyCells) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({
@@ -302,6 +303,7 @@ TEST(DecompositionTest2D, DecomposeManyCells) {
 				box2({5, 6}, {2, 4}),
 				box2({3, 6}, {4, 5})
 				));
+	checkLinks(result);
 }
 
 TEST(DecompositionTest2D, ManyChangesOnSingleLevel) {
@@ -319,6 +321,7 @@ TEST(DecompositionTest2D, ManyChangesOnSingleLevel) {
 				box2({2, 3}, {3, 4}),
 				box2({4, 5}, {3, 4})
 				));
+	checkLinks(result);
 }
 
 
