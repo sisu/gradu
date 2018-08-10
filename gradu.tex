@@ -65,6 +65,7 @@
 \newcommand\x[1]{\ensuremath{{#1}_x}\xspace}
 \newcommand\xrange[1]{\ensuremath{x(#1)}\xspace}
 \newcommand\yrange[1]{\ensuremath{y(#1)}\xspace}
+\newcommand\zrange[1]{\ensuremath{z(#1)}\xspace}
 \newcommand\xranget[2]{\ensuremath{x(#1)_{#2}}\xspace}
 \newcommand\yranget[2]{\ensuremath{y(#1)_{#2}}\xspace}
 \newcommand\nbs[1]{\ensuremath{\textsc{naap}{(#1)}}\xspace}
@@ -603,15 +604,20 @@ Hajotelman idea on pyyhkäistä alueen läpi tasolla joka on kohtisuorassa $z$-akse
 Alueen ja tason leikkausta kutsutaan alueen \emph{poikkileikkaukseksi}.
 Idea on muodostaa 2D-hajotelma jokaisessa uniikissa poikkileikkauksessa, ja venyttää näin saatuja $xy$-tason suorakaiteita $z$-akselin suunnassa jotta ne peittävät koko 3-ulotteisen alueen.
 
-\begin{algorithmic}\label{alg:jako3d}
-\State $L \gets \text{tyhjä lista}$
-\ForAll{Este-suorakaide $t$ kohtisuorassa $z$-akselia vastaan}
-	\If $t$ aloittaa esteen
-	\Else
-	\EndIf
-	\State Muodosta 2D-hajotelma alueella $L$.
+\begin{alg}\label{alg:jako3d}
+Jaa estejoukon $E$ rajoittama alue suorakulmaisiin särmiöihin.
+\begin{algorithmic}
+\State $Z\gets \text{kaikkien esteiden $z$-koordinaatit}$.
+\State Järjestä $Z$ kasvavaan järjestykseen.
+\State Poista toistuvat elementit taulukosta $Z$.
+\State $A\gets\emptyset$.
+\ForAll{$z\in Z$}
+	\State $E_z\gets\set{e \mid e\in E, z\in\zrange{e}}$.
+	\State Muodosta 2D-hajotelma estejoukolle $E_z$.
+	\State $A\gets E_z$.
 \EndFor
 \end{algorithmic}
+\end{alg}
 
 
 

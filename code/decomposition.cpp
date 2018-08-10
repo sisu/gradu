@@ -15,8 +15,8 @@ struct Event {
 	bool startObstacle = false;
 
 	bool operator<(const Event& e) const {
-		if (pos==e.pos) return startObstacle>e.startObstacle;
-		return pos<e.pos;
+		if (pos!=e.pos) return pos<e.pos;
+		return startObstacle>e.startObstacle;
 	}
 };
 
@@ -48,6 +48,14 @@ bool operator<(const DecomposeNode& n, int i) {
 }
 bool operator<(int i, const DecomposeNode& n) {
 	return i < n.xRange.from;
+}
+
+template<class T>
+void moveContentsUnordered(vector<T>& to, vector<T>& from) {
+	if (from.size() > to.size()) {
+		from.swap(to);
+	}
+	to.insert(to.end(), make_move_iterator(from.begin()), make_move_iterator(from.end()));
 }
 
 template<>
@@ -103,7 +111,7 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 					links.push_back(decomposition.size());
 					decomposition.push_back(it->consumeToCell(event.pos));
 				} else {
-					links.insert(links.end(), it->backLinks.begin(), it->backLinks.end());
+					moveContentsUnordered(links, it->backLinks);
 				}
 				totalRange = totalRange.union_(it->xRange);
 				it = nodeSet.erase(it);
