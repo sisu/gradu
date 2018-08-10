@@ -294,4 +294,29 @@ TEST(DecompositionTest3D, DecomposeTwoCells) {
 				));
 }
 
+TEST(DecompositionTest3D, DecomposeDeepCells) {
+	ObstacleSet<3> obs = makeObstaclesForVolume(
+			{
+				{"...",
+				 ".#.",
+				 "..."},
+				{"...",
+				 "##.",
+				 "..."},
+				{"...",
+				 "##.",
+				 ".#."},
+			});
+	cout<<"obs: "<<obs<<'\n';
+	Decomposition<3> result = decomposeFreeSpace(obs);
+	EXPECT_THAT(getBoxes(result), ElementsAre(
+				box3({1,2}, {2,3}, {1,2}),
+				box3({1,4}, {3,4}, {1,3}),
+				box3({3,4}, {2,3}, {1,3}),
+				box3({1,2}, {3,4}, {3,4}),
+				box3({1,4}, {1,2}, {1,4}),
+				box3({3,4}, {2,4}, {3,4})
+				));
+}
+
 } // namespace

@@ -131,10 +131,11 @@ void mergePlaneResults(Decomposition<D>& result,
 	Decomposition<D> newCells;
 	size_t i=0, j=0;
 	while(i < activeCells.size() && j < plane.size()) {
-		const Cell<D>& a = activeCells[i];
+		Cell<D> a = activeCells[i];
 		const Cell<D-1>& b = plane[j];
 		int x = compare(a.box, b.box);
 		if (x<0) {
+			a.box[D-1].to = curZ;
 			result.push_back(a);
 			i++;
 		} else {
@@ -150,7 +151,11 @@ void mergePlaneResults(Decomposition<D>& result,
 			j++;
 		}
 	}
-	result.insert(result.end(), activeCells.begin()+i, activeCells.end());
+	for(; i<activeCells.size(); ++i) {
+		Cell<D> a = activeCells[i];
+		a.box[D-1].to = curZ;
+		result.push_back(a);
+	}
 	for(; j<plane.size(); ++j) {
 		const Cell<D-1>& b = plane[j];
 		Box<D> box;
