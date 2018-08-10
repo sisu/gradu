@@ -188,7 +188,7 @@ Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 		Decomposition<D-1> curPlane = decomposeFreeSpace(crossSection);
 		mergePlaneResults(result, activeCells, curPlane, z);
 	}
-	result.insert(result.end(), activeCells.begin(), activeCells.end());
+	assert(activeCells.empty());
 	return result;
 }
 
