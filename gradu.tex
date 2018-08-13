@@ -75,6 +75,7 @@
 %\newcommand\decompc[1]{\ensuremath{\textsc{hajo}({#1})}\xspace}
 \newcommand\sweep[2]{\ensuremath{\textsc{pyyh}_{#2}{(#1)}}\xspace}
 \newcommand\stepof[1]{\ensuremath{\textsc{askel}{(#1)}}\xspace}
+\newcommand\proj[2]{\ensuremath{\text{proj}_{#1}(#2)}\xspace}
 
 \newcommand\rotr[1]{\ensuremath{\top #1}\xspace}
 \newcommand\vecof[1]{\ensuremath{\left [#1\right ]}\xspace}
@@ -603,6 +604,8 @@ Tunnetaan myös tapoja jakaa 3D-alue pienempään määrään suorakaiteita, mutta näis
 Hajotelman idea on pyyhkäistä alueen läpi tasolla joka on kohtisuorassa $z$-akselia kohti, ja tarkastella tason ja esteiden leikkausta pyyhkäisyn aikana.
 Alueen ja tason leikkausta kutsutaan alueen \emph{poikkileikkaukseksi}.
 Idea on muodostaa 2D-hajotelma jokaisessa uniikissa poikkileikkauksessa, ja venyttää näin saatuja $xy$-tason suorakaiteita $z$-akselin suunnassa jotta ne peittävät koko 3-ulotteisen alueen.
+Jos kahden peräkkäisen $xy$-tason hajotelma sisältää yhteisen suorakaiteen, yhdistetään niitä muodostetut särmiöt.
+Seuraava algoritmi selventää tätä ideaa.
 
 \begin{alg}\label{alg:jako3d}
 Jaa estejoukon $E$ rajoittama alue suorakulmaisiin särmiöihin.
@@ -611,13 +614,26 @@ Jaa estejoukon $E$ rajoittama alue suorakulmaisiin särmiöihin.
 \State Järjestä $Z$ kasvavaan järjestykseen.
 \State Poista toistuvat elementit taulukosta $Z$.
 \State $A\gets\emptyset$.
+\State $R\gets\emptyset$.
 \ForAll{$z\in Z$}
 	\State $E_z\gets\set{e \mid e\in E, z\in\zrange{e}}$.
-	\State Muodosta 2D-hajotelma estejoukolle $E_z$.
-	\State $A\gets E_z$.
+	\State Muodosta 2D-hajotelma $T$ estejoukolle $E_z$ algoritmilla~\ref{alg:jako2d}.
+	\State $A'\gets\set{\proj{xy}{a} \mid a\in A}$.
+	\State $L\gets A'\cap T$.
+	\State $U\gets A'\setminus T$.
+	\State $A\gets \set{a \mid a\in A, \proj{xy}{a}\in T}$.
 \EndFor
+\State Palauta joukko $R$.
 \end{algorithmic}
 \end{alg}
+
+\begin{lem}Algoritmi~\ref{alg:jako3d} jakaa alueen $O(n^2)$ suorakulmaiseen särmiöön.\end{lem}
+\begin{proof}HT\end{proof}
+
+Laajennetaan algoritmia~\ref{alg:jako3d} niin, että se laskee myös linkit muodostettujen solujen välillä.
+
+\begin{lem}Algoritmin~\ref{alg:jako3d} tuottaman hajotelman solujen välillä on $O(n^2)$ linkkiä.\end{lem}
+\begin{proof}HT\end{proof}
 
 
 
