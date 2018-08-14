@@ -31,10 +31,15 @@ struct DecomposeNode {
 	Range xRange;
 	int yStart = 0;
 	mutable vector<int> backLinks;
+	mutable vector<int> backObstacles;
 
-	Cell<2> consumeToCell(int yEnd) const {
+	Cell<2> consumeToCell(int yEnd, int obstacle) const {
 		Cell<2> res(Box<2>{{xRange, {yStart, yEnd}}});
 		res.links[UP] = move(backLinks);
+		res.obstacles[UP] = move(backObstacles);
+		if (obstacle >= 0) {
+			res.obstacles[DOWN].push_back(obstacle);
+		}
 		cout<<"Creating cell "<<res.box<<' '<<res.links[UP]<<'\n';
 		return res;
 	}
@@ -82,17 +87,20 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 			vector<int> links;
 			if (it->yStart < event.pos) {
 				links.push_back(decomposition.size());
-				decomposition.push_back(it->consumeToCell(event.pos));
+				decomposition.push_back(it->consumeToCell(event.pos, event.idx));
 			} else {
 				links = std::move(it->backLinks);
+				for(int i: links) {
+					decomposition[i].obstacles[DOWN].push_back(event.idx);
+				}
 			}
 			it = nodeSet.erase(it);
 			if (oldRange.from < range.from) {
-				DecomposeNode node{{oldRange.from, range.from}, event.pos, links};
+				DecomposeNode node{{oldRange.from, range.from}, event.pos, links, {}};
 				nodeSet.insert(node);
 			}
 			if (oldRange.to > range.to) {
-				DecomposeNode node{{range.to, oldRange.to}, event.pos, links};
+				DecomposeNode node{{range.to, oldRange.to}, event.pos, links, {}};
 				nodeSet.insert(node);
 			}
 		} else {
@@ -102,6 +110,7 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 				--it;
 			}
 			vector<int> links;
+			vector<int> obstacles = {event.idx};
 			while(it != nodeSet.end() && it->xRange.from <= totalRange.to) {
 				if (it->xRange.to < totalRange.from) {
 					++it;
@@ -109,15 +118,16 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 				}
 				if (it->yStart < event.pos) {
 					links.push_back(decomposition.size());
-					decomposition.push_back(it->consumeToCell(event.pos));
+					decomposition.push_back(it->consumeToCell(event.pos, -1));
 				} else {
 					moveContentsUnordered(links, it->backLinks);
+					moveContentsUnordered(obstacles, it->backObstacles);
 				}
 				totalRange = totalRange.union_(it->xRange);
 				it = nodeSet.erase(it);
 			}
-			DecomposeNode node{totalRange, event.pos, move(links)};
-			cout<<"insert to nodeset "<<totalRange<<'\n';
+			DecomposeNode node{totalRange, event.pos, move(links), move(obstacles)};
+			cout<<"insert to nodeset "<<totalRange<<' '<<event.idx<<'\n';
 			nodeSet.insert(std::move(node));
 		}
 	}
@@ -126,6 +136,12 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 			for(int j: decomposition[i].links[d]) {
 				decomposition[j].links[d^1].push_back(i);
 			}
+		}
+	}
+	for(auto& c: decomposition) {
+		for(int d=0; d<4; ++d) {
+			sort(c.links[d].begin(), c.links[d].end());
+			sort(c.obstacles[d].begin(), c.obstacles[d].end());
 		}
 	}
 	return decomposition;
@@ -193,6 +209,9 @@ void mergePlaneResults(Decomposition<D>& result,
 	activeCells = move(newCells);
 }
 
+void computeLinksBetweenLayers() {
+}
+
 template<int D>
 Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 	vector<int> depths;
@@ -214,6 +233,7 @@ Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 		}
 		Decomposition<D-1> curPlane = decomposeFreeSpace(crossSection);
 		mergePlaneResults(result, activeCells, curPlane, z);
+		computeLinksBetweenLayers();
 	}
 	assert(activeCells.empty());
 	return result;

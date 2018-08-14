@@ -228,19 +228,37 @@ Box<3> box3(Range x, Range y, Range z) {
 }
 
 template<int D>
-vector<int> getLinksInDir(const Decomposition<D>& dec, size_t index, int dir) {
-	Box<D> target = dec[index].box;
+Box<D> makeBoundaryBox(const Box<D>& b, int dir) {
+	Box<D> res = b;
 	Point<D> vdir = dirVec<D>(dir);
 	for(int i=0; i<D; ++i) {
 		if (vdir[i] < 0) {
-			target[i] = {target[i].from-1, target[i].from};
+			res[i] = {res[i].from-1, res[i].from+1};
 		} else if (vdir[i] > 0) {
-			target[i] = {target[i].to, target[i].to+1};
+			res[i] = {res[i].to-1, res[i].to+1};
 		}
 	}
+	return res;
+}
+
+template<int D>
+vector<int> getLinksInDir(const Decomposition<D>& dec, size_t index, int dir) {
+	Box<D> target = makeBoundaryBox(dec[index].box, dir);
 	vector<int> res;
 	for(size_t i=0; i<dec.size(); ++i) {
 		if (i != index && target.intersects(dec[i].box)) {
+			res.push_back(i);
+		}
+	}
+	return res;
+}
+template<int D>
+vector<int> getObstaclesInDir(const ObstacleSet<D>& obs, const Box<D>& box, int dir) {
+	Box<D> target = makeBoundaryBox(box, dir);
+	int targetDir = dir ^ 1;
+	vector<int> res;
+	for(size_t i=0; i<obs.size(); ++i) {
+		if (obs[i].direction == targetDir && target.intersects(obs[i].box)) {
 			res.push_back(i);
 		}
 	}
@@ -257,6 +275,14 @@ void checkLinks(const Decomposition<D>& dec) {
 	}
 }
 
+template<int D>
+void checkObstacles(const Decomposition<D>& dec, const ObstacleSet<D>& obstacles) {
+	for(size_t i=0; i<dec.size(); ++i) {
+		for(int j=0; j<2*D; ++j) {
+			EXPECT_THAT(dec[i].obstacles[j], ElementsAreArray(getObstaclesInDir(obstacles, dec[i].box, j))) << i<<' '<<j<<' '<<dec[i].box;
+		}
+	}
+}
 
 
 TEST(DecompositionTest2D, DecomposeEmpty) {
@@ -269,6 +295,7 @@ TEST(DecompositionTest2D, DecomposeSingleCell) {
 	cout<<"obs: "<<obs<<'\n';
 	Decomposition<2> result = decomposeFreeSpace(obs);
 	EXPECT_THAT(getBoxes(result), ElementsAre(box2({1,2}, {1,2})));
+	checkObstacles(result, obs);
 }
 
 TEST(DecompositionTest2D, DecomposeTwoCells1) {
@@ -278,6 +305,7 @@ TEST(DecompositionTest2D, DecomposeTwoCells1) {
 	EXPECT_THAT(getBoxes(result), ElementsAre(
 				box2({1,2}, {1,2}), box2({1,3}, {2,3})));
 	checkLinks(result);
+	checkObstacles(result, obs);
 }
 TEST(DecompositionTest2D, DecomposeTwoCells2) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({"..", "#."});
@@ -286,6 +314,7 @@ TEST(DecompositionTest2D, DecomposeTwoCells2) {
 	EXPECT_THAT(getBoxes(result), ElementsAre(
 				box2({1,3}, {1,2}), box2({2,3}, {2,3})));
 	checkLinks(result);
+	checkObstacles(result, obs);
 }
 TEST(DecompositionTest2D, DecomposeManyCells) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({
@@ -304,6 +333,7 @@ TEST(DecompositionTest2D, DecomposeManyCells) {
 				box2({3, 6}, {4, 5})
 				));
 	checkLinks(result);
+	checkObstacles(result, obs);
 }
 
 TEST(DecompositionTest2D, ManyChangesOnSingleLevel) {
@@ -322,6 +352,7 @@ TEST(DecompositionTest2D, ManyChangesOnSingleLevel) {
 				box2({4, 5}, {3, 4})
 				));
 	checkLinks(result);
+	checkObstacles(result, obs);
 }
 
 
