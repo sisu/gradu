@@ -63,6 +63,83 @@ void moveContentsUnordered(vector<T>& to, vector<T>& from) {
 	to.insert(to.end(), make_move_iterator(from.begin()), make_move_iterator(from.end()));
 }
 
+class Sweepline {
+public:
+	Sweepline(const ObstacleSet<2>* obstacles): obstacles(*obstacles) {}
+
+	void handleEvent(const Event& event) {
+		if (event.startObstacle) {
+			addObstacleEvent(event);
+		} else {
+			endObstacleEvent(event);
+		}
+	}
+
+	Decomposition<2>& result() { return decomposition; }
+
+private:
+	void addObstacleEvent(const Event& event) {
+		const Range range = obstacles[event.idx].box[X_AXIS];
+		auto it = nodeSet.upper_bound(range.from);
+		assert(it != nodeSet.begin());
+		--it;
+		Range oldRange = it->xRange;
+		vector<int> links;
+		if (it->yStart < event.pos) {
+			links.push_back(decomposition.size());
+			decomposition.push_back(it->consumeToCell(event.pos, event.idx));
+		} else {
+			links = std::move(it->backLinks);
+			for(int i: links) {
+				decomposition[i].obstacles[DOWN].push_back(event.idx);
+			}
+		}
+		it = nodeSet.erase(it);
+		if (oldRange.from < range.from) {
+			DecomposeNode node{{oldRange.from, range.from}, event.pos, links, {}};
+			nodeSet.insert(node);
+		}
+		if (oldRange.to > range.to) {
+			DecomposeNode node{{range.to, oldRange.to}, event.pos, links, {}};
+			nodeSet.insert(node);
+		}
+	}
+
+	void endObstacleEvent(const Event& event) {
+		const Range range = obstacles[event.idx].box[X_AXIS];
+		Range totalRange = range;
+		auto it = nodeSet.upper_bound(range.from);
+		if (it != nodeSet.begin()) {
+			--it;
+		}
+		vector<int> links;
+		vector<int> obstacles = {event.idx};
+		while(it != nodeSet.end() && it->xRange.from <= totalRange.to) {
+			if (it->xRange.to < totalRange.from) {
+				++it;
+				continue;
+			}
+			if (it->yStart < event.pos) {
+				links.push_back(decomposition.size());
+				decomposition.push_back(it->consumeToCell(event.pos, -1));
+			} else {
+				moveContentsUnordered(links, it->backLinks);
+				moveContentsUnordered(obstacles, it->backObstacles);
+			}
+			totalRange = totalRange.union_(it->xRange);
+			it = nodeSet.erase(it);
+		}
+		DecomposeNode node{totalRange, event.pos, move(links), move(obstacles)};
+		cout<<"insert to nodeset "<<totalRange<<' '<<event.idx<<'\n';
+		nodeSet.insert(std::move(node));
+	}
+
+	const ObstacleSet<2>& obstacles;
+
+	set<DecomposeNode, less<>> nodeSet;
+	Decomposition<2> decomposition;
+};
+
 template<>
 Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	vector<Event> events;
@@ -74,63 +151,11 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	}
 	sort(events.begin(), events.end());
 
-	set<DecomposeNode, less<>> nodeSet;
-	Decomposition<2> decomposition;
+	Sweepline sweepline(&obstacles);
 	for(Event event : events) {
-		const Range range = obstacles[event.idx].box[X_AXIS];
-		cout<<"evt "<<event.idx<<' '<<range<<' '<<event.pos<<" : "<<event.startObstacle<<'\n';
-		if (event.startObstacle) {
-			auto it = nodeSet.upper_bound(range.from);
-			assert(it != nodeSet.begin());
-			--it;
-			Range oldRange = it->xRange;
-			vector<int> links;
-			if (it->yStart < event.pos) {
-				links.push_back(decomposition.size());
-				decomposition.push_back(it->consumeToCell(event.pos, event.idx));
-			} else {
-				links = std::move(it->backLinks);
-				for(int i: links) {
-					decomposition[i].obstacles[DOWN].push_back(event.idx);
-				}
-			}
-			it = nodeSet.erase(it);
-			if (oldRange.from < range.from) {
-				DecomposeNode node{{oldRange.from, range.from}, event.pos, links, {}};
-				nodeSet.insert(node);
-			}
-			if (oldRange.to > range.to) {
-				DecomposeNode node{{range.to, oldRange.to}, event.pos, links, {}};
-				nodeSet.insert(node);
-			}
-		} else {
-			Range totalRange = range;
-			auto it = nodeSet.upper_bound(range.from);
-			if (it != nodeSet.begin()) {
-				--it;
-			}
-			vector<int> links;
-			vector<int> obstacles = {event.idx};
-			while(it != nodeSet.end() && it->xRange.from <= totalRange.to) {
-				if (it->xRange.to < totalRange.from) {
-					++it;
-					continue;
-				}
-				if (it->yStart < event.pos) {
-					links.push_back(decomposition.size());
-					decomposition.push_back(it->consumeToCell(event.pos, -1));
-				} else {
-					moveContentsUnordered(links, it->backLinks);
-					moveContentsUnordered(obstacles, it->backObstacles);
-				}
-				totalRange = totalRange.union_(it->xRange);
-				it = nodeSet.erase(it);
-			}
-			DecomposeNode node{totalRange, event.pos, move(links), move(obstacles)};
-			cout<<"insert to nodeset "<<totalRange<<' '<<event.idx<<'\n';
-			nodeSet.insert(std::move(node));
-		}
+		sweepline.handleEvent(event);
 	}
+	Decomposition<2> decomposition = move(sweepline.result());
 	for(size_t i=0; i<decomposition.size(); ++i) {
 		for(int d=0; d<4; ++d) {
 			for(int j: decomposition[i].links[d]) {
