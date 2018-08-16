@@ -184,58 +184,81 @@ int compare(const Box<A>& a, const Box<B>& b) {
 }
 
 template<int D>
-void mergePlaneResults(Decomposition<D>& result,
-		Decomposition<D>& activeCells,
-		Decomposition<D-1>& plane,
-		int curZ) {
-	sort(activeCells.begin(), activeCells.end(),
-			[](const Cell<D>& a, const Cell<D>& b) {
+class SweepState {
+public:
+	SweepState(ObstacleSet<D> obstacles): obstacles(obstacles) {}
+
+	void advanceToDepth(int z) {
+		ObstacleSet<D-1> crossSection;
+		for(const auto& obs: obstacles) {
+			if (obs.box[Z_AXIS].contains(z)) {
+				crossSection.push_back({obs.box.project(), obs.direction});
+			}
+		}
+		Decomposition<D-1> curPlane = decomposeFreeSpace(crossSection);
+		mergePlaneResults(curPlane, z);
+		computeLinksBetweenLayers();
+	}
+
+	Decomposition<3>& result() { return decomposition; }
+
+private:
+	void computeLinksBetweenLayers() {
+	}
+
+	void mergePlaneResults(Decomposition<D-1>& plane,
+			int curZ) {
+		sort(activeCells.begin(), activeCells.end(),
+				[](const Cell<D>& a, const Cell<D>& b) {
 				return compare(a.box,b.box) < 0;
-			});
-	sort(plane.begin(), plane.end(),
-			[](const Cell<D-1>& a, const Cell<D-1>& b) {
+				});
+		sort(plane.begin(), plane.end(),
+				[](const Cell<D-1>& a, const Cell<D-1>& b) {
 				return compare(a.box,b.box) < 0;
-			});
-	Decomposition<D> newCells;
-	size_t i=0, j=0;
-	while(i < activeCells.size() && j < plane.size()) {
-		Cell<D> a = activeCells[i];
-		const Cell<D-1>& b = plane[j];
-		int x = compare(a.box, b.box);
-		if (x<0) {
+				});
+		Decomposition<D> newCells;
+		size_t i=0, j=0;
+		while(i < activeCells.size() && j < plane.size()) {
+			Cell<D> a = activeCells[i];
+			const Cell<D-1>& b = plane[j];
+			int x = compare(a.box, b.box);
+			if (x<0) {
+				a.box[D-1].to = curZ;
+				decomposition.push_back(a);
+				i++;
+			} else {
+				Box<D> box;
+				for(int k=0; k<D-1; ++k) box[k] = b.box[k];
+				int start = curZ;
+				if (x==0) {
+					start = a.box[D-1].from;
+					i++;
+				}
+				box[D-1] = {start, curZ+1};
+				newCells.emplace_back(box);
+				j++;
+			}
+		}
+		for(; i<activeCells.size(); ++i) {
+			Cell<D> a = activeCells[i];
 			a.box[D-1].to = curZ;
-			result.push_back(a);
-			i++;
-		} else {
+			decomposition.push_back(a);
+		}
+		for(; j<plane.size(); ++j) {
+			const Cell<D-1>& b = plane[j];
 			Box<D> box;
 			for(int k=0; k<D-1; ++k) box[k] = b.box[k];
-			int start = curZ;
-			if (x==0) {
-				start = a.box[D-1].from;
-				i++;
-			}
-			box[D-1] = {start, curZ+1};
+			box[D-1] = {curZ, curZ+1};
 			newCells.emplace_back(box);
-			j++;
 		}
+		activeCells = move(newCells);
 	}
-	for(; i<activeCells.size(); ++i) {
-		Cell<D> a = activeCells[i];
-		a.box[D-1].to = curZ;
-		result.push_back(a);
-	}
-	for(; j<plane.size(); ++j) {
-		const Cell<D-1>& b = plane[j];
-		Box<D> box;
-		for(int k=0; k<D-1; ++k) box[k] = b.box[k];
-		box[D-1] = {curZ, curZ+1};
-		newCells.emplace_back(box);
-	}
-	activeCells = move(newCells);
-}
 
-void computeLinksBetweenLayers() {
-}
+	ObstacleSet<D> obstacles;
+
+	Decomposition<D> decomposition;
+	Decomposition<D> activeCells;
+};
 
 template<int D>
 Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
@@ -247,21 +270,12 @@ Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 	}
 	sort(depths.begin(), depths.end());
 	depths.erase(unique(depths.begin(), depths.end()), depths.end());
-	Decomposition<D> result;
-	Decomposition<D> activeCells;
+
+	SweepState<D> state(obstacles);
 	for(int z: depths) {
-		ObstacleSet<D-1> crossSection;
-		for(const auto& obs: obstacles) {
-			if (obs.box[Z_AXIS].contains(z)) {
-				crossSection.push_back({obs.box.project(), obs.direction});
-			}
-		}
-		Decomposition<D-1> curPlane = decomposeFreeSpace(crossSection);
-		mergePlaneResults(result, activeCells, curPlane, z);
-		computeLinksBetweenLayers();
+		state.advanceToDepth(z);
 	}
-	assert(activeCells.empty());
-	return result;
+	return move(state.result());
 }
 
 template
