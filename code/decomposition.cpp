@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <numeric>
 #include <map>
 #include <set>
 #include <vector>
@@ -218,47 +219,8 @@ private:
 	}
 
 	void mergePlaneResults(Decomposition<D-1>& plane, int curZ) {
-		sort(activeCells.begin(), activeCells.end(),
-				[](const Cell<D>& a, const Cell<D>& b) {
-				return compare(a.box,b.box) < 0;
-				});
-		sort(plane.begin(), plane.end(),
-				[](const Cell<D-1>& a, const Cell<D-1>& b) {
-				return compare(a.box,b.box) < 0;
-				});
-		Decomposition<D> newCells;
-		size_t i=0, j=0;
-		while(i < activeCells.size() && j < plane.size()) {
-			Cell<D> a = activeCells[i];
-			const Cell<D-1>& b = plane[j];
-			int x = compare(a.box, b.box);
-			if (x<0) {
-				a.box[D-1].to = curZ;
-				decomposition.push_back(a);
-				i++;
-			} else {
-				int start = curZ;
-				if (x==0) {
-					start = a.box[D-1].from;
-					i++;
-				}
-				newCells.emplace_back(fromProj(b.box, start));
-				j++;
-			}
-		}
-		for(; i<activeCells.size(); ++i) {
-			Cell<D> a = activeCells[i];
-			a.box[D-1].to = curZ;
-			decomposition.push_back(a);
-		}
-		for(; j<plane.size(); ++j) {
-			newCells.emplace_back(fromProj(plane[j].box, curZ));
-		}
-		activeCells = move(newCells);
-	}
-
-	void mergePlaneResults2(Decomposition<D-1>& plane, int curZ) {
 		map<Box<D-1>, int> newMap;
+		vector<int> planeIndex(plane.size());
 		for(size_t i=0; i<plane.size(); ++i) {
 			const Box<D-1>& box = plane[i].box;
 			auto it = activeIndex.find(box);
@@ -271,10 +233,20 @@ private:
 				decomposition.emplace_back(fromProj(box, curZ));
 			}
 			newMap[box] = index;
+			planeIndex[i] = index;
+		}
+		for(size_t i=0; i<plane.size(); ++i) {
+			int from = planeIndex[i];
+			for(int j=0; j<2*(D-1); ++j) {
+				for(int x : plane[i].links[j]) {
+					decomposition[from].links[j].push_back(planeIndex[x]);
+				}
+			}
 		}
 		for(auto p : activeIndex) {
 			decomposition[p.second].box[D-1].to = curZ;
 		}
+		activeIndex = move(newMap);
 	}
 
 	static Box<D> fromProj(const Box<D-1>& from, int start) {
