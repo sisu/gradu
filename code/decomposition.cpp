@@ -1,11 +1,12 @@
 #include "decomposition.hpp"
 #include "Box.hpp"
-#include <vector>
+
 #include <algorithm>
-#include <set>
-#include <iostream>
-#include <unordered_map>
 #include <cassert>
+#include <iostream>
+#include <map>
+#include <set>
+#include <vector>
 
 using namespace std;
 
@@ -184,6 +185,16 @@ int compare(const Box<A>& a, const Box<B>& b) {
 }
 
 template<int D>
+bool operator<(const Box<D>& a, const Box<D>& b) {
+	for(int i=0; i<D; ++i) {
+		for(int j=0; j<2; ++j) {
+			if (a[i][j] != b[i][j]) return a[i][j] < b[i][j];
+		}
+	}
+	return false;
+}
+
+template<int D>
 class SweepState {
 public:
 	SweepState(ObstacleSet<D> obstacles): obstacles(obstacles) {}
@@ -206,8 +217,7 @@ private:
 	void computeLinksBetweenLayers() {
 	}
 
-	void mergePlaneResults(Decomposition<D-1>& plane,
-			int curZ) {
+	void mergePlaneResults(Decomposition<D-1>& plane, int curZ) {
 		sort(activeCells.begin(), activeCells.end(),
 				[](const Cell<D>& a, const Cell<D>& b) {
 				return compare(a.box,b.box) < 0;
@@ -227,15 +237,12 @@ private:
 				decomposition.push_back(a);
 				i++;
 			} else {
-				Box<D> box;
-				for(int k=0; k<D-1; ++k) box[k] = b.box[k];
 				int start = curZ;
 				if (x==0) {
 					start = a.box[D-1].from;
 					i++;
 				}
-				box[D-1] = {start, curZ+1};
-				newCells.emplace_back(box);
+				newCells.emplace_back(fromProj(b.box, start));
 				j++;
 			}
 		}
@@ -245,19 +252,44 @@ private:
 			decomposition.push_back(a);
 		}
 		for(; j<plane.size(); ++j) {
-			const Cell<D-1>& b = plane[j];
-			Box<D> box;
-			for(int k=0; k<D-1; ++k) box[k] = b.box[k];
-			box[D-1] = {curZ, curZ+1};
-			newCells.emplace_back(box);
+			newCells.emplace_back(fromProj(plane[j].box, curZ));
 		}
 		activeCells = move(newCells);
+	}
+
+	void mergePlaneResults2(Decomposition<D-1>& plane, int curZ) {
+		map<Box<D-1>, int> newMap;
+		for(size_t i=0; i<plane.size(); ++i) {
+			const Box<D-1>& box = plane[i].box;
+			auto it = activeIndex.find(box);
+			int index;
+			if (it != activeIndex.end()) {
+				index = it->second;
+				activeIndex.erase(it);
+			} else {
+				index = decomposition.size();
+				decomposition.emplace_back(fromProj(box, curZ));
+			}
+			newMap[box] = index;
+		}
+		for(auto p : activeIndex) {
+			decomposition[p.second].box[D-1].to = curZ;
+		}
+	}
+
+	static Box<D> fromProj(const Box<D-1>& from, int start) {
+		Box<D> box;
+		for(int k=0; k<D-1; ++k) box[k] = from[k];
+		box[D-1] = {start, -1};
+		return box;
 	}
 
 	ObstacleSet<D> obstacles;
 
 	Decomposition<D> decomposition;
 	Decomposition<D> activeCells;
+
+	map<Box<D-1>, int> activeIndex;
 };
 
 template<int D>
