@@ -196,6 +196,21 @@ bool operator<(const Box<D>& a, const Box<D>& b) {
 }
 
 template<int D>
+vector<pair<int,int>> overlappingBoxes(
+		const vector<Box<D>>& bs1,
+		const vector<Box<D>>& bs2) {
+	vector<pair<int,int>> conns;
+	for(size_t i=0; i<bs1.size(); ++i) {
+		for(size_t j=0; j<bs2.size(); ++j) {
+			if (bs1[i].intersects(bs2[j])) {
+				conns.emplace_back(i,j);
+			}
+		}
+	}
+	return conns;
+}
+
+template<int D>
 class SweepState {
 public:
 	SweepState(ObstacleSet<D> obstacles): obstacles(obstacles) {}
@@ -221,6 +236,8 @@ private:
 	void mergePlaneResults(Decomposition<D-1>& plane, int curZ) {
 		map<Box<D-1>, int> newMap;
 		vector<int> planeIndex(plane.size());
+		vector<Box<D-1>> addedBoxes;
+		vector<int> addedIndex;
 		for(size_t i=0; i<plane.size(); ++i) {
 			const Box<D-1>& box = plane[i].box;
 			auto it = activeIndex.find(box);
@@ -231,6 +248,8 @@ private:
 			} else {
 				index = decomposition.size();
 				decomposition.emplace_back(fromProj(box, curZ));
+				addedBoxes.push_back(box);
+				addedIndex.push_back(index);
 			}
 			newMap[box] = index;
 			planeIndex[i] = index;
@@ -243,10 +262,21 @@ private:
 				}
 			}
 		}
+		vector<Box<D-1>> removedBoxes;
+		vector<int> removedIndex;
 		for(auto p : activeIndex) {
 			decomposition[p.second].box[D-1].to = curZ;
+			removedBoxes.push_back(p.first);
+			removedIndex.push_back(p.second);
 		}
 		activeIndex = move(newMap);
+		auto newLinks = overlappingBoxes(removedBoxes, addedBoxes);
+		for(auto p: newLinks) {
+			int a = removedIndex[p.first];
+			int b = addedIndex[p.second];
+			decomposition[a].links[2*(D-1)+1].push_back(b);
+			decomposition[b].links[2*(D-1)].push_back(a);
+		}
 	}
 
 	static Box<D> fromProj(const Box<D-1>& from, int start) {
@@ -264,6 +294,12 @@ private:
 	map<Box<D-1>, int> activeIndex;
 };
 
+template<class T>
+void sortUnique(vector<T>& v) {
+	sort(v.begin(), v.end());
+	v.erase(unique(v.begin(), v.end()), v.end());
+}
+
 template<int D>
 Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 	vector<int> depths;
@@ -279,7 +315,14 @@ Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 	for(int z: depths) {
 		state.advanceToDepth(z);
 	}
-	return move(state.result());
+	Decomposition<D> result = move(state.result());
+	for(Cell<D>& cell: result) {
+		for(int i=0; i<2*D; ++i) {
+			sortUnique(cell.links[i]);
+			sortUnique(cell.obstacles[i]);
+		}
+	}
+	return result;
 }
 
 template

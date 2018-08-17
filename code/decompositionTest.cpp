@@ -406,6 +406,7 @@ TEST(DecompositionTest3D, DecomposeDeepCells) {
 				box3({1,2}, {3,4}, {3,4}),
 				box3({3,4}, {2,4}, {3,4})
 				));
+	checkLinks(result);
 }
 
 } // namespace
