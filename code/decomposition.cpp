@@ -142,6 +142,52 @@ private:
 	Decomposition<2> decomposition;
 };
 
+template<class T>
+void sortUnique(vector<T>& v) {
+	sort(v.begin(), v.end());
+	v.erase(unique(v.begin(), v.end()), v.end());
+}
+
+template<int D>
+void cleanLinks(Decomposition<D>& decomposition) {
+	for(Cell<D>& cell: decomposition) {
+		for(int i=0; i<2*D; ++i) {
+			sortUnique(cell.links[i]);
+			sortUnique(cell.obstacles[i]);
+		}
+	}
+}
+template<int D>
+void addReverseLinks(Decomposition<D>& decomposition) {
+	for(size_t i=0; i<decomposition.size(); ++i) {
+		Cell<D>& c = decomposition[i];
+		for(int d=0; d<2*D; ++d) {
+			for(int j: c.links[d]) {
+				decomposition[j].links[d^1].push_back(i);
+			}
+		}
+	}
+}
+void addXObstacles(Decomposition<2>& decomposition,
+		const map<pair<int,int>, int> cornerToObstacle) {
+	for(size_t i=0; i<decomposition.size(); ++i) {
+		Cell<2>& c = decomposition[i];
+		for(int side=0; side<2; ++side) {
+			auto it = cornerToObstacle.find({c.box[X_AXIS][side], c.box[Y_AXIS].from});
+			if (it != cornerToObstacle.end()) {
+				c.obstacles[side].push_back(it->second);
+			} else {
+				for(int x: c.links[UP]) {
+					const auto& d = decomposition[x];
+					if (d.box[X_AXIS][side] == c.box[X_AXIS][side]) {
+						c.obstacles[side] = d.obstacles[side];
+					}
+				}
+			}
+		}
+	}
+}
+
 template<>
 Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	vector<Event> events;
@@ -163,33 +209,10 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 		sweepline.handleEvent(event);
 	}
 	Decomposition<2> decomposition = move(sweepline.result());
-	for(size_t i=0; i<decomposition.size(); ++i) {
-		Cell<2>& c = decomposition[i];
-		for(int d=0; d<4; ++d) {
-			for(int j: c.links[d]) {
-				decomposition[j].links[d^1].push_back(i);
-			}
-		}
-		for(int side=0; side<2; ++side) {
-			auto it = cornerToObstacle.find({c.box[X_AXIS][side], c.box[Y_AXIS].from});
-			if (it != cornerToObstacle.end()) {
-				c.obstacles[side].push_back(it->second);
-			} else {
-				for(int x: c.links[UP]) {
-					const auto& d = decomposition[x];
-					if (d.box[X_AXIS][side] == c.box[X_AXIS][side]) {
-						c.obstacles[side] = d.obstacles[side];
-					}
-				}
-			}
-		}
-	}
-	for(auto& c: decomposition) {
-		for(int d=0; d<4; ++d) {
-			sort(c.links[d].begin(), c.links[d].end());
-			sort(c.obstacles[d].begin(), c.obstacles[d].end());
-		}
-	}
+
+	addReverseLinks(decomposition);
+	addXObstacles(decomposition, cornerToObstacle);
+	cleanLinks(decomposition);
 	return decomposition;
 }
 
@@ -314,12 +337,6 @@ private:
 	map<Box<D-1>, int> activeIndex;
 };
 
-template<class T>
-void sortUnique(vector<T>& v) {
-	sort(v.begin(), v.end());
-	v.erase(unique(v.begin(), v.end()), v.end());
-}
-
 template<int D>
 Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 	vector<int> depths;
@@ -335,14 +352,8 @@ Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 	for(int z: depths) {
 		state.advanceToDepth(z);
 	}
-	Decomposition<D> result = move(state.result());
-	for(Cell<D>& cell: result) {
-		for(int i=0; i<2*D; ++i) {
-			sortUnique(cell.links[i]);
-			sortUnique(cell.obstacles[i]);
-		}
-	}
-	return result;
+	cleanLinks(state.result());
+	return move(state.result());
 }
 
 template
