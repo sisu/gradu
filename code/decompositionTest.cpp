@@ -377,6 +377,7 @@ TEST(DecompositionTest3D, DecomposeSingleCell) {
 	cout<<"obs: "<<obs<<'\n';
 	Decomposition<3> result = decomposeFreeSpace(obs);
 	EXPECT_THAT(getBoxes(result), ElementsAre(box3({1,2}, {1,2}, {1,2})));
+	checkObstacles(result, obs);
 }
 
 TEST(DecompositionTest3D, DecomposeTwoCells) {

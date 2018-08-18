@@ -260,25 +260,36 @@ public:
 
 	void advanceToDepth(int z) {
 		ObstacleSet<D-1> crossSection;
-		for(const auto& obs: obstacles) {
+		vector<int> obsIndex;
+		for(size_t i=0; i<obstacles.size(); ++i) {
+			const Obstacle<D>& obs = obstacles[i];
 			if (obs.box[Z_AXIS].contains(z)) {
 				crossSection.push_back({obs.box.project(), obs.direction});
+				obsIndex.push_back(i);
 			}
 		}
 		Decomposition<D-1> curPlane = decomposeFreeSpace(crossSection);
-		mergePlaneResults(curPlane, z);
-		computeLinksBetweenLayers();
+		vector<int> planeIndex(curPlane.size());
+		mergePlaneResults(curPlane, z, planeIndex);
+		for(size_t i=0; i<curPlane.size(); ++i) {
+			Cell<D>& target = decomposition[planeIndex[i]];
+			for(int j=0; j<2*(D-1); ++j) {
+				for(int x : curPlane[i].links[j]) {
+					target.links[j].push_back(planeIndex[x]);
+				}
+				for(int x : curPlane[i].obstacles[j]) {
+					target.obstacles[j].push_back(obsIndex[x]);
+				}
+			}
+		}
 	}
 
 	Decomposition<3>& result() { return decomposition; }
 
 private:
-	void computeLinksBetweenLayers() {
-	}
-
-	void mergePlaneResults(Decomposition<D-1>& plane, int curZ) {
+	void mergePlaneResults(Decomposition<D-1>& plane, int curZ,
+			vector<int>& planeIndex) {
 		map<Box<D-1>, int> newMap;
-		vector<int> planeIndex(plane.size());
 		vector<Box<D-1>> addedBoxes;
 		vector<int> addedIndex;
 		for(size_t i=0; i<plane.size(); ++i) {
@@ -296,14 +307,6 @@ private:
 			}
 			newMap[box] = index;
 			planeIndex[i] = index;
-		}
-		for(size_t i=0; i<plane.size(); ++i) {
-			int from = planeIndex[i];
-			for(int j=0; j<2*(D-1); ++j) {
-				for(int x : plane[i].links[j]) {
-					decomposition[from].links[j].push_back(planeIndex[x]);
-				}
-			}
 		}
 		vector<Box<D-1>> removedBoxes;
 		vector<int> removedIndex;
