@@ -79,13 +79,35 @@ void addObstaclesOnLine(
 	}
 }
 
-ObstacleSet<2> makeObstaclesForPlane(const vector<string>& area0) {
-	const vector<string> area = addBorderAroundArea(area0);
-	ObstacleSet<2> result;
+vector<string> swapXY(const vector<string>& area) {
+	int h = area.size();
+	int w = area[0].size();
+	vector<string> res(w, string(h, '#'));
+	for(int i=0; i<h; ++i) {
+		for(int j=0; j<w; ++j) {
+			res[j][i] = area[i][j];
+		}
+	}
+	return res;
+}
+
+void addObstaclesForPlane(ObstacleSet<2>& result, const vector<string>& area) {
 	int h = area.size();
 	for(int i=0; i+1<h; ++i) {
 		addObstaclesOnLine(result, area, i+1, UP);
 		addObstaclesOnLine(result, area, i, DOWN);
+	}
+}
+
+ObstacleSet<2> makeObstaclesForPlane(const vector<string>& area0) {
+	const vector<string> area = addBorderAroundArea(area0);
+	ObstacleSet<2> result;
+	addObstaclesForPlane(result, area);
+	int n = result.size();
+	addObstaclesForPlane(result, swapXY(area));
+	for(size_t i=n; i<result.size(); ++i) {
+		swap(result[i].box[0], result[i].box[1]);
+		result[i].direction += LEFT - UP;
 	}
 	return result;
 }
@@ -153,17 +175,6 @@ void addObstaclesForVolume(ObstacleSet<3>& result,
 	result.insert(result.end(), activeRects.begin(), activeRects.end());
 }
 
-vector<string> swapXY(const vector<string>& area) {
-	int h = area.size();
-	int w = area[0].size();
-	vector<string> res(w, string(h, '#'));
-	for(int i=0; i<h; ++i) {
-		for(int j=0; j<w; ++j) {
-			res[j][i] = area[i][j];
-		}
-	}
-	return res;
-}
 vector<vector<string>> swapXY(const vector<vector<string>>& volume) {
 	int n = volume.size();
 	vector<vector<string>> res;

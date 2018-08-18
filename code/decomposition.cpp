@@ -199,6 +199,7 @@ template<int D>
 vector<pair<int,int>> overlappingBoxes(
 		const vector<Box<D>>& bs1,
 		const vector<Box<D>>& bs2) {
+	// TODO: more efficient impl
 	vector<pair<int,int>> conns;
 	for(size_t i=0; i<bs1.size(); ++i) {
 		for(size_t j=0; j<bs2.size(); ++j) {
