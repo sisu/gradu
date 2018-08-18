@@ -31,7 +31,7 @@ constexpr int DOWN = 3;
 
 struct DecomposeNode {
 	Range xRange;
-	int yStart = 0;
+	int yStart = -1;
 	mutable vector<int> backLinks;
 	mutable vector<int> backObstacles;
 
@@ -145,11 +145,16 @@ private:
 template<>
 Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	vector<Event> events;
+	map<pair<int,int>, int> cornerToObstacle;
 	for(int i=0; i<(int)obstacles.size(); ++i) {
 		const auto& obs = obstacles[i];
 		cout<<"obs "<<obs<<' '<<obs.box[X_AXIS].size()<<'\n';
-		if (obs.box[X_AXIS].size() == 0) continue;
-		events.push_back({obs.box[Y_AXIS].from, i, obs.direction == UP});
+		if (obs.box[X_AXIS].size() == 0) {
+			cornerToObstacle[{obs.box[X_AXIS].from, obs.box[Y_AXIS].from}] = i;
+			cornerToObstacle[{obs.box[X_AXIS].to, obs.box[Y_AXIS].from}] = i;
+		} else {
+			events.push_back({obs.box[Y_AXIS].from, i, obs.direction == UP});
+		}
 	}
 	sort(events.begin(), events.end());
 
@@ -159,9 +164,23 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	}
 	Decomposition<2> decomposition = move(sweepline.result());
 	for(size_t i=0; i<decomposition.size(); ++i) {
+		Cell<2>& c = decomposition[i];
 		for(int d=0; d<4; ++d) {
-			for(int j: decomposition[i].links[d]) {
+			for(int j: c.links[d]) {
 				decomposition[j].links[d^1].push_back(i);
+			}
+		}
+		for(int side=0; side<2; ++side) {
+			auto it = cornerToObstacle.find({c.box[X_AXIS][side], c.box[Y_AXIS].from});
+			if (it != cornerToObstacle.end()) {
+				c.obstacles[side].push_back(it->second);
+			} else {
+				for(int x: c.links[UP]) {
+					const auto& d = decomposition[x];
+					if (d.box[X_AXIS][side] == c.box[X_AXIS][side]) {
+						c.obstacles[side] = d.obstacles[side];
+					}
+				}
 			}
 		}
 	}
