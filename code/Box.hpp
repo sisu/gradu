@@ -1,5 +1,6 @@
 #pragma once
 #include "Range.hpp"
+#include <initializer_list>
 #include <ostream>
 #include <cstring>
 
@@ -8,6 +9,10 @@ struct Point {
 	Point() {
 		memset(data,0,sizeof(data));
 	}
+	Point(std::initializer_list<int> x) {
+		std::copy(x.begin(), x.end(), data);
+	}
+
 	int data[D];
 	int& operator[](int i) { return data[i]; }
 	int operator[](int i) const { return data[i]; }
