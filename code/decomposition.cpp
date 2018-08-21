@@ -12,6 +12,8 @@
 
 using namespace std;
 
+namespace {
+
 struct Event {
 	int pos = -1;
 	int idx = -1;
@@ -51,9 +53,11 @@ struct DecomposeNode {
 		return xRange.from < n.xRange.from;
 	}
 };
+#if 0
 bool operator<(const DecomposeNode& n, int i) {
 	return n.xRange.from < i;
 }
+#endif
 bool operator<(int i, const DecomposeNode& n) {
 	return i < n.xRange.from;
 }
@@ -189,6 +193,8 @@ void addXObstacles(Decomposition<2>& decomposition,
 	}
 }
 
+} // namespace
+
 template<>
 Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	vector<Event> events;
@@ -216,6 +222,8 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	cleanLinks(decomposition);
 	return decomposition;
 }
+
+//namespace {
 
 template<int A, int B>
 int compare(const Box<A>& a, const Box<B>& b) {
@@ -421,6 +429,8 @@ void computeLinksInDir(Decomposition<D>& decomposition, const ObstacleSet<D>& ob
 		}
 	}
 }
+
+//} // namespace
 
 template<int D>
 Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {

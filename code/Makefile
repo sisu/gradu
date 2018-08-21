@@ -39,7 +39,7 @@ $(TBIN): %: %.o
 	$(CC) $^ -o $@ $(TFLAGS) -lgtest -lgtest_main -lgmock -pthread
 	"./$@"
 
-$(ODIR)/./decompositionTest: $(ODIR)/./decomposition.o
+$(ODIR)/./decompositionTest: $(ODIR)/./decomposition.o $(ODIR)/./obstacles.o
 
 clean:
 	rm -rf "$(ODIR)"
