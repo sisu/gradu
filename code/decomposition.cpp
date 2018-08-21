@@ -1,5 +1,6 @@
 #include "decomposition.hpp"
 #include "Box.hpp"
+#include "Span.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -254,6 +255,17 @@ vector<pair<int,int>> overlappingBoxes(
 }
 
 template<int D>
+struct IndexedBoxes {
+	void add(int i, const Box<D>& b) {
+		index.push_back(i);
+		box.push_back(b);
+	}
+
+	vector<int> index;
+	vector<Box<D>> box;
+};
+
+template<int D>
 class SweepState {
 public:
 	SweepState(ObstacleSet<D> obstacles): obstacles(obstacles) {}
@@ -270,7 +282,8 @@ public:
 		}
 		Decomposition<D-1> curPlane = decomposeFreeSpace(crossSection);
 		vector<int> planeIndex(curPlane.size());
-		mergePlaneResults(curPlane, z, planeIndex);
+		IndexedBoxes<D-1> removedCells;
+		mergePlaneResults(curPlane, z, planeIndex, removedCells);
 		for(size_t i=0; i<curPlane.size(); ++i) {
 			Cell<D>& target = decomposition[planeIndex[i]];
 			for(int j=0; j<2*(D-1); ++j) {
@@ -282,13 +295,22 @@ public:
 				}
 			}
 		}
+		vector<int> newObs;
+		set_difference(prevObsIndex.begin(), prevObsIndex.end(),
+				obsIndex.begin(), obsIndex.end(),
+				back_inserter(newObs));
+		vector<Box<D-1>> newObsBox;
+		for(int i: newObs) newObsBox.push_back(obstacles[i].box.project());
+//		overlappingBoxes(removedBoxes, newObsBox);
+
+		prevObsIndex = obsIndex;
 	}
 
 	Decomposition<3>& result() { return decomposition; }
 
 private:
 	void mergePlaneResults(Decomposition<D-1>& plane, int curZ,
-			vector<int>& planeIndex) {
+			vector<int>& planeIndex, IndexedBoxes<D-1>& removedCells) {
 		map<Box<D-1>, int> newMap;
 		vector<Box<D-1>> addedBoxes;
 		vector<int> addedIndex;
@@ -308,17 +330,14 @@ private:
 			newMap[box] = index;
 			planeIndex[i] = index;
 		}
-		vector<Box<D-1>> removedBoxes;
-		vector<int> removedIndex;
 		for(auto p : activeIndex) {
 			decomposition[p.second].box[D-1].to = curZ;
-			removedBoxes.push_back(p.first);
-			removedIndex.push_back(p.second);
+			removedCells.add(p.second, p.first);
 		}
 		activeIndex = move(newMap);
-		auto newLinks = overlappingBoxes(removedBoxes, addedBoxes);
+		auto newLinks = overlappingBoxes(removedCells.box, addedBoxes);
 		for(auto p: newLinks) {
-			int a = removedIndex[p.first];
+			int a = removedCells.index[p.first];
 			int b = addedIndex[p.second];
 			decomposition[a].links[2*(D-1)+1].push_back(b);
 			decomposition[b].links[2*(D-1)].push_back(a);
@@ -338,7 +357,70 @@ private:
 	Decomposition<D> activeCells;
 
 	map<Box<D-1>, int> activeIndex;
+	vector<int> prevObsIndex;
 };
+
+template<int D, class T>
+vector<Box<D-1>> getProjBoxesT(const T& items, Span<const int> idx) {
+	vector<Box<D-1>> boxes;
+	boxes.reserve(idx.size());
+	for(int i: idx) {
+		boxes.push_back(items[i].box.project());
+	}
+	return boxes;
+}
+
+template<int D>
+vector<Box<D-1>> getProjBoxes(const Decomposition<D>& items, Span<const int> idx) {
+	return getProjBoxesT<D>(items, idx);
+}
+
+template<int D>
+vector<Box<D-1>> getProjBoxes(const ObstacleSet<D>& items, Span<const int> idx) {
+	return getProjBoxesT<D>(items, idx);
+}
+
+template<int D>
+void computeLinksInDir(Decomposition<D>& decomposition, const ObstacleSet<D>& obstacles, int axis) {
+	map<int, vector<int>> decFrom;
+	map<int, vector<int>> decTo;
+	map<int, vector<int>> obsFrom;
+	map<int, vector<int>> obsTo;
+	vector<int> zs;
+	for(size_t i=0; i<decomposition.size(); ++i) {
+		const Range& r = decomposition[i].box[axis];
+		decFrom[r.from].push_back(i);
+		decTo[r.to].push_back(i);
+		zs.push_back(r.from);
+		zs.push_back(r.to);
+	}
+	for(size_t i=0; i<obstacles.size(); ++i) {
+		const Obstacle<D>& obs = obstacles[i];
+		const Range& r = obs.box[axis];
+		if (r.size() != 0) continue;
+		auto& m = obs.direction&1 ? obsTo : obsFrom;
+		m[r.from].push_back(i);
+		zs.push_back(r.from);
+	}
+	sortUnique(zs);
+	for(int z: zs) {
+		const auto& dt = decTo[z];
+		const auto& df = decFrom[z];
+		for(auto p : overlappingBoxes(getProjBoxes(decomposition, dt), getProjBoxes(decomposition, df))) {
+			int a = dt[p.first], b = df[p.second];
+			decomposition[a].links[2*axis+1].push_back(b);
+			decomposition[b].links[2*axis].push_back(a);
+		}
+		const auto& ot = obsTo[z];
+		const auto& of = obsFrom[z];
+		for(auto p : overlappingBoxes(getProjBoxes(decomposition, dt), getProjBoxes(obstacles, of))) {
+			decomposition[dt[p.first]].obstacles[2*axis+1].push_back(of[p.second]);
+		}
+		for(auto p : overlappingBoxes(getProjBoxes(decomposition, df), getProjBoxes(obstacles, ot))) {
+			decomposition[df[p.first]].obstacles[2*axis].push_back(ot[p.second]);
+		}
+	}
+}
 
 template<int D>
 Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
@@ -348,15 +430,16 @@ Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 			depths.push_back(obs.box[Z_AXIS].from);
 		}
 	}
-	sort(depths.begin(), depths.end());
-	depths.erase(unique(depths.begin(), depths.end()), depths.end());
+	sortUnique(depths);
 
 	SweepState<D> state(obstacles);
 	for(int z: depths) {
 		state.advanceToDepth(z);
 	}
-	cleanLinks(state.result());
-	return move(state.result());
+	Decomposition<D> decomposition = move(state.result());
+	computeLinksInDir(decomposition, obstacles, D-1);
+	cleanLinks(decomposition);
+	return decomposition;
 }
 
 template

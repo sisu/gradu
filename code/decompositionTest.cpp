@@ -393,6 +393,7 @@ TEST(DecompositionTest3D, DecomposeTwoCells) {
 				box3({1,3}, {2,3}, {1,3})
 				));
 	checkLinks(result);
+	checkObstacles(result, obs);
 }
 
 TEST(DecompositionTest3D, DecomposeDeepCells) {
@@ -419,6 +420,7 @@ TEST(DecompositionTest3D, DecomposeDeepCells) {
 				box3({3,4}, {2,4}, {3,4})
 				));
 	checkLinks(result);
+	checkObstacles(result, obs);
 }
 
 } // namespace
