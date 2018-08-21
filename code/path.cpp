@@ -1,19 +1,36 @@
 #include "path.hpp"
 
-#if 0
 namespace {
 
-struct EventSet {
+using namespace std;
+
+enum class EventType { ADD_RECT, CELL, OBSTACLE };
+
+template<int D>
+struct Event {
+	EventType type;
+	int cell = -1;
+	int position = -1;
+	Box<D-1> box;
 };
 
-void sweep();
+template<int D>
+struct EventSet {
+	vector<Event<D>> events[2*D];
+};
+
+void sweep() {
+}
 
 } // namespace
-#endif
 
 template<int D>
 int linkDistance(const ObstacleSet<D>& obstacles,
 		Point<D> startP, Point<D> endP) {
+	Decomposition<D> decomposition = decomposeFreeSpace(obstacles);
+	EventSet<D> currentEvents;
+	for(int d=0; d<D; ++d) {
+	}
 	return 0;
 }
 
