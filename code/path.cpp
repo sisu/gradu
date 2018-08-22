@@ -34,10 +34,13 @@ struct EventSet {
 };
 
 struct TreeItem {
+	int start = -1;
 };
 
 template<int D>
 struct QueryPlane {
+//	QueryPlane(int maxSize);
+
 	void add(Box<D> box, const TreeItem& value) {
 	}
 
@@ -46,7 +49,7 @@ struct QueryPlane {
 	}
 
 	template<class Callback>
-	void remove(Box<D> box, Callback& cb) {
+	void remove(Box<D> box, Callback&& cb) {
 	}
 };
 
@@ -60,8 +63,18 @@ Event<D> cellEvent(const Decomposition<D>& dec, int dir, int cell) {
 }
 
 template<int D>
+Event<D> obstacleEvent(const ObstacleSet<D>& obs, int dir, int obstacle) {
+	Event<D> event;
+	event.type = EventType::OBSTACLE;
+	event.cell = obstacle;
+	event.position = obs[obstacle].box[dir>>1][dir&1];
+	return event;
+}
+
+template<int D>
 struct IlluminateState {
-	IlluminateState(const Decomposition<D>& dec): decomposition(dec) {}
+	IlluminateState(ObstacleSet<D> obs):
+		obstacles(obs), decomposition(decomposeFreeSpace(obstacles)) {}
 
 	void sweep(int dir) {
 		const int axis = dir/2;
@@ -75,6 +88,7 @@ struct IlluminateState {
 			} else if (event.type == EventType::CELL) {
 				const Cell<D>& cell = decomposition[event.cell];
 				for(int obs: cell.obstacles[dir]) {
+					events.push(obstacleEvent(obstacles, dir, obs));
 				}
 				for(int nb: cell.links[dir]) {
 					Box<D-1> box = decomposition[nb].box.project(axis);
@@ -83,11 +97,14 @@ struct IlluminateState {
 					}
 				}
 			} else {
+				Box<D-1> box = obstacles[event.cell].box.project(dir/2);
+				plane.remove(box, [](){});
 			}
 		}
 	}
 
-	const Decomposition<D>& decomposition;
+	const ObstacleSet<D> obstacles;
+	const Decomposition<D> decomposition;
 	EventSet<D> curEvents;
 	EventSet<D> nextEvents;
 
@@ -115,10 +132,10 @@ Box<D> unitBox(Point<D> pt) {
 
 template<int D>
 int linkDistance(const ObstacleSet<D>& obstacles, Point<D> startP, Point<D> endP) {
-	Decomposition<D> decomposition = decomposeFreeSpace(obstacles);
+	IlluminateState<D> state(obstacles);
+	const auto& decomposition = state.decomposition;
 	int startCell = pointCell(decomposition, startP);
 	Box<D> startBox = unitBox(startP);
-	IlluminateState<D> state(decomposition);
 	for(int d=0; d<D; ++d) {
 		Event<D> e;
 		e.type = EventType::ADD_RECT;
