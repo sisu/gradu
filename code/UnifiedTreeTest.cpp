@@ -84,7 +84,7 @@ enum class OType { ADD, CHECK };
 
 template<int D>
 struct Operation {
-	OType type;
+	OType type = OType::ADD;
 	Box<D> box;
 	Item<D> value;
 };
@@ -159,9 +159,12 @@ TEST(UnifiedTreeTest1D, AddCheckTree) {
 }
 
 TEST(UnifiedTreeTest1D, Random32) {
-	UnifiedTree<Item<1>, 1> tree{32};
-	mt19937 rng;
-	runOps(tree, genRandomOps<1>(32, 10, rng));
+	for(int i=0; i<3; ++i) {
+//		cout<<"\nRun "<<i<<'\n';
+		UnifiedTree<Item<1>, 1> tree{32};
+		mt19937 rng(i);
+		runOps(tree, genRandomOps<1>(32, 10, rng));
+	}
 }
 
 } // namespace

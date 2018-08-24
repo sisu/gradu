@@ -56,7 +56,7 @@ private:
 			if (!x.hasData[ALL_MASK]) {
 				x = value;
 			}
-			std::cout<<"add "<<index<<' '<<covered<<'\n';
+//			std::cout<<"add "<<index<<' '<<covered<<'\n';
 			x.hasData.set(covered);
 			return;
 		}
@@ -91,6 +91,7 @@ private:
 	bool checkRec(int index, int axis, Mask covered, const Box<D>& box) const {
 		if (axis == D) {
 			const T& x = data[index];
+//			std::cout<<"check "<<index<<' '<<covered<<' '<<data.size()<<'\n';
 			for(Mask i=0; i<=ALL_MASK; ++i) {
 				if ((i | covered) == ALL_MASK && x.hasData[i]) return true;
 			}
@@ -101,7 +102,7 @@ private:
 		Range range = box[axis];
 		int a,b,ap,bp;
 		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
-			std::cout<<"check "<<a<<' '<<b<<' '<<ap<<' '<<bp<<'\n';
+//			std::cout<<"check "<<a<<' '<<b<<' '<<ap<<' '<<bp<<'\n';
 			if (a != ap && checkRec(index + step*ap, axis+1, covered, box)) return true;
 			if (b != bp && ap!=bp && checkRec(index + step*bp, axis+1, covered, box)) return true;
 			if ((a&1) && checkRec(index + step*a++, axis+1, covered | (1U << axis), box)) return true;
