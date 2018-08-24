@@ -1,6 +1,9 @@
 #include "UnifiedTree.hpp"
+
 #include <bitset>
+#include <random>
 #include <vector>
+
 #include <gmock/gmock-more-matchers.h>
 #include <gtest/gtest.h>
 
@@ -107,10 +110,26 @@ void runOps(UnifiedTree<Item<D>, D>& actual, const vector<Operation<D>>& ops) {
 				oss<<t<<'\n';
 				break;
 			case OType::CHECK:
-				EXPECT_EQ(expected.check(t.box), actual.check(t.box))<<oss.str()<<" ; "<<t;
+				EXPECT_EQ(actual.check(t.box), expected.check(t.box))<<oss.str()<<" ; "<<t;
 				break;
 		}
 	}
+}
+
+template<int D>
+vector<Operation<D>> genRandomOps(int size, int n, mt19937& rng) {
+	vector<Operation<D>> ops;
+	for(int i=0; i<n; ++i) {
+		Operation<D> op;
+		op.type = rng()&1 ? OType::ADD : OType::CHECK;
+		for(int j=0; j<D; ++j) {
+			int a = rng()%(size+1), b = rng()%(size+1);
+			if (a>b) swap(a,b);
+			op.box[j] = {a,b};
+		}
+		ops.push_back(op);
+	}
+	return ops;
 }
 
 TEST(UnifiedTreeTest1D, AddCheckUnitTree) {
@@ -137,6 +156,12 @@ TEST(UnifiedTreeTest1D, AddCheckTree) {
 		makeOp1(OType::ADD, 4, 8),
 		makeOp1(OType::CHECK, 5, 6)};
 	runOps(tree, ops);
+}
+
+TEST(UnifiedTreeTest1D, Random32) {
+	UnifiedTree<Item<1>, 1> tree{32};
+	mt19937 rng;
+	runOps(tree, genRandomOps<1>(32, 100, rng));
 }
 
 } // namespace
