@@ -105,6 +105,8 @@ struct IlluminateState {
 
 	const ObstacleSet<D> obstacles;
 	const Decomposition<D> decomposition;
+	Point<D> endP;
+
 	EventSet<D> curEvents;
 	EventSet<D> nextEvents;
 
@@ -133,6 +135,7 @@ Box<D> unitBox(Point<D> pt) {
 template<int D>
 int linkDistance(const ObstacleSet<D>& obstacles, Point<D> startP, Point<D> endP) {
 	IlluminateState<D> state(obstacles);
+	state.endP = endP;
 	const auto& decomposition = state.decomposition;
 	int startCell = pointCell(decomposition, startP);
 	Box<D> startBox = unitBox(startP);

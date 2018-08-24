@@ -3,6 +3,7 @@
 #include <initializer_list>
 #include <ostream>
 #include <cstring>
+#include <cassert>
 
 template<int D>
 struct Point {
