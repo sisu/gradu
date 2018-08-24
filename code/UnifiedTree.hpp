@@ -5,6 +5,12 @@
 #include <array>
 #include <vector>
 #include <cassert>
+#include <iostream>
+
+inline int toPow2(int x) {
+	while(x & (x-1)) x+=x&-x;
+	return x;
+}
 
 template<class T, int D>
 class UnifiedTree {
@@ -23,7 +29,7 @@ public:
 		assert((int)sizes.size() == D);
 		int total = 1;
 		for(int i=D-1; i>=0; --i) {
-			int s = sizes.begin()[i];
+			int s = toPow2(sizes.begin()[i]);
 			size[i] = s;
 			stepSize[i] = total;
 			total *= 2*s;
@@ -39,6 +45,8 @@ public:
 		return checkRec(0, 0, box);
 	}
 
+	Index getSize() const { return size; }
+
 private:
 	void addRec(int index, int axis, const Box<D>& box, const T& value) {
 		if (axis == D) {
@@ -49,21 +57,25 @@ private:
 			}
 			return;
 		}
-		int s = size[D];
+		int s = size[axis];
 		int step = stepSize[axis];
 		Range range = box[axis];
-		for(int a=s+range.from, b = s+range.to; a<=b; a/=2, b/=2) {
-			if (a&1) addRec(index + step*a++, axis+1, box, value);
-			if (!(b&1)) addRec(index + step*b--, axis+1, box, value);
+		for(int a=s+range.from, b=s+range.to-1; a<=b; a/=2, b/=2) {
+			if (a&1) {
+				addRec(index + step*a++, axis+1, box, value);
+			}
+			if (!(b&1)) {
+				addRec(index + step*b--, axis+1, box, value);
+			}
 		}
 	}
 
 	bool checkRec(int index, int axis, const Box<D>& box) const {
 		if (axis == D) return data[index].hasData[D];
-		int s = size[D];
+		int s = size[axis];
 		int step = stepSize[axis];
 		Range range = box[axis];
-		for(int a=s+range.from, b=s+range.to; a>0; a/=2, b/=2) {
+		for(int a=s+range.from, b=s+range.to-1; a>0; a/=2, b/=2) {
 			if (checkRec(index + step*a, axis+1, box)) return true;
 			if (a != b && checkRec(index + step*b, axis+1, box)) return true;
 		}
