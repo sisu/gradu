@@ -100,6 +100,7 @@ private:
 		int s = size[axis];
 		int step = stepSize[axis];
 		Range range = box[axis];
+		if (range.size()==0) return false;
 		int a,b,ap,bp;
 		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
 //			std::cout<<"check "<<a<<' '<<b<<' '<<ap<<' '<<bp<<'\n';

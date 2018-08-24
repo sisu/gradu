@@ -74,11 +74,9 @@ Box<1> box1(int from, int to) {
 	return {{Range{from,to}}};
 }
 
-#if 0
 Box<2> box2(Range x, Range y) {
 	return {{x, y}};
 }
-#endif
 
 enum class OType { ADD, CHECK };
 
@@ -91,6 +89,9 @@ struct Operation {
 
 Operation<1> makeOp1(OType type, int from, int to) {
 	return {type, box1(from, to), {}};
+}
+Operation<2> makeOp2(OType type, Range x, Range y) {
+	return {type, box2(x, y), {}};
 }
 
 template<int D>
@@ -133,18 +134,11 @@ vector<Operation<D>> genRandomOps(int size, int n, mt19937& rng) {
 }
 
 TEST(UnifiedTreeTest1D, AddCheckUnitTree) {
-#if 0
-	UnifiedTree<Item<1>, 1> tree{1};
-	EXPECT_FALSE(tree.check(box1(0, 1)));
-	tree.add(box1(0,1), {});
-	EXPECT_TRUE(tree.check(box1(0, 1)));
-#else
 	UnifiedTree<Item<1>, 1> tree{1};
 	vector<Operation<1>> ops = {
 		makeOp1(OType::ADD, 0, 1),
 		makeOp1(OType::CHECK, 0, 1)};
 	runOps(tree, ops);
-#endif
 }
 
 TEST(UnifiedTreeTest1D, AddCheckTree) {
@@ -159,11 +153,28 @@ TEST(UnifiedTreeTest1D, AddCheckTree) {
 }
 
 TEST(UnifiedTreeTest1D, Random32) {
-	for(int i=0; i<3; ++i) {
+	for(int i=0; i<10; ++i) {
 //		cout<<"\nRun "<<i<<'\n';
 		UnifiedTree<Item<1>, 1> tree{32};
 		mt19937 rng(i);
 		runOps(tree, genRandomOps<1>(32, 10, rng));
+	}
+}
+
+TEST(UnifiedTreeTest2D, AddCheckUnitTree) {
+	UnifiedTree<Item<2>, 2> tree{1, 1};
+	vector<Operation<2>> ops = {
+		makeOp2(OType::ADD, {0,1}, {0,1}),
+		makeOp2(OType::CHECK, {0,1}, {0,1})};
+	runOps(tree, ops);
+}
+
+TEST(UnifiedTreeTest2D, Random32) {
+	for(int i=0; i<5; ++i) {
+//		cout<<"\nRun "<<i<<'\n';
+		UnifiedTree<Item<2>, 2> tree{32, 32};
+		mt19937 rng(i);
+		runOps(tree, genRandomOps<2>(32, 20, rng));
 	}
 }
 
