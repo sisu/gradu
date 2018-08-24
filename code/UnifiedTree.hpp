@@ -36,7 +36,7 @@ public:
 	}
 
 	bool check(const Box<D>& box) const {
-		checkRec(0, 0, box);
+		return checkRec(0, 0, box);
 	}
 
 private:
