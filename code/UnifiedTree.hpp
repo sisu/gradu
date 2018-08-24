@@ -38,46 +38,78 @@ public:
 	}
 
 	void add(const Box<D>& box, const T& value) {
-		addRec(0, 0, box, value);
+		addRec(0, 0, 0, box, value);
 	}
 
 	bool check(const Box<D>& box) const {
-		return checkRec(0, 0, box);
+		return checkRec(0, 0, 0, box);
 	}
 
 	Index getSize() const { return size; }
 
 private:
-	void addRec(int index, int axis, const Box<D>& box, const T& value) {
+	using Mask = unsigned;
+
+	void addRec(int index, int axis, Mask covered, const Box<D>& box, const T& value) {
 		if (axis == D) {
 			T& x = data[index];
-			if (!x.hasData[D]) {
+			if (!x.hasData[ALL_MASK]) {
 				x = value;
-				x.hasData.set(D);
 			}
+			std::cout<<"add "<<index<<' '<<covered<<'\n';
+			x.hasData.set(covered);
 			return;
 		}
 		int s = size[axis];
 		int step = stepSize[axis];
 		Range range = box[axis];
-		for(int a=s+range.from, b=s+range.to-1; a<=b; a/=2, b/=2) {
+		int a,b,ap,bp;
+		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
+			if (a != ap) {
+				addRec(index + step*ap, axis+1, covered, box, value);
+			}
+			if (b != bp) {
+				addRec(index + step*bp, axis+1, covered, box, value);
+			}
 			if (a&1) {
-				addRec(index + step*a++, axis+1, box, value);
+//				std::cout<<"add a "<<a<<'\n';
+				addRec(index + step*a++, axis+1, covered | (1U << axis), box, value);
 			}
 			if (!(b&1)) {
-				addRec(index + step*b--, axis+1, box, value);
+//				std::cout<<"add b "<<b<<'\n';
+				addRec(index + step*b--, axis+1, covered | (1U << axis), box, value);
+			}
+		}
+		for(; ap > 0; ap/=2, bp/=2) {
+			addRec(index + step*ap, axis+1, covered, box, value);
+			if (ap != bp) {
+				addRec(index + step*bp, axis+1, covered, box, value);
 			}
 		}
 	}
 
-	bool checkRec(int index, int axis, const Box<D>& box) const {
-		if (axis == D) return data[index].hasData[D];
+	bool checkRec(int index, int axis, Mask covered, const Box<D>& box) const {
+		if (axis == D) {
+			const T& x = data[index];
+			for(Mask i=0; i<=ALL_MASK; ++i) {
+				if ((i | covered) == ALL_MASK && x.hasData[i]) return true;
+			}
+			return false;
+		}
 		int s = size[axis];
 		int step = stepSize[axis];
 		Range range = box[axis];
-		for(int a=s+range.from, b=s+range.to-1; a>0; a/=2, b/=2) {
-			if (checkRec(index + step*a, axis+1, box)) return true;
-			if (a != b && checkRec(index + step*b, axis+1, box)) return true;
+		int a,b,ap,bp;
+		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
+			std::cout<<"check "<<a<<' '<<b<<' '<<ap<<' '<<bp<<'\n';
+			if (a != ap && checkRec(index + step*ap, axis+1, covered, box)) return true;
+			if (b != bp && ap!=bp && checkRec(index + step*bp, axis+1, covered, box)) return true;
+			if ((a&1) && checkRec(index + step*a++, axis+1, covered | (1U << axis), box)) return true;
+			if (!(b&1) && checkRec(index + step*b--, axis+1, covered | (1U << axis), box)) return true;
+		}
+		for(; ap > 0; ap/=2, bp/=2) {
+			if (checkRec(index + step*ap, axis+1, covered, box)) return true;
+			if (ap != bp && checkRec(index + step*bp, axis+1, covered, box)) return true;
 		}
 		return false;
 	}
@@ -92,6 +124,7 @@ private:
 		}
 	}
 #endif
+	static constexpr Mask ALL_MASK = (1U<<D)-1;
 
 	Index size = {};
 	Index stepSize = {};

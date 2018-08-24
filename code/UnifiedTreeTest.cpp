@@ -161,7 +161,7 @@ TEST(UnifiedTreeTest1D, AddCheckTree) {
 TEST(UnifiedTreeTest1D, Random32) {
 	UnifiedTree<Item<1>, 1> tree{32};
 	mt19937 rng;
-	runOps(tree, genRandomOps<1>(32, 100, rng));
+	runOps(tree, genRandomOps<1>(32, 10, rng));
 }
 
 } // namespace
