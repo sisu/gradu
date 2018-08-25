@@ -175,12 +175,13 @@ struct IlluminateState {
 	}
 
 	void onRemove(int axis, Index index, const TreeItem& item, int position) {
+		Range range = item.start<position ? Range{item.start, position} : Range{position, item.start};
 		cout<<"Remove "<<axis<<' '<<index<<' '<<item<<' '<<position<<'\n';
 		if (item.start == position) return;
 		Box<D> box;
 		for(int i=0; i<D; ++i) {
 			box[i] = i<axis ? plane.rangeForIndex(i, index[i])
-				: i==axis ? Range{item.start, position}
+				: i==axis ? range
 				: plane.rangeForIndex(i-1, index[i-1]);
 		}
 		cout<<"rm box "<<box<<'\n';
