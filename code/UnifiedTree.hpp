@@ -139,6 +139,7 @@ private:
 				int step = stepSize[splitAxis];
 				int i = index[splitAxis];
 				int baseIndex = totalIndex - step * i;
+//				std::cout<<"push to children "<<baseIndex<<' '<<step<<' '<<i<<'\n';
 				assignItem(baseIndex + step * (2*i), x);
 				assignItem(baseIndex + step * (2*i+1), x);
 			}
@@ -149,7 +150,7 @@ private:
 		Range range = rangeForIndex(axis, i);
 		std::cout<<"removerec "<<totalIndex<<' '<<axis<<' '<<i<<' '<<range<<" ; "<<box<<'\n';
 		if (!box[axis].intersects(range)) return;
-		if (range.contains(box[axis])) {
+		if (box[axis].contains(range)) {
 			removeRec(totalIndex + stepSize[axis] * i, index, axis+1, covered | (1U << axis), box);
 		} else {
 			removeRec(totalIndex + stepSize[axis] * i, index, axis+1, covered, box);
@@ -168,6 +169,24 @@ private:
 
 	void postRemove(int totalIndex, Index index, int axis, Mask covered, const Box<D>& box) {
 		if (axis == D) {
+			std::cout<<"postRemove "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
+			T& t = data[totalIndex];
+			t.hasData.reset();
+			for(int d=0; d<D; ++d) {
+				if (index[d] >= size[d]) continue;
+				int x = index[d];
+				int step = stepSize[d];
+				int baseIndex = totalIndex - step*x;
+				const auto& a = data[baseIndex + step*(2*x)];
+				const auto& b = data[baseIndex + step*(2*x+1)];
+//				std::cout<<"trying to get data from "<<baseIndex<<' '<<x<<" : "<<baseIndex+step*(2*x)<<'\n';
+				for(Mask i=0; i<1<<D; ++i) {
+					if (!(1 & (i>>d)) && (covered | i) != ALL_MASK) {
+//						std::cout<<"copy subset "<<i<<" : "<<a.hasData[i]<<' '<<b.hasData[i]<<'\n';
+						t.hasData[i] = t.hasData[i] | a.hasData[i] | b.hasData[i];
+					}
+				}
+			}
 			return;
 		}
 		int s = size[axis];

@@ -171,6 +171,18 @@ TEST(UnifiedTreeTest1D, RemoveUnitTree) {
 	runOps(tree, ops);
 }
 
+TEST(UnifiedTreeTest1D, RemoveSmallPartOfRange) {
+	UnifiedTree<Item<1>, 1> tree{8};
+	vector<Operation<1>> ops = {
+		makeOp1(OType::ADD, 0, 8),
+		makeOp1(OType::REMOVE, 4, 5),
+		makeOp1(OType::CHECK, 3, 4),
+		makeOp1(OType::CHECK, 4, 5),
+		makeOp1(OType::CHECK, 5, 6),
+		makeOp1(OType::CHECK, 0, 8)};
+	runOps(tree, ops);
+}
+
 TEST(UnifiedTreeTest1D, AddCheckTree) {
 	UnifiedTree<Item<1>, 1> tree{8};
 	vector<Operation<1>> ops = {
