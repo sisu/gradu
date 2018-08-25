@@ -139,11 +139,11 @@ void runOps(UnifiedTree<Item<D>, D>& actual, const vector<Operation<D>>& ops) {
 }
 
 template<int D>
-vector<Operation<D>> genRandomOps(int size, int n, mt19937& rng) {
+vector<Operation<D>> genRandomOps(int size, int n, vector<OType> otypes, mt19937& rng) {
 	vector<Operation<D>> ops;
 	for(int i=0; i<n; ++i) {
 		Operation<D> op;
-		op.type = rng()&1 ? OType::ADD : OType::CHECK;
+		op.type = otypes[rng()%otypes.size()];
 		for(int j=0; j<D; ++j) {
 			int a = rng()%(size+1), b = rng()%(size+1);
 			if (a>b) swap(a,b);
@@ -206,12 +206,21 @@ TEST(UnifiedTreeTest1D, AddCheckTree) {
 	runOps(tree, ops);
 }
 
-TEST(UnifiedTreeTest1D, Random32) {
+TEST(UnifiedTreeTest1D, RandomAddCheck32) {
 	for(int i=0; i<10; ++i) {
 //		cout<<"\nRun "<<i<<'\n';
 		UnifiedTree<Item<1>, 1> tree{32};
 		mt19937 rng(i);
-		runOps(tree, genRandomOps<1>(32, 10, rng));
+		runOps(tree, genRandomOps<1>(32, 10, {OType::ADD, OType::CHECK}, rng));
+	}
+}
+
+TEST(UnifiedTreeTest1D, RandomAddRemove32) {
+	for(int i=0; i<10; ++i) {
+//		cout<<"\nRun "<<i<<'\n';
+		UnifiedTree<Item<1>, 1> tree{32};
+		mt19937 rng(i);
+		runOps(tree, genRandomOps<1>(32, 10, {OType::ADD, OType::REMOVE, OType::CHECK}, rng));
 	}
 }
 
@@ -228,7 +237,7 @@ TEST(UnifiedTreeTest2D, Random32) {
 //		cout<<"\nRun "<<i<<'\n';
 		UnifiedTree<Item<2>, 2> tree{32, 32};
 		mt19937 rng(i);
-		runOps(tree, genRandomOps<2>(32, 20, rng));
+		runOps(tree, genRandomOps<2>(32, 20, {OType::ADD, OType::CHECK}, rng));
 	}
 }
 
