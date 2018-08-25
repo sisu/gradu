@@ -51,7 +51,7 @@ public:
 		for(int i=0; i<D; ++i) if (box[i].size()==0) return;
 		Index ones;
 		for(int i=0; i<D; ++i) ones[i]=1;
-		removeRec(0,ones,0,0,box);
+		removeRec(ones,0,0,box);
 		postRemove(ones,0,0,box);
 	}
 
@@ -138,8 +138,9 @@ private:
 		return false;
 	}
 
-	void removeRec(int totalIndex, Index index, int axis, Mask covered, const Box<D>& box) {
+	void removeRec(Index index, int axis, Mask covered, const Box<D>& box) {
 		if (axis == D) {
+			int totalIndex = computeIndex(index);
 			std::cout<<"rm "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
 			Item& x = data[totalIndex];
 			if (covered != ALL_MASK && x.hasData[ALL_MASK]) {
@@ -157,16 +158,16 @@ private:
 		}
 		int i = index[axis];
 		Range range = rangeForIndex(axis, i);
-		std::cout<<"removerec "<<totalIndex<<' '<<axis<<' '<<i<<' '<<range<<" ; "<<box<<'\n';
+		std::cout<<"removerec "<<axis<<' '<<i<<' '<<range<<" ; "<<box<<'\n';
 		if (!box[axis].intersects(range)) return;
 		if (box[axis].contains(range)) {
-			removeRec(totalIndex + stepSize[axis] * i, index, axis+1, covered | (1U << axis), box);
+			removeRec(index, axis+1, covered | (1U << axis), box);
 		} else {
-			removeRec(totalIndex + stepSize[axis] * i, index, axis+1, covered, box);
+			removeRec(index, axis+1, covered, box);
 			index[axis] = 2*i;
-			removeRec(totalIndex, index, axis, covered, box);
+			removeRec(index, axis, covered, box);
 			index[axis] = 2*i+1;
-			removeRec(totalIndex, index, axis, covered, box);
+			removeRec(index, axis, covered, box);
 		}
 	}
 
@@ -226,29 +227,23 @@ private:
 		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
 //			std::cout<<"loop "<<a<<' '<<b<<' '<<ap<<' '<<bp<<'\n';
 			if (a != ap) {
-				index[axis] = ap;
-				postRemove(index, axis+1, covered, box);
+				postRemove(withIndex(index, axis, ap), axis+1, covered, box);
 			}
 			if (b != bp) {
-				index[axis] = bp;
-				postRemove(index, axis+1, covered, box);
+				postRemove(withIndex(index, axis, bp), axis+1, covered, box);
 			}
 			if (a&1) {
-				index[axis] = a++;
-				postRemove(index, axis+1, covered | (1U<<axis), box);
+				postRemove(withIndex(index, axis, a++), axis+1, covered | (1U<<axis), box);
 			}
 			if (!(b&1)) {
-				index[axis] = b--;
-				postRemove(index, axis+1, covered | (1U<<axis), box);
+				postRemove(withIndex(index, axis, b--), axis+1, covered | (1U<<axis), box);
 			}
 		}
 		for(; ap > 0; ap/=2, bp/=2) {
 //			std::cout<<"loop2 "<<ap<<' '<<bp<<'\n';
-			index[axis] = ap;
-			postRemove(index, axis+1, covered, box);
+			postRemove(withIndex(index, axis, ap), axis+1, covered, box);
 			if (ap != bp) {
-				index[axis] = bp;
-				postRemove(index, axis+1, covered, box);
+				postRemove(withIndex(index, axis, bp), axis+1, covered, box);
 			}
 		}
 	}
@@ -256,6 +251,11 @@ private:
 	Range rangeForIndex(int axis, int index) const {
 //		std::cout<<"rangeforindex "<<axis<<' '<<index<<' '<<size[axis]<<'\n';
 		return TreeStructure{2*size[axis]}.indexToRange(index);
+	}
+
+	static Index& withIndex(Index& index, int axis, int x) {
+		index[axis] = x;
+		return index;
 	}
 
 	int computeIndex(const Index& index) const {
