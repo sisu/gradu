@@ -1,6 +1,6 @@
 #include "path.hpp"
 
-//#include "QueryPlane.hpp"
+#include "UnifiedTree.hpp"
 #include <algorithm>
 #include <cassert>
 #include <queue>
@@ -38,22 +38,6 @@ struct TreeItem {
 };
 
 template<int D>
-struct QueryPlane {
-//	QueryPlane(int maxSize);
-
-	void add(Box<D> box, const TreeItem& value) {
-	}
-
-	bool check(Box<D> box) const {
-		return false;
-	}
-
-	template<class Callback>
-	void remove(Box<D> box, Callback&& cb) {
-	}
-};
-
-template<int D>
 Event<D> cellEvent(const Decomposition<D>& dec, int dir, int cell) {
 	Event<D> event;
 	event.type = EventType::CELL;
@@ -72,9 +56,23 @@ Event<D> obstacleEvent(const ObstacleSet<D>& obs, int dir, int obstacle) {
 }
 
 template<int D>
+array<int, D-1> buildSize(const Decomposition<D>& dec) {
+	int s = 0;
+	for(const Cell<D>& c: dec) {
+		for(int i=0; i<D; ++i) {
+			s = max(s, c.box[i].to);
+		}
+	}
+	array<int, D-1> arr;
+	for(int i=0; i<D-1; ++i) arr[i] = s;
+	return arr;
+}
+
+template<int D>
 struct IlluminateState {
 	IlluminateState(ObstacleSet<D> obs):
-		obstacles(obs), decomposition(decomposeFreeSpace(obstacles)) {}
+		obstacles(obs), decomposition(decomposeFreeSpace(obstacles)),
+	plane(buildSize(decomposition)) {}
 
 	void sweep(int dir) {
 		const int axis = dir/2;
@@ -98,7 +96,7 @@ struct IlluminateState {
 				}
 			} else {
 				Box<D-1> box = obstacles[event.cell].box.project(dir/2);
-				plane.remove(box, [](){});
+				plane.remove(box);
 			}
 		}
 	}
@@ -110,7 +108,7 @@ struct IlluminateState {
 	EventSet<D> curEvents;
 	EventSet<D> nextEvents;
 
-	QueryPlane<D-1> plane;
+	UnifiedTree<TreeItem, D-1> plane;
 };
 
 template<int D>

@@ -27,8 +27,7 @@ public:
 #endif
 	using Index = std::array<int, D>;
 
-	UnifiedTree(std::initializer_list<int> sizes) {
-		assert((int)sizes.size() == D);
+	UnifiedTree(Index sizes) {
 		int total = 1;
 		for(int i=D-1; i>=0; --i) {
 			int s = toPow2(sizes.begin()[i]);
@@ -143,6 +142,8 @@ private:
 			int totalIndex = computeIndex(index);
 			std::cout<<"rm "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
 			Item& x = data[totalIndex];
+			if (x.hasData[ALL_MASK]) {
+			}
 			if (covered != ALL_MASK && x.hasData[ALL_MASK]) {
 				int splitAxis = 0;
 				while(1 & (covered >> splitAxis)) ++splitAxis;
