@@ -232,12 +232,22 @@ TEST(UnifiedTreeTest2D, AddCheckUnitTree) {
 	runOps(tree, ops);
 }
 
-TEST(UnifiedTreeTest2D, Random32) {
+TEST(UnifiedTreeTest2D, RandomAddCheck32) {
 	for(int i=0; i<5; ++i) {
 //		cout<<"\nRun "<<i<<'\n';
 		UnifiedTree<Item<2>, 2> tree{32, 32};
 		mt19937 rng(i);
 		runOps(tree, genRandomOps<2>(32, 20, {OType::ADD, OType::CHECK}, rng));
+	}
+}
+
+TEST(UnifiedTreeTest2D, RandomAddRemove32) {
+	constexpr int size = 32;
+	for(int i=0; i<5; ++i) {
+//		cout<<"\nRun "<<i<<'\n';
+		UnifiedTree<Item<2>, 2> tree{size, size};
+		mt19937 rng(2);
+		runOps(tree, genRandomOps<2>(size, 20, {OType::ADD, OType::REMOVE, OType::CHECK}, rng));
 	}
 }
 

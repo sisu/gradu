@@ -47,10 +47,11 @@ public:
 	}
 
 	void remove(Box<D> box) {
+		for(int i=0; i<D; ++i) if (box[i].size()==0) return;
 		Index ones;
 		for(int i=0; i<D; ++i) ones[i]=1;
 		removeRec(0,ones,0,0,box);
-		postRemove(0,ones,0,0,box);
+		postRemove(ones,0,0,box);
 	}
 
 	Index getSize() const { return size; }
@@ -75,6 +76,7 @@ private:
 		int s = size[axis];
 		int step = stepSize[axis];
 		Range range = box[axis];
+		if (range.size()==0) return;
 		int a,b,ap,bp;
 		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
 			if (a != ap) {
@@ -188,9 +190,11 @@ private:
 		return true;
 	}
 
-	void postRemove(int totalIndex, Index index, int axis, Mask covered, const Box<D>& box) {
+	void postRemove(Index index, int axis, Mask covered, const Box<D>& box) {
 		if (axis == D) {
-			std::cout<<"postRemove "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
+			int totalIndex = computeIndex(index);
+//			std::cout<<"postRemove "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
+//			for(int i: index)std::cout<<i<<' ';std::cout<<'\n';
 			T& t = data[totalIndex];
 			t.hasData.reset();
 			for(int d=0; d<D; ++d) {
@@ -211,33 +215,35 @@ private:
 			return;
 		}
 		int s = size[axis];
-		int step = stepSize[axis];
 		Range range = box[axis];
+//		std::cout<<"range "<<range<<'\n';
 		int a,b,ap,bp;
 		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
+//			std::cout<<"loop "<<a<<' '<<b<<' '<<ap<<' '<<bp<<'\n';
 			if (a != ap) {
 				index[axis] = ap;
-				postRemove(totalIndex + step*ap, index, axis+1, covered, box);
+				postRemove(index, axis+1, covered, box);
 			}
 			if (b != bp) {
 				index[axis] = bp;
-				postRemove(totalIndex + step*bp, index, axis+1, covered, box);
+				postRemove(index, axis+1, covered, box);
 			}
 			if (a&1) {
-				index[axis] = a;
-				postRemove(totalIndex + step*a++, index, axis+1, covered | (1U<<axis), box);
+				index[axis] = a++;
+				postRemove(index, axis+1, covered | (1U<<axis), box);
 			}
 			if (!(b&1)) {
-				index[axis] = b;
-				postRemove(totalIndex + step*b--, index, axis+1, covered | (1U<<axis), box);
+				index[axis] = b--;
+				postRemove(index, axis+1, covered | (1U<<axis), box);
 			}
 		}
 		for(; ap > 0; ap/=2, bp/=2) {
+//			std::cout<<"loop2 "<<ap<<' '<<bp<<'\n';
 			index[axis] = ap;
-			postRemove(totalIndex + step*ap, index, axis+1, covered, box);
+			postRemove(index, axis+1, covered, box);
 			if (ap != bp) {
 				index[axis] = bp;
-				postRemove(totalIndex + step*bp, index, axis+1, covered, box);
+				postRemove(index, axis+1, covered, box);
 			}
 		}
 	}
@@ -245,6 +251,12 @@ private:
 	Range rangeForIndex(int axis, int index) const {
 //		std::cout<<"rangeforindex "<<axis<<' '<<index<<' '<<size[axis]<<'\n';
 		return TreeStructure{2*size[axis]}.indexToRange(index);
+	}
+
+	int computeIndex(const Index& index) const {
+		int r=0;
+		for(int i=0; i<D; ++i) r += stepSize[i] * index[i];
+		return r;
 	}
 
 #if 0
