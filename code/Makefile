@@ -7,6 +7,7 @@ SRC:=$(filter-out $(TSRC),$(SRC))
 OBJ:=$(patsubst %.cpp,obj/%.o,$(SRC))
 TOBJ:=$(patsubst %.cpp,obj/%.o,$(TSRC))
 TBIN:=$(patsubst %.cpp,obj/%,$(TSRC))
+TRUN:=$(patsubst %.cpp,obj/%.done,$(TSRC))
 
 ODIR:=obj
 ODIRS:=$(addprefix $(ODIR)/, $(DIRS))
@@ -24,7 +25,9 @@ BIN:=minlink
 
 all: $(ODIRS) $(BIN)
 
-test: $(ODIRS) $(TBIN)
+test: test-build $(TRUN)
+
+test-build: $(ODIRS) $(TBIN)
 
 $(BIN): $(OBJ)
 	$(CC) -o $@ $(OBJ) $(CXXFLAGS)
@@ -37,7 +40,9 @@ $(TOBJ): $(ODIR)/%.o: %.cpp
 
 $(TBIN): %: %.o
 	$(CC) $^ -o $@ $(TFLAGS) -lgtest -lgtest_main -lgmock -pthread
-	"./$@"
+
+$(TRUN): %.done: %
+	"./$<" && touch "$@"
 
 $(ODIR)/./decompositionTest: $(ODIR)/./decomposition.o $(ODIR)/./obstacles.o
 
