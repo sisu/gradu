@@ -100,6 +100,12 @@ private:
 		}
 	}
 
+	void assignItem(int index, const T& item) {
+		if (data[index].hasData[ALL_MASK]) return;
+		data[index] = item;
+		data[index].hasData.set();
+	}
+
 	bool checkRec(int index, int axis, Mask covered, const Box<D>& box) const {
 		if (axis == D) {
 			const T& x = data[index];
@@ -129,11 +135,7 @@ private:
 		if (axis == D) {
 			std::cout<<"rm "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
 			T& x = data[totalIndex];
-			if (covered == ALL_MASK) {
-				x.hasData.reset();
-				return;
-			}
-			if (x.hasData[ALL_MASK]) {
+			if (covered != ALL_MASK && x.hasData[ALL_MASK]) {
 				int splitAxis = 0;
 				while(1 & (covered >> splitAxis)) ++splitAxis;
 				int step = stepSize[splitAxis];
@@ -143,7 +145,7 @@ private:
 				assignItem(baseIndex + step * (2*i), x);
 				assignItem(baseIndex + step * (2*i+1), x);
 			}
-			x.hasData.reset();
+			clearSubtree(0, index, 0, covered);
 			return;
 		}
 		int i = index[axis];
@@ -161,10 +163,29 @@ private:
 		}
 	}
 
-	void assignItem(int index, const T& item) {
-		if (data[index].hasData[ALL_MASK]) return;
-		data[index] = item;
-		data[index].hasData.set();
+	bool clearSubtree(int totalIndex, Index index, int axis, Mask covered) {
+		while(axis<D && !(1&(covered>>axis))) ++axis;
+		if (axis == D) {
+			T& t = data[totalIndex];
+			bool res = t.hasData[0];
+			for(Mask i=0; i<1<<D; ++i) {
+				if ((i | covered) == ALL_MASK) {
+					t.hasData.reset(i);
+				}
+			}
+			return res;
+		}
+		int step = stepSize[axis];
+		int i = index[axis];
+		bool res = clearSubtree(totalIndex + step * i, index, axis+1, covered);
+		if (!res) return false;
+		if (i < size[axis]) {
+			index[axis] = 2*i;
+			clearSubtree(totalIndex, index, axis, covered);
+			index[axis] = 2*i+1;
+			clearSubtree(totalIndex, index, axis, covered);
+		}
+		return true;
 	}
 
 	void postRemove(int totalIndex, Index index, int axis, Mask covered, const Box<D>& box) {
