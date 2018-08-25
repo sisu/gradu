@@ -34,6 +34,10 @@ public:
 		return checkRec(0,0,box);
 	}
 
+	void remove(const Box<D>& box) {
+		removeRec(0,0,box);
+	}
+
 private:
 	void addRec(int index, int axis, const Box<D>& box, const T& value) {
 		if (axis == D) {
@@ -59,6 +63,18 @@ private:
 		}
 		return false;
 	}
+	void removeRec(int index, int axis, const Box<D>& box) {
+		if (axis == D) {
+			T& x = data[index];
+			x.hasData.reset();
+			return;
+		}
+		int step = stepSize[axis];
+		Range range = box[axis];
+		for(int i=range.from; i<range.to; ++i) {
+			removeRec(index + step*i, axis+1, box);
+		}
+	}
 
 	Index size = {};
 	Index stepSize = {};
@@ -78,7 +94,7 @@ Box<2> box2(Range x, Range y) {
 	return {{x, y}};
 }
 
-enum class OType { ADD, CHECK };
+enum class OType { ADD, REMOVE, CHECK };
 
 template<int D>
 struct Operation {
@@ -110,6 +126,11 @@ void runOps(UnifiedTree<Item<D>, D>& actual, const vector<Operation<D>>& ops) {
 				actual.add(t.box, t.value);
 				oss<<t<<'\n';
 				break;
+			case OType::REMOVE:
+				expected.remove(t.box);
+				actual.remove(t.box);
+				oss<<t<<'\n';
+				break;
 			case OType::CHECK:
 				EXPECT_EQ(actual.check(t.box), expected.check(t.box))<<oss.str()<<" ; "<<t;
 				break;
@@ -137,6 +158,15 @@ TEST(UnifiedTreeTest1D, AddCheckUnitTree) {
 	UnifiedTree<Item<1>, 1> tree{1};
 	vector<Operation<1>> ops = {
 		makeOp1(OType::ADD, 0, 1),
+		makeOp1(OType::CHECK, 0, 1)};
+	runOps(tree, ops);
+}
+
+TEST(UnifiedTreeTest1D, RemoveUnitTree) {
+	UnifiedTree<Item<1>, 1> tree{1};
+	vector<Operation<1>> ops = {
+		makeOp1(OType::ADD, 0, 1),
+		makeOp1(OType::REMOVE, 0, 1),
 		makeOp1(OType::CHECK, 0, 1)};
 	runOps(tree, ops);
 }

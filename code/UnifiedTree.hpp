@@ -45,6 +45,9 @@ public:
 		return checkRec(0, 0, 0, box);
 	}
 
+	void remove(Box<D> box) {
+	}
+
 	Index getSize() const { return size; }
 
 private:
@@ -114,6 +117,14 @@ private:
 			if (ap != bp && checkRec(index + step*bp, axis+1, covered, box)) return true;
 		}
 		return false;
+	}
+
+	void removeRec(int totalIndex, int index, int axis, Mask covered, const Box<D>& box) {
+		if (axis == D) {
+			T& x = data[index];
+			x.hasData.reset();
+			return;
+		}
 	}
 
 #if 0
