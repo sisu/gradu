@@ -128,9 +128,12 @@ struct IlluminateState {
 
 	IlluminateState(ObstacleSet<D> obs):
 		obstacles(obs), decomposition(decomposeFreeSpace(obstacles)),
-	plane(buildSize(decomposition)) {}
+	plane(buildSize(decomposition)),
+	obstacleReachTime(obstacles.size(), -1)
+	{}
 
 	void newRound() {
+		++curStep;
 		swap(curEvents, nextEvents);
 		nextEvents.clear();
 		curEvents.genCellEvents(decomposition);
@@ -165,16 +168,20 @@ struct IlluminateState {
 					}
 				}
 			} else {
+				int& time = obstacleReachTime[event.cell];
+				if (time<0) {
+					time = curStep;
+				}
 				Box<D-1> box = obstacles[event.cell].box.project(dir/2);
 				cout<<"remove box "<<box<<'\n';
 				plane.remove(box, [&](Index idx, const TreeItem& item) {
-					onRemove(axis, idx, item, position);
+					onRemove(axis, idx, item, position, time);
 				});
 			}
 		}
 	}
 
-	void onRemove(int axis, Index index, const TreeItem& item, int position) {
+	void onRemove(int axis, Index index, const TreeItem& item, int position, int obsTime) {
 		Range range = item.start<position ? Range{item.start, position} : Range{position, item.start};
 		cout<<"Remove "<<axis<<' '<<index<<' '<<item<<' '<<position<<'\n';
 		if (item.start == position) return;
@@ -187,6 +194,9 @@ struct IlluminateState {
 		cout<<"rm box "<<box<<'\n';
 		if (box.contains(endP)) {
 			endFound = true;
+		}
+		if (curStep > obsTime + D + 1) {
+			return;
 		}
 		for(int i=0; i<2*D; ++i) {
 			if (i/2 != axis) {
@@ -204,6 +214,9 @@ struct IlluminateState {
 	EventSet<D> nextEvents;
 
 	Plane plane;
+
+	vector<int> obstacleReachTime;
+	int curStep = 0;
 };
 
 template<int D>
@@ -240,16 +253,14 @@ int linkDistance(const ObstacleSet<D>& obstacles, Point<D> startP, Point<D> endP
 		events.push_back(addRectEvent(startBox, i));
 	}
 	state.curEvents.genCellEvents(decomposition);
-	int step = 0;
 	while(!state.curEvents.empty() && !state.endFound) {
-		step++;
-		cout<<"\nround "<<step<<'\n';
+		cout<<"\nround "<<state.curStep<<'\n';
 		for(int i=0; i<2*D; ++i) {
 			state.sweep(i);
 		}
 		state.newRound();
 	}
-	return state.endFound ? step : -1;
+	return state.endFound ? state.curStep : -1;
 }
 
 template

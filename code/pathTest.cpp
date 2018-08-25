@@ -33,4 +33,9 @@ TEST(LinkDistance2D, AroundObstacle2) {
 	EXPECT_EQ(linkDistance(obs, {2,1}, {1,2}), 4);
 }
 
+TEST(LinkDistance2D, Infeasible) {
+	ObstacleSet<2> obs = makeObstaclesForPlane({"#..", "...", "..#"});
+	EXPECT_EQ(linkDistance(obs, {2,1}, {3,3}), -1);
+}
+
 } // namespace
