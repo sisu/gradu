@@ -1,7 +1,8 @@
 #pragma once
 
-//#include "TreeStructure.hpp"
 #include "Box.hpp"
+#include "TreeStructure.hpp"
+
 #include <array>
 #include <vector>
 #include <cassert>
@@ -46,6 +47,10 @@ public:
 	}
 
 	void remove(Box<D> box) {
+		Index ones;
+		for(int i=0; i<D; ++i) ones[i]=1;
+		removeRec(0,ones,0,0,box);
+		postRemove(0,ones,0,0,box);
 	}
 
 	Index getSize() const { return size; }
@@ -56,11 +61,15 @@ private:
 	void addRec(int index, int axis, Mask covered, const Box<D>& box, const T& value) {
 		if (axis == D) {
 			T& x = data[index];
-			if (!x.hasData[ALL_MASK]) {
-				x = value;
+			if (covered == ALL_MASK && !x.hasData[ALL_MASK]) {
+				assignItem(index, value);
+			} else {
+				for(Mask i=0; i<1<<D; ++i) {
+					if (i == (i & covered)) {
+						x.hasData.set(i);
+					}
+				}
 			}
-//			std::cout<<"add "<<index<<' '<<covered<<'\n';
-			x.hasData.set(covered);
 			return;
 		}
 		int s = size[axis];
@@ -95,10 +104,7 @@ private:
 		if (axis == D) {
 			const T& x = data[index];
 //			std::cout<<"check "<<index<<' '<<covered<<' '<<data.size()<<'\n';
-			for(Mask i=0; i<=ALL_MASK; ++i) {
-				if ((i | covered) == ALL_MASK && x.hasData[i]) return true;
-			}
-			return false;
+			return x.hasData[covered ^ ALL_MASK];
 		}
 		int s = size[axis];
 		int step = stepSize[axis];
@@ -119,12 +125,86 @@ private:
 		return false;
 	}
 
-	void removeRec(int totalIndex, int index, int axis, Mask covered, const Box<D>& box) {
+	void removeRec(int totalIndex, Index index, int axis, Mask covered, const Box<D>& box) {
 		if (axis == D) {
-			T& x = data[index];
+			std::cout<<"rm "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
+			T& x = data[totalIndex];
+			if (covered == ALL_MASK) {
+				x.hasData.reset();
+				return;
+			}
+			if (x.hasData[ALL_MASK]) {
+				int splitAxis = 0;
+				while(1 & (covered >> splitAxis)) ++splitAxis;
+				int step = stepSize[splitAxis];
+				int i = index[splitAxis];
+				int baseIndex = totalIndex - step * i;
+				assignItem(baseIndex + step * (2*i), x);
+				assignItem(baseIndex + step * (2*i+1), x);
+			}
 			x.hasData.reset();
 			return;
 		}
+		int i = index[axis];
+		Range range = rangeForIndex(axis, i);
+		std::cout<<"removerec "<<totalIndex<<' '<<axis<<' '<<i<<' '<<range<<" ; "<<box<<'\n';
+		if (!box[axis].intersects(range)) return;
+		if (range.contains(box[axis])) {
+			removeRec(totalIndex + stepSize[axis] * i, index, axis+1, covered | (1U << axis), box);
+		} else {
+			removeRec(totalIndex + stepSize[axis] * i, index, axis+1, covered, box);
+			index[axis] = 2*i;
+			removeRec(totalIndex, index, axis, covered, box);
+			index[axis] = 2*i+1;
+			removeRec(totalIndex, index, axis, covered, box);
+		}
+	}
+
+	void assignItem(int index, const T& item) {
+		if (data[index].hasData[ALL_MASK]) return;
+		data[index] = item;
+		data[index].hasData.set();
+	}
+
+	void postRemove(int totalIndex, Index index, int axis, Mask covered, const Box<D>& box) {
+		if (axis == D) {
+			return;
+		}
+		int s = size[axis];
+		int step = stepSize[axis];
+		Range range = box[axis];
+		int a,b,ap,bp;
+		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
+			if (a != ap) {
+				index[axis] = ap;
+				postRemove(totalIndex + step*ap, index, axis+1, covered, box);
+			}
+			if (b != bp) {
+				index[axis] = bp;
+				postRemove(totalIndex + step*bp, index, axis+1, covered, box);
+			}
+			if (a&1) {
+				index[axis] = a;
+				postRemove(totalIndex + step*a++, index, axis+1, covered | (1U<<axis), box);
+			}
+			if (!(b&1)) {
+				index[axis] = b;
+				postRemove(totalIndex + step*b--, index, axis+1, covered | (1U<<axis), box);
+			}
+		}
+		for(; ap > 0; ap/=2, bp/=2) {
+			index[axis] = ap;
+			postRemove(totalIndex + step*ap, index, axis+1, covered, box);
+			if (ap != bp) {
+				index[axis] = bp;
+				postRemove(totalIndex + step*bp, index, axis+1, covered, box);
+			}
+		}
+	}
+
+	Range rangeForIndex(int axis, int index) const {
+//		std::cout<<"rangeforindex "<<axis<<' '<<index<<' '<<size[axis]<<'\n';
+		return TreeStructure{2*size[axis]}.indexToRange(index);
 	}
 
 #if 0

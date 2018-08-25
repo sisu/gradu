@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include "Range.hpp"
 
 struct TreeStructure {
