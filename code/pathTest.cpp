@@ -13,11 +13,9 @@ TEST(LinkDistance2D, StartEndPointSame) {
 	EXPECT_EQ(linkDistance(obs, {1,1}, {1,1}), 0);
 }
 
-#if 0
 TEST(LinkDistance2D, StartEndSameLine) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({".."});
 	EXPECT_EQ(linkDistance(obs, {1,1}, {2,1}), 1);
 }
-#endif
 
 } // namespace

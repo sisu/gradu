@@ -47,7 +47,7 @@ public:
 	}
 
 	void remove(Box<D> box) {
-		remove(box, [](Index){});
+		remove(box, [](const Index&, const T&){});
 	}
 
 	template<class V>
@@ -60,6 +60,16 @@ public:
 	}
 
 	Index getSize() const { return size; }
+
+	Box<D> boxForIndex(const Index& index) const {
+		Box<D> box;
+		for(int i=0; i<D; ++i) box[i] = rangeForIndex(i, index[i]);
+		return box;
+	}
+
+	Range rangeForIndex(int axis, int index) const {
+		return TreeStructure{2*size[axis]}.indexToRange(index);
+	}
 
 private:
 	struct Item {
@@ -149,7 +159,7 @@ private:
 //			std::cout<<"rm "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
 			Item& x = data[totalIndex];
 			if (x.hasData[ALL_MASK]) {
-				visitor(index);
+				visitor(index, x.data);
 			}
 			if (covered != ALL_MASK && x.hasData[ALL_MASK]) {
 				int splitAxis = 0;
@@ -254,11 +264,6 @@ private:
 				postRemove(withIndex(index, axis, bp), axis+1, covered, box);
 			}
 		}
-	}
-
-	Range rangeForIndex(int axis, int index) const {
-//		std::cout<<"rangeforindex "<<axis<<' '<<index<<' '<<size[axis]<<'\n';
-		return TreeStructure{2*size[axis]}.indexToRange(index);
 	}
 
 	static Index& withIndex(Index& index, int axis, int x) {

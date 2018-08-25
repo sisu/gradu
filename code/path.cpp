@@ -46,6 +46,10 @@ template<int D>
 struct EventSet {
 	vector<Event<D>> events[2*D];
 
+	bool empty() const {
+		for(const auto& e: events) if (!e.empty()) return false;
+		return true;
+	}
 	void clear() {
 		for(auto& v: events) v.clear();
 	}
@@ -54,6 +58,10 @@ struct EventSet {
 struct TreeItem {
 	int start = -1;
 };
+
+ostream& operator<<(ostream& out, const TreeItem& item) {
+	return out<<"("<<item.start<<")";
+}
 
 template<int D>
 Event<D> cellEvent(const Decomposition<D>& dec, int dir, int cell) {
@@ -91,10 +99,16 @@ array<int, D-1> buildSize(const Decomposition<D>& dec) {
 template<int D>
 struct IlluminateState {
 	typedef UnifiedTree<TreeItem, D-1> Plane;
+	using Index = typename Plane::Index;
 
 	IlluminateState(ObstacleSet<D> obs):
 		obstacles(obs), decomposition(decomposeFreeSpace(obstacles)),
 	plane(buildSize(decomposition)) {}
+
+	void newRound() {
+		swap(curEvents, nextEvents);
+		nextEvents.clear();
+	}
 
 	void sweep(int dir) {
 		cout<<"sweep "<<dir<<'\n';
@@ -121,16 +135,31 @@ struct IlluminateState {
 				}
 			} else {
 				Box<D-1> box = obstacles[event.cell].box.project(dir/2);
-				plane.remove(box, [](typename Plane::Index idx) {
-					cout<<"remove "<<idx<<'\n';
+				plane.remove(box, [&](Index idx, const TreeItem& item) {
+					onRemove(axis, idx, item, position);
 				});
 			}
+		}
+	}
+
+	void onRemove(int axis, Index index, const TreeItem& item, int position) {
+//		cout<<"Remove "<<axis<<' '<<index<<' '<<item<<' '<<position<<'\n';
+		Box<D> box;
+		for(int i=0; i<D; ++i) {
+			box[i] = i<axis ? plane.rangeForIndex(i, index[i])
+				: i==axis ? Range{item.start, position}
+				: plane.rangeForIndex(i-1, index[i-1]);
+		}
+		cout<<"rm box "<<box<<'\n';
+		if (box.contains(endP)) {
+			endFound = true;
 		}
 	}
 
 	const ObstacleSet<D> obstacles;
 	const Decomposition<D> decomposition;
 	Point<D> endP;
+	bool endFound = false;
 
 	EventSet<D> curEvents;
 	EventSet<D> nextEvents;
@@ -164,6 +193,7 @@ int linkDistance(const ObstacleSet<D>& obstacles, Point<D> startP, Point<D> endP
 	const auto& decomposition = state.decomposition;
 	int startCell = pointCell(decomposition, startP);
 	Box<D> startBox = unitBox(startP);
+	if (startBox.contains(endP)) return 0;
 	for(int d=0; d<D; ++d) {
 		Event<D> e;
 		e.type = EventType::ADD_RECT;
@@ -176,10 +206,15 @@ int linkDistance(const ObstacleSet<D>& obstacles, Point<D> startP, Point<D> endP
 	for(int i=0; i<2*D; ++i) {
 		state.curEvents.events[i].push_back(cellEvent(decomposition, i, startCell));
 	}
-	for(int i=0; i<2*D; ++i) {
-		state.sweep(i);
+	int step = 0;
+	while(!state.curEvents.empty() && !state.endFound) {
+		step++;
+		for(int i=0; i<2*D; ++i) {
+			state.sweep(i);
+		}
+		state.newRound();
 	}
-	return 0;
+	return state.endFound ? step : -1;
 }
 
 template
