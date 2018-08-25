@@ -1,6 +1,8 @@
 #include "path.hpp"
 
 #include "UnifiedTree.hpp"
+#include "util.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <queue>
@@ -45,6 +47,7 @@ ostream& operator<<(ostream& out, const Event<D>& e) {
 template<int D>
 struct EventSet {
 	vector<Event<D>> events[2*D];
+	vector<int> cells;
 
 	bool empty() const {
 		for(const auto& e: events) if (!e.empty()) return false;
@@ -53,6 +56,7 @@ struct EventSet {
 	void clear() {
 		for(auto& v: events) v.clear();
 	}
+	void genCellEvents(const Decomposition<D>& dec);
 };
 
 struct TreeItem {
@@ -74,12 +78,33 @@ Event<D> cellEvent(const Decomposition<D>& dec, int dir, int cell) {
 }
 
 template<int D>
+void EventSet<D>::genCellEvents(const Decomposition<D>& dec) {
+	sortUnique(cells);
+	for(int c: cells) {
+		for(int i=0; i<2*D; ++i) {
+			events[i].push_back(cellEvent(dec, i, c));
+		}
+	}
+	cells.clear();
+}
+
+template<int D>
 Event<D> obstacleEvent(const ObstacleSet<D>& obs, int dir, int obstacle) {
 	Event<D> event;
 	event.type = EventType::OBSTACLE;
 	event.cell = obstacle;
 	event.position = obs[obstacle].box[dir>>1][dir&1];
 	if (dir&1) event.position *= -1;
+	return event;
+}
+
+template<int D>
+Event<D> addRectEvent(const Box<D>& box, int dir) {
+	Event<D> event;
+	event.type = EventType::ADD_RECT;
+	event.position = box[dir>>1][dir&1];
+	if (dir&1) event.position *= -1;
+	event.box = box.project(dir>>1);
 	return event;
 }
 
@@ -108,6 +133,7 @@ struct IlluminateState {
 	void newRound() {
 		swap(curEvents, nextEvents);
 		nextEvents.clear();
+		curEvents.genCellEvents(decomposition);
 	}
 
 	void sweep(int dir) {
@@ -133,6 +159,9 @@ struct IlluminateState {
 						events.push(cellEvent(decomposition, dir, nb));
 					}
 				}
+				if (plane.check(cell.box.project(axis))) {
+					nextEvents.cells.push_back(event.cell);
+				}
 			} else {
 				Box<D-1> box = obstacles[event.cell].box.project(dir/2);
 				plane.remove(box, [&](Index idx, const TreeItem& item) {
@@ -153,6 +182,11 @@ struct IlluminateState {
 		cout<<"rm box "<<box<<'\n';
 		if (box.contains(endP)) {
 			endFound = true;
+		}
+		for(int i=0; i<2*D; ++i) {
+			if (i/2 != axis) {
+				nextEvents.events[i].push_back(addRectEvent(box, i));
+			}
 		}
 	}
 
@@ -194,21 +228,16 @@ int linkDistance(const ObstacleSet<D>& obstacles, Point<D> startP, Point<D> endP
 	int startCell = pointCell(decomposition, startP);
 	Box<D> startBox = unitBox(startP);
 	if (startBox.contains(endP)) return 0;
-	for(int d=0; d<D; ++d) {
-		Event<D> e;
-		e.type = EventType::ADD_RECT;
-		e.position = startP[d];
-		e.box = startBox.project(d);
-		state.curEvents.events[2*d].push_back(e);
-		e.position = -startP[d];
-		state.curEvents.events[2*d+1].push_back(e);
-	}
+	state.curEvents.cells.push_back(startCell);
 	for(int i=0; i<2*D; ++i) {
-		state.curEvents.events[i].push_back(cellEvent(decomposition, i, startCell));
+		auto& events = state.curEvents.events[i];
+		events.push_back(addRectEvent(startBox, i));
 	}
+	state.curEvents.genCellEvents(decomposition);
 	int step = 0;
 	while(!state.curEvents.empty() && !state.endFound) {
 		step++;
+		cout<<"\nround "<<step<<'\n';
 		for(int i=0; i<2*D; ++i) {
 			state.sweep(i);
 		}

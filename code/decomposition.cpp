@@ -1,6 +1,8 @@
 #include "decomposition.hpp"
+
 #include "Box.hpp"
 #include "Span.hpp"
+#include "util.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -146,12 +148,6 @@ private:
 	set<DecomposeNode, less<>> nodeSet;
 	Decomposition<2> decomposition;
 };
-
-template<class T>
-void sortUnique(vector<T>& v) {
-	sort(v.begin(), v.end());
-	v.erase(unique(v.begin(), v.end()), v.end());
-}
 
 template<int D>
 void cleanLinks(Decomposition<D>& decomposition) {
