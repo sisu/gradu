@@ -137,7 +137,7 @@ struct IlluminateState {
 	}
 
 	void sweep(int dir) {
-		cout<<"sweep "<<dir<<'\n';
+		cout<<"    sweep "<<dir<<'\n';
 		const int axis = dir/2;
 		priority_queue<Event<D>> events(curEvents.events[dir].begin(), curEvents.events[dir].end());
 		while(!events.empty()) {
@@ -148,8 +148,13 @@ struct IlluminateState {
 
 			if (event.type == EventType::ADD_RECT) {
 				plane.add(event.box, {position});
+				cout<<"add box "<<event.box<<'\n';
 			} else if (event.type == EventType::CELL) {
 				const Cell<D>& cell = decomposition[event.cell];
+				if (!plane.check(cell.box.project(axis))) {
+					continue;
+				}
+				nextEvents.cells.push_back(event.cell);
 				for(int obs: cell.obstacles[dir]) {
 					events.push(obstacleEvent(obstacles, dir, obs));
 				}
@@ -159,11 +164,9 @@ struct IlluminateState {
 						events.push(cellEvent(decomposition, dir, nb));
 					}
 				}
-				if (plane.check(cell.box.project(axis))) {
-					nextEvents.cells.push_back(event.cell);
-				}
 			} else {
 				Box<D-1> box = obstacles[event.cell].box.project(dir/2);
+				cout<<"remove box "<<box<<'\n';
 				plane.remove(box, [&](Index idx, const TreeItem& item) {
 					onRemove(axis, idx, item, position);
 				});
@@ -172,7 +175,8 @@ struct IlluminateState {
 	}
 
 	void onRemove(int axis, Index index, const TreeItem& item, int position) {
-//		cout<<"Remove "<<axis<<' '<<index<<' '<<item<<' '<<position<<'\n';
+		cout<<"Remove "<<axis<<' '<<index<<' '<<item<<' '<<position<<'\n';
+		if (item.start == position) return;
 		Box<D> box;
 		for(int i=0; i<D; ++i) {
 			box[i] = i<axis ? plane.rangeForIndex(i, index[i])
@@ -225,6 +229,7 @@ int linkDistance(const ObstacleSet<D>& obstacles, Point<D> startP, Point<D> endP
 	IlluminateState<D> state(obstacles);
 	state.endP = endP;
 	const auto& decomposition = state.decomposition;
+	cout<<"decomposition: "<<decomposition<<'\n';
 	int startCell = pointCell(decomposition, startP);
 	Box<D> startBox = unitBox(startP);
 	if (startBox.contains(endP)) return 0;

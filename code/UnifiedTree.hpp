@@ -158,9 +158,6 @@ private:
 			int totalIndex = computeIndex(index);
 //			std::cout<<"rm "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
 			Item& x = data[totalIndex];
-			if (x.hasData[ALL_MASK]) {
-				visitor(index, x.data);
-			}
 			if (covered != ALL_MASK && x.hasData[ALL_MASK]) {
 				int splitAxis = 0;
 				while(1 & (covered >> splitAxis)) ++splitAxis;
@@ -171,7 +168,7 @@ private:
 				assignItem(baseIndex + step * (2*i), x.data);
 				assignItem(baseIndex + step * (2*i+1), x.data);
 			}
-			clearSubtree(0, index, 0, covered);
+			clearSubtree(0, index, 0, covered, visitor);
 			return;
 		}
 		int i = index[axis];
@@ -189,10 +186,14 @@ private:
 		}
 	}
 
-	bool clearSubtree(int totalIndex, Index index, int axis, Mask covered) {
+	template<class V>
+	bool clearSubtree(int totalIndex, Index index, int axis, Mask covered, V&& visitor) {
 		while(axis<D && !(1&(covered>>axis))) ++axis;
 		if (axis == D) {
 			Item& t = data[totalIndex];
+			if (t.hasData[ALL_MASK]) {
+				visitor(index, t.data);
+			}
 			bool res = t.hasData[0];
 			for(Mask i=0; i<1<<D; ++i) {
 				if ((i | covered) == ALL_MASK) {
@@ -203,13 +204,13 @@ private:
 		}
 		int step = stepSize[axis];
 		int i = index[axis];
-		bool res = clearSubtree(totalIndex + step * i, index, axis+1, covered);
+		bool res = clearSubtree(totalIndex + step * i, index, axis+1, covered, visitor);
 		if (!res) return false;
 		if (i < size[axis]) {
 			index[axis] = 2*i;
-			clearSubtree(totalIndex, index, axis, covered);
+			clearSubtree(totalIndex, index, axis, covered, visitor);
 			index[axis] = 2*i+1;
-			clearSubtree(totalIndex, index, axis, covered);
+			clearSubtree(totalIndex, index, axis, covered, visitor);
 		}
 		return true;
 	}
