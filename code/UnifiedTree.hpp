@@ -4,9 +4,10 @@
 #include "TreeStructure.hpp"
 
 #include <array>
-#include <vector>
+#include <bitset>
 #include <cassert>
 #include <iostream>
+#include <vector>
 
 inline int toPow2(int x) {
 	while(x & (x-1)) x+=x&-x;
@@ -57,11 +58,15 @@ public:
 	Index getSize() const { return size; }
 
 private:
+	struct Item {
+		std::bitset<1<<D> hasData;
+		T data;
+	};
 	using Mask = unsigned;
 
 	void addRec(int index, int axis, Mask covered, const Box<D>& box, const T& value) {
 		if (axis == D) {
-			T& x = data[index];
+			Item& x = data[index];
 			if (covered == ALL_MASK && !x.hasData[ALL_MASK]) {
 				assignItem(index, value);
 			} else {
@@ -104,13 +109,13 @@ private:
 
 	void assignItem(int index, const T& item) {
 		if (data[index].hasData[ALL_MASK]) return;
-		data[index] = item;
+		data[index].data = item;
 		data[index].hasData.set();
 	}
 
 	bool checkRec(int index, int axis, Mask covered, const Box<D>& box) const {
 		if (axis == D) {
-			const T& x = data[index];
+			const Item& x = data[index];
 //			std::cout<<"check "<<index<<' '<<covered<<' '<<data.size()<<'\n';
 			return x.hasData[covered ^ ALL_MASK];
 		}
@@ -136,7 +141,7 @@ private:
 	void removeRec(int totalIndex, Index index, int axis, Mask covered, const Box<D>& box) {
 		if (axis == D) {
 			std::cout<<"rm "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
-			T& x = data[totalIndex];
+			Item& x = data[totalIndex];
 			if (covered != ALL_MASK && x.hasData[ALL_MASK]) {
 				int splitAxis = 0;
 				while(1 & (covered >> splitAxis)) ++splitAxis;
@@ -144,8 +149,8 @@ private:
 				int i = index[splitAxis];
 				int baseIndex = totalIndex - step * i;
 //				std::cout<<"push to children "<<baseIndex<<' '<<step<<' '<<i<<'\n';
-				assignItem(baseIndex + step * (2*i), x);
-				assignItem(baseIndex + step * (2*i+1), x);
+				assignItem(baseIndex + step * (2*i), x.data);
+				assignItem(baseIndex + step * (2*i+1), x.data);
 			}
 			clearSubtree(0, index, 0, covered);
 			return;
@@ -168,7 +173,7 @@ private:
 	bool clearSubtree(int totalIndex, Index index, int axis, Mask covered) {
 		while(axis<D && !(1&(covered>>axis))) ++axis;
 		if (axis == D) {
-			T& t = data[totalIndex];
+			Item& t = data[totalIndex];
 			bool res = t.hasData[0];
 			for(Mask i=0; i<1<<D; ++i) {
 				if ((i | covered) == ALL_MASK) {
@@ -195,7 +200,7 @@ private:
 			int totalIndex = computeIndex(index);
 //			std::cout<<"postRemove "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
 //			for(int i: index)std::cout<<i<<' ';std::cout<<'\n';
-			T& t = data[totalIndex];
+			Item& t = data[totalIndex];
 			t.hasData.reset();
 			for(int d=0; d<D; ++d) {
 				if (index[d] >= size[d]) continue;
@@ -273,5 +278,5 @@ private:
 
 	Index size = {};
 	Index stepSize = {};
-	std::vector<T> data;
+	std::vector<Item> data;
 };

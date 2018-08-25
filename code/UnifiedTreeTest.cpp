@@ -39,12 +39,17 @@ public:
 	}
 
 private:
+	struct Item {
+		bool hasData = false;
+		T data;
+	};
+
 	void addRec(int index, int axis, const Box<D>& box, const T& value) {
 		if (axis == D) {
-			T& x = data[index];
-			if (!x.hasData[D]) {
-				x = value;
-				x.hasData.set(D);
+			Item& x = data[index];
+			if (!x.hasData) {
+				x.data = value;
+				x.hasData = true;
 			}
 			return;
 		}
@@ -55,7 +60,7 @@ private:
 		}
 	}
 	bool checkRec(int index, int axis, const Box<D>& box) const {
-		if (axis == D) return data[index].hasData[D];
+		if (axis == D) return data[index].hasData;
 		int step = stepSize[axis];
 		Range range = box[axis];
 		for(int i=range.from; i<range.to; ++i) {
@@ -65,8 +70,8 @@ private:
 	}
 	void removeRec(int index, int axis, const Box<D>& box) {
 		if (axis == D) {
-			T& x = data[index];
-			x.hasData.reset();
+			Item& x = data[index];
+			x.hasData = false;
 			return;
 		}
 		int step = stepSize[axis];
@@ -78,13 +83,11 @@ private:
 
 	Index size = {};
 	Index stepSize = {};
-	vector<T> data;
+	vector<Item> data;
 };
 
 template<int D>
-struct Item {
-	std::bitset<1<<D> hasData;
-};
+struct Item {};
 
 Box<1> box1(int from, int to) {
 	return {{Range{from,to}}};
