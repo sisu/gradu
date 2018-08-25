@@ -5,11 +5,24 @@
 #include <cassert>
 #include <queue>
 
-namespace {
-
 using namespace std;
 
+namespace std {
+template<class T, size_t N>
+ostream& operator<<(ostream& out, const array<T, N>& arr) {
+	out<<'[';
+	for(size_t i=0; i<N; ++i) {
+		if (i) out<<' ';
+		out<<arr[i];
+	}
+	return out<<']';
+}
+} // namespace std
+
+namespace {
+
 enum class EventType { ADD_RECT, CELL, OBSTACLE };
+const string eventTypeNames[] = {"add", "cell", "obstacle"};
 
 template<int D>
 struct Event {
@@ -20,9 +33,14 @@ struct Event {
 
 	bool operator<(const Event& e) const {
 		if (position != e.position) return position < e.position;
-		return (int)type < (int)e.type;
+		return (int)type > (int)e.type;
 	}
 };
+
+template<int D>
+ostream& operator<<(ostream& out, const Event<D>& e) {
+	return out<<"{"<<eventTypeNames[(int)e.type]<<' '<<e.cell<<' '<<e.position<<' '<<e.box<<"}";
+}
 
 template<int D>
 struct EventSet {
@@ -43,6 +61,7 @@ Event<D> cellEvent(const Decomposition<D>& dec, int dir, int cell) {
 	event.type = EventType::CELL;
 	event.cell = cell;
 	event.position = dec[cell].box[dir>>1][dir&1];
+	if (dir&1) event.position *= -1;
 	return event;
 }
 
@@ -52,6 +71,7 @@ Event<D> obstacleEvent(const ObstacleSet<D>& obs, int dir, int obstacle) {
 	event.type = EventType::OBSTACLE;
 	event.cell = obstacle;
 	event.position = obs[obstacle].box[dir>>1][dir&1];
+	if (dir&1) event.position *= -1;
 	return event;
 }
 
@@ -70,19 +90,24 @@ array<int, D-1> buildSize(const Decomposition<D>& dec) {
 
 template<int D>
 struct IlluminateState {
+	typedef UnifiedTree<TreeItem, D-1> Plane;
+
 	IlluminateState(ObstacleSet<D> obs):
 		obstacles(obs), decomposition(decomposeFreeSpace(obstacles)),
 	plane(buildSize(decomposition)) {}
 
 	void sweep(int dir) {
+		cout<<"sweep "<<dir<<'\n';
 		const int axis = dir/2;
 		priority_queue<Event<D>> events(curEvents.events[dir].begin(), curEvents.events[dir].end());
 		while(!events.empty()) {
 			Event<D> event = events.top();
+			cout<<"event "<<event<<'\n';
 			events.pop();
+			int position = dir&1 ? -event.position : event.position;
 
 			if (event.type == EventType::ADD_RECT) {
-				plane.add(event.box, {});
+				plane.add(event.box, {position});
 			} else if (event.type == EventType::CELL) {
 				const Cell<D>& cell = decomposition[event.cell];
 				for(int obs: cell.obstacles[dir]) {
@@ -96,7 +121,9 @@ struct IlluminateState {
 				}
 			} else {
 				Box<D-1> box = obstacles[event.cell].box.project(dir/2);
-				plane.remove(box);
+				plane.remove(box, [](typename Plane::Index idx) {
+					cout<<"remove "<<idx<<'\n';
+				});
 			}
 		}
 	}
@@ -108,7 +135,7 @@ struct IlluminateState {
 	EventSet<D> curEvents;
 	EventSet<D> nextEvents;
 
-	UnifiedTree<TreeItem, D-1> plane;
+	Plane plane;
 };
 
 template<int D>
@@ -143,6 +170,7 @@ int linkDistance(const ObstacleSet<D>& obstacles, Point<D> startP, Point<D> endP
 		e.position = startP[d];
 		e.box = startBox.project(d);
 		state.curEvents.events[2*d].push_back(e);
+		e.position = -startP[d];
 		state.curEvents.events[2*d+1].push_back(e);
 	}
 	for(int i=0; i<2*D; ++i) {

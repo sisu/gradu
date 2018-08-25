@@ -47,10 +47,15 @@ public:
 	}
 
 	void remove(Box<D> box) {
+		remove(box, [](Index){});
+	}
+
+	template<class V>
+	void remove(Box<D> box, V&& visitor) {
 		for(int i=0; i<D; ++i) if (box[i].size()==0) return;
 		Index ones;
 		for(int i=0; i<D; ++i) ones[i]=1;
-		removeRec(ones,0,0,box);
+		removeRec(ones,0,0,box, visitor);
 		postRemove(ones,0,0,box);
 	}
 
@@ -137,12 +142,14 @@ private:
 		return false;
 	}
 
-	void removeRec(Index index, int axis, Mask covered, const Box<D>& box) {
+	template<class V>
+	void removeRec(Index index, int axis, Mask covered, const Box<D>& box, V&& visitor) {
 		if (axis == D) {
 			int totalIndex = computeIndex(index);
-			std::cout<<"rm "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
+//			std::cout<<"rm "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
 			Item& x = data[totalIndex];
 			if (x.hasData[ALL_MASK]) {
+				visitor(index);
 			}
 			if (covered != ALL_MASK && x.hasData[ALL_MASK]) {
 				int splitAxis = 0;
@@ -159,16 +166,16 @@ private:
 		}
 		int i = index[axis];
 		Range range = rangeForIndex(axis, i);
-		std::cout<<"removerec "<<axis<<' '<<i<<' '<<range<<" ; "<<box<<'\n';
+//		std::cout<<"removerec "<<axis<<' '<<i<<' '<<range<<" ; "<<box<<'\n';
 		if (!box[axis].intersects(range)) return;
 		if (box[axis].contains(range)) {
-			removeRec(index, axis+1, covered | (1U << axis), box);
+			removeRec(index, axis+1, covered | (1U << axis), box, visitor);
 		} else {
-			removeRec(index, axis+1, covered, box);
+			removeRec(index, axis+1, covered, box, visitor);
 			index[axis] = 2*i;
-			removeRec(index, axis, covered, box);
+			removeRec(index, axis, covered, box, visitor);
 			index[axis] = 2*i+1;
-			removeRec(index, axis, covered, box);
+			removeRec(index, axis, covered, box, visitor);
 		}
 	}
 
