@@ -1,5 +1,6 @@
 #include "path.hpp"
 #include "obstacles.hpp"
+#include "slowPath.hpp"
 #include <cstring>
 #include <gmock/gmock-more-matchers.h>
 #include <gtest/gtest.h>

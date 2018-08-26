@@ -46,7 +46,7 @@ $(TRUN): %.done: %
 
 $(ODIR)/./decompositionTest: $(ODIR)/./decomposition.o $(ODIR)/./obstacles.o
 
-$(ODIR)/./pathTest: $(ODIR)/./decomposition.o $(ODIR)/./path.o $(ODIR)/./obstacles.o
+$(ODIR)/./pathTest: $(ODIR)/./decomposition.o $(ODIR)/./path.o $(ODIR)/./obstacles.o $(ODIR)/./slowPath.o
 
 clean:
 	rm -rf "$(ODIR)"

@@ -17,7 +17,14 @@ struct Point {
 	int data[D];
 	int& operator[](int i) { return data[i]; }
 	int operator[](int i) const { return data[i]; }
+	const int* begin() const { return data; }
+	const int* end() const { return data+D; }
 };
+template<int D>
+inline bool operator==(const Point<D>& a, const Point<D>& b) {
+	for(int i=0; i<D; ++i) if (a[i] != b[i]) return false;
+	return true;
+}
 
 template<int D>
 struct Box {
