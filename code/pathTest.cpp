@@ -29,6 +29,8 @@ Point<2> randomFreePoint(const vector<string>& grid, mt19937& rng) {
 		res[0] = rng()%w;
 		res[1] = rng()%h;
 	} while(grid[res[1]][res[0]] != '.');
+	res[0]+=1;
+	res[1]+=1;
 	return res;
 }
 
@@ -83,15 +85,17 @@ TEST(LinkDistance2D, Spiral) {
 }
 
 TEST(LinkDistance2D, RandomTest) {
-	mt19937 rng;
-	auto grid = genRandomGrid(8, 8, rng);
-	cout<<"grid: "<<grid<<'\n';
-	auto obs = makeObstaclesForPlane(grid);
-	Point<2> start = randomFreePoint(grid, rng);
-	Point<2> end = randomFreePoint(grid, rng);
-	cout<<"RES: "<<slowLinkDistance(obs,start,end)<<'\n';
-	EXPECT_EQ(linkDistance(obs, start, end),
-			slowLinkDistance(obs, start, end));
+	for(int i=0; i<10; ++i) {
+		mt19937 rng(i);
+		auto grid = genRandomGrid(8, 8, rng);
+		cout<<"grid: "<<grid<<'\n';
+		auto obs = makeObstaclesForPlane(grid);
+		Point<2> start = randomFreePoint(grid, rng);
+		Point<2> end = randomFreePoint(grid, rng);
+		cout<<"RES: "<<slowLinkDistance(obs,start,end)<<'\n';
+		EXPECT_EQ(linkDistance(obs, start, end),
+				slowLinkDistance(obs, start, end));
+	}
 }
 
 TEST(LinkDistance3D, Triv) {

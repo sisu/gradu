@@ -316,7 +316,7 @@ int linkDistance(const ObstacleSet<D>& obstacles, Point<D> startP, Point<D> endP
 	IlluminateState<D> state(obstacles);
 	state.endP = endP;
 	const auto& decomposition = state.decomposition;
-	cout<<"decomposition: "<<decomposition<<'\n';
+	cout<<"decomposition: "<<decomposition<<' '<<startP<<'\n';
 	int startCell = pointCell(decomposition, startP);
 	Box<D> startBox = unitBox(startP);
 	if (startBox.contains(endP)) return 0;
