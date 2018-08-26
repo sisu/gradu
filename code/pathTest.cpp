@@ -85,9 +85,9 @@ TEST(LinkDistance2D, Spiral) {
 }
 
 TEST(LinkDistance2D, RandomTest) {
-	for(int i=0; i<10; ++i) {
+	for(int i=0; i<1; ++i) {
 		mt19937 rng(i);
-		auto grid = genRandomGrid(8, 8, rng);
+		auto grid = genRandomGrid(32, 32, rng);
 		cout<<"grid: "<<grid<<'\n';
 		auto obs = makeObstaclesForPlane(grid);
 		Point<2> start = randomFreePoint(grid, rng);

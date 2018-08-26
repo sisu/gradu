@@ -1,5 +1,6 @@
 #include "path.hpp"
 
+#include "ClearableBitset.hpp"
 #include "print.hpp"
 #include "UnifiedTree.hpp"
 #include "util.hpp"
@@ -201,8 +202,9 @@ struct IlluminateState {
 	IlluminateState(ObstacleSet<D> obs):
 		obstacles(obs), decomposition(decomposeFreeSpace(obstacles)),
 	plane(buildSize(decomposition)),
-	obstacleReachTime(obstacles.size(), -1)
-	{}
+	obstacleReachTime(obstacles.size(), -1),
+	visitedCells(decomposition.size()),
+	visitedObstacles(obstacles.size()) {}
 
 	void newRound() {
 		++curStep;
@@ -214,6 +216,8 @@ struct IlluminateState {
 
 	void sweep(int dir) {
 		cout<<"    sweep "<<dir<<'\n';
+		visitedCells.reset();
+		visitedObstacles.reset();
 		const int axis = dir/2;
 		priority_queue<Event<D>> events(curEvents.events[dir].begin(), curEvents.events[dir].end());
 		while(!events.empty()) {
@@ -232,11 +236,14 @@ struct IlluminateState {
 				}
 				nextEvents.cells.push_back(event.cell);
 				for(int obs: cell.obstacles[dir]) {
+					if (visitedObstacles[obs]) continue;
+					visitedObstacles.set(obs);
 					events.push(obstacleEvent(obstacles, dir, obs));
 				}
 				for(int nb: cell.links[dir]) {
 					Box<D-1> box = decomposition[nb].box.project(axis);
-					if (plane.check(box)) {
+					if (plane.check(box) && !visitedCells[nb]) {
+						visitedCells.set(nb);
 						events.push(cellEvent(decomposition, dir, nb));
 					}
 				}
@@ -289,6 +296,9 @@ struct IlluminateState {
 	Plane plane;
 
 	vector<int> obstacleReachTime;
+	ClearableBitset visitedCells;
+	ClearableBitset visitedObstacles;
+
 	int curStep = 0;
 };
 
