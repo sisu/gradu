@@ -38,4 +38,24 @@ TEST(LinkDistance2D, Infeasible) {
 	EXPECT_EQ(linkDistance(obs, {2,1}, {3,3}), -1);
 }
 
+TEST(LinkDistance2D, ManyPaths) {
+	ObstacleSet<2> obs = makeObstaclesForPlane(
+		{".#...",
+		 "...#.",
+		 ".#...",
+		 "...#."});
+	EXPECT_EQ(linkDistance(obs, {1,1}, {5,4}), 5);
+}
+
+TEST(LinkDistance2D, Spiral) {
+	ObstacleSet<2> obs = makeObstaclesForPlane(
+		{".#.....",
+		 ".#.###.",
+		 ".#.#.#.",
+		 ".#...#.",
+		 ".#####.",
+		 "......."});
+	EXPECT_EQ(linkDistance(obs, {1,1}, {5,3}), 7);
+}
+
 } // namespace
