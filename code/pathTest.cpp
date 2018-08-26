@@ -58,4 +58,34 @@ TEST(LinkDistance2D, Spiral) {
 	EXPECT_EQ(linkDistance(obs, {1,1}, {5,3}), 7);
 }
 
+TEST(LinkDistance3D, Triv) {
+	ObstacleSet<3> obs = makeObstaclesForVolume({
+		{
+			"..",
+			"..",
+		},{
+			"..",
+			"..",
+		}});
+	EXPECT_EQ(linkDistance(obs, {1,1,1}, {2,2,2}), 3);
+}
+
+TEST(LinkDistance3D, AroundObstacle) {
+	ObstacleSet<3> obs = makeObstaclesForVolume({
+		{
+			"...",
+			"###",
+			"...",
+		},{
+			"#..",
+			".#.",
+			"#..",
+		},{
+			"...",
+			".##",
+			"...",
+		}});
+	EXPECT_EQ(linkDistance(obs, {1,1,1}, {1,2,2}), 5);
+}
+
 } // namespace

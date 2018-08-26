@@ -265,3 +265,5 @@ int linkDistance(const ObstacleSet<D>& obstacles, Point<D> startP, Point<D> endP
 
 template
 int linkDistance<2>(const ObstacleSet<2>& obstacles, Point<2> startP, Point<2> endP);
+template
+int linkDistance<3>(const ObstacleSet<3>& obstacles, Point<3> startP, Point<3> endP);
