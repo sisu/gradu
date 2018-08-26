@@ -56,6 +56,50 @@ void removeEquals(vector<T>& v1, vector<T>& v2, C&& compare) {
 	v2.erase(k2, v2.end());
 }
 
+template<class T, class M>
+void mergeAdjacentElements(vector<T>& vec, M&& tryMerge) {
+	auto it = vec.begin(), keep=it;
+	for(; it != vec.end(); ++it, ++keep) {
+		auto n = next(it);
+		if (n==vec.end()) {
+			iter_swap(it++, keep++);
+			break;
+		}
+		if (tryMerge(*it, *n)) {
+			iter_swap(it, keep);
+			++it;
+		} else if (it != keep) {
+			iter_swap(it, keep);
+		}
+	}
+	vec.erase(keep, vec.end());
+}
+
+template<int D>
+void mergeAdjacentEvents(vector<Event<D>>& events,
+		int eventAxis, int mergeAxis) {
+	int projAxis = mergeAxis - (mergeAxis > eventAxis);
+	sort(events.begin(), events.end(), [projAxis](const Event<D>& a, const Event<D>& b) {
+		if (a.position != b.position) return a.position < b.position;
+		for(int i=0; i<D-1; ++i) if (i != projAxis) {
+			for(int j=0; j<2; ++j) {
+				if (a.box[i][j] != b.box[i][j]) return a.box[i][j] < b.box[i][j];
+			}
+		}
+		for(int j=0; j<2; ++j) {
+			if (a.box[projAxis][j] != b.box[projAxis][j]) return a.box[projAxis][j] < b.box[projAxis][j];
+		}
+		return false;
+	});
+	mergeAdjacentElements(events, [projAxis](Event<D>& a, Event<D>& b) {
+		if (a.position != b.position) return false;
+		for(int i=0; i<D-1; ++i) if (i != projAxis && a.box[i] != b.box[i]) return false;
+		if (a.box[projAxis].to < b.box[projAxis].from) return false;
+		a.box[projAxis].to = max(a.box[projAxis].to, b.box[projAxis].to);
+		return true;
+	});
+}
+
 template<int D>
 struct EventSet {
 	vector<Event<D>> events[2*D];
@@ -77,6 +121,12 @@ struct EventSet {
 				if (p1!=p2) return p1<p2;
 				return a.position < -b.position || a.box < b.box;
 			});
+		}
+		for(int a=0; a<D; ++a) {
+			for(int m=0; m<D; ++m) if (a!=m) {
+				mergeAdjacentEvents(events[2*a], a, m);
+				mergeAdjacentEvents(events[2*a+1], a, m);
+			}
 		}
 	}
 };
