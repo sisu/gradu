@@ -36,6 +36,8 @@ ostream& operator<<(ostream& out, const Event<D>& e) {
 
 template<class T, class C>
 void removeEquals(vector<T>& v1, vector<T>& v2, C&& compare) {
+//	cout<<"v1: "<<v1<<endl;
+//	cout<<"v2: "<<v2<<endl;
 	sort(v1.begin(), v1.end(), compare);
 	sort(v2.begin(), v2.end(), compare);
 	auto it1=v1.begin(), it2=v2.begin();
@@ -120,7 +122,7 @@ struct EventSet {
 			removeEquals(events[2*a], events[2*a+1], [](const Event<D>& a, const Event<D>& b) {
 				int p1=abs(a.position), p2=abs(b.position);
 				if (p1!=p2) return p1<p2;
-				return a.position < -b.position || a.box < b.box;
+				return a.box < b.box;
 			});
 		}
 		for(int a=0; a<D; ++a) {

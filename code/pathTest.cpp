@@ -85,7 +85,7 @@ TEST(LinkDistance2D, Spiral) {
 }
 
 TEST(LinkDistance2D, RandomTest) {
-	for(int i=0; i<1; ++i) {
+	for(int i=0; i<10; ++i) {
 		mt19937 rng(i);
 		auto grid = genRandomGrid(32, 32, rng);
 		cout<<"grid: "<<grid<<'\n';
