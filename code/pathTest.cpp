@@ -2,12 +2,35 @@
 #include "obstacles.hpp"
 #include "slowPath.hpp"
 #include <cstring>
+#include <random>
 #include <gmock/gmock-more-matchers.h>
 #include <gtest/gtest.h>
 
 namespace {
 
 using namespace std;
+
+vector<string> genRandomGrid(int w, int h, mt19937& rng) {
+	vector<string> res;
+	for(int i=0; i<h; ++i) {
+		string str(w+2, '#');
+		for(int j=0; j<w; ++j) {
+			str[j+1] = rng() < rng.max()/4 ? '#' : '.';
+		}
+		res.push_back(move(str));
+	}
+	return res;
+}
+
+Point<2> randomFreePoint(const vector<string>& grid, mt19937& rng) {
+	Point<2> res;
+	int w = grid[0].size(), h = grid.size();
+	do {
+		res[0] = rng()%w;
+		res[1] = rng()%h;
+	} while(grid[res[1]][res[0]] != '.');
+	return res;
+}
 
 TEST(LinkDistance2D, StartEndPointSame) {
 	ObstacleSet<2> obs = makeObstaclesForPlane({"."});
@@ -57,6 +80,18 @@ TEST(LinkDistance2D, Spiral) {
 		 ".#####.",
 		 "......."});
 	EXPECT_EQ(linkDistance(obs, {1,1}, {5,3}), 7);
+}
+
+TEST(LinkDistance2D, RandomTest) {
+	mt19937 rng;
+	auto grid = genRandomGrid(8, 8, rng);
+	cout<<"grid: "<<grid<<'\n';
+	auto obs = makeObstaclesForPlane(grid);
+	Point<2> start = randomFreePoint(grid, rng);
+	Point<2> end = randomFreePoint(grid, rng);
+	cout<<"RES: "<<slowLinkDistance(obs,start,end)<<'\n';
+	EXPECT_EQ(linkDistance(obs, start, end),
+			slowLinkDistance(obs, start, end));
 }
 
 TEST(LinkDistance3D, Triv) {
