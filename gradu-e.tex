@@ -39,19 +39,19 @@
 
 \newcommand\epts{\ensuremath{P}\xspace}
 \newcommand\segsize{\ensuremath{m}\xspace}
-\newcommand\inter[1]{\ensuremath{\textsc{väli}(#1)}\xspace}
-\newcommand\leftc[1]{\ensuremath{\textsc{vasen}(#1)}\xspace}
-\newcommand\rightc[1]{\ensuremath{\textsc{oikea}(#1)}\xspace}
-\newcommand\reach[1]{\ensuremath{\textsc{valo}(#1)}\xspace}
-\newcommand\reachd[2]{\ensuremath{\textsc{valo}_{#2}(#1)}\xspace}
+\newcommand\inter[1]{\ensuremath{\textsc{interval}(#1)}\xspace}
+\newcommand\leftc[1]{\ensuremath{\textsc{left}(#1)}\xspace}
+\newcommand\rightc[1]{\ensuremath{\textsc{right}(#1)}\xspace}
+\newcommand\reach[1]{\ensuremath{\textsc{light}(#1)}\xspace}
+\newcommand\reachd[2]{\ensuremath{\textsc{light}_{#2}(#1)}\xspace}
 \newcommand\canon[1]{\ensuremath{\bar{\textsc{c}}(#1)}\xspace}
 \newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
 \newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
 \newcommand\canoni[2]{\ensuremath{\textsc{c}_{#2}(#1)}\xspace}
 \newcommand\canonpar[1]{\ensuremath{\textsc{p}_{\textsc{c}}(#1)}\xspace}
 \newcommand\epar[1]{\ensuremath{\textsc{p}(#1)}\xspace}
-\newcommand\visitp{\ensuremath{\textsc{VieraileVanhempi}}\xspace}
-\newcommand\visitc{\ensuremath{\textsc{VieraileKanoninen}}\xspace}
+\newcommand\visitp{\ensuremath{\textsc{VisitParent}}\xspace}
+\newcommand\visitc{\ensuremath{\textsc{VisitCanonical}}\xspace}
 
 \newcommand\pop[1]{\ensuremath{\textsc{pop}(#1)}\xspace}
 
@@ -62,24 +62,24 @@
 \newcommand\zrange[1]{\ensuremath{z(#1)}\xspace}
 \newcommand\xranget[2]{\ensuremath{x(#1)_{#2}}\xspace}
 \newcommand\yranget[2]{\ensuremath{y(#1)_{#2}}\xspace}
-\newcommand\nbs[1]{\ensuremath{\textsc{naap}{(#1)}}\xspace}
-\newcommand\nbsd[2]{\ensuremath{\textsc{naap}_{#2}{(#1)}}\xspace}
+\newcommand\nbs[1]{\ensuremath{\textsc{neighb}{(#1)}}\xspace}
+\newcommand\nbsd[2]{\ensuremath{\textsc{neighb}_{#2}{(#1)}}\xspace}
 
-\newcommand\decomp[1]{\ensuremath{\textsc{hajo}_{#1}}\xspace}
+\newcommand\decomp[1]{\ensuremath{\textsc{dec}_{#1}}\xspace}
 %\newcommand\decompc[1]{\ensuremath{\textsc{hajo}({#1})}\xspace}
-\newcommand\sweep[2]{\ensuremath{\textsc{pyyh}_{#2}{(#1)}}\xspace}
-\newcommand\stepof[1]{\ensuremath{\textsc{askel}{(#1)}}\xspace}
+\newcommand\sweep[2]{\ensuremath{\textsc{sweep}_{#2}{(#1)}}\xspace}
+\newcommand\stepof[1]{\ensuremath{\textsc{step}{(#1)}}\xspace}
 \newcommand\proj[2]{\ensuremath{\text{proj}_{#1}(#2)}\xspace}
 
 \newcommand\rotr[1]{\ensuremath{\top #1}\xspace}
 \newcommand\vecof[1]{\ensuremath{\left [#1\right ]}\xspace}
 \newcommand\sline[1]{\ensuremath{S_{#1}}\xspace}
-\newcommand\intert[2]{\ensuremath{\textsc{väli}_{#1}(#2)}\xspace}
+\newcommand\intert[2]{\ensuremath{\textsc{interval}_{#1}(#2)}\xspace}
 \newcommand\point[1]{\ensuremath{\left ({#1}\right )}\xspace}
 
-\newcommand\cellevt{\ensuremath{\texttt{SoluTapahtuma}}\xspace}
-\newcommand\obsevt{\ensuremath{\texttt{EsteTapahtuma}}\xspace}
-\newcommand\addrectevt{\ensuremath{\texttt{LisäysTapahtuma}}\xspace}
+\newcommand\cellevt{\ensuremath{\texttt{CellEvent}}\xspace}
+\newcommand\obsevt{\ensuremath{\texttt{ObstacleEvent}}\xspace}
+\newcommand\addrectevt{\ensuremath{\texttt{AddRectEvent}}\xspace}
 
 
 \title{Minimum Link Paths In Two and More Dimensions}
@@ -168,6 +168,43 @@ For the $C$-oriented problem, we present a new algorithm that works in time $O(C
 We also study 3D version of the problem for a case where the only allowed directions are the coordinate axes.
 For this problem we present a new algorithm that works in time $O(n^2\log^2n)$, which is a significant improvement over the earlier best known result $O(n^{2.5}\log n)$.\cite{restricted}
 Finally, we extend the 3D solution to work in $D$-dimensional domains in time $O(n^D\log^Dn)$.
+
+\subsection{Problem description}
+
+The definition of the minimum link path problem is the following.
+\begin{prob}\label{prob:path}
+We are given a description of free space \fspace and two points $\spt\in\fspace$ and $\ept\in\fspace$.
+The task is to find a path from \spt to \ept in \fspace with minimum link distance.
+\end{prob}
+
+Typically the algorithms for pathfinding start from one of the points, and search the area until the other point is found.
+Often this approach allows us to create a data structure that can be used to efficiently find a path between \spt and any other point.
+Thus the same algorithms can be applied to solve a problem where \ept is given only afterwards.
+
+\begin{prob}\label{prob:map}
+We are given a description of free space \fspace and a point $\spt\in\fspace$.
+Construct a data structure that allows finding the minimum link path between \spt and any given point.
+\end{prob}
+
+\subsection{Overview of algorithms}\label{sec:overview}
+
+All the known algorithms for the minimum link path problem use the same basic idea:
+The tasks is to find a minimum link path from point \spt to point \ept.
+Let \reach{k} be the set of points reachable by at most $k$ links from \spt.
+Start by defining $\reach{0}=\set{\spt}$, and iteratively compute \reach{k+1} from \reach{k}.
+The iteration continues until we find $k$ such that $\ept\in\reach{k}$.
+This iteration is often called \emph{staged illumination}, because the computation of \reach{k+1} can be illustrated by setting a light source in all points of \reach{k}, and selecting all the lit points.
+
+This process closely resembles the bredth-first search, but a key difference is that the search is done in continuous space rather than in a graph.
+A nontrivial part in any minimum link path algorithm is maintaining the illuminated area in a data structure that allows efficient computation of \reach{k+1} from \reach{k}.
+
+Representing the illuminated area can be made more simple by first splitting the free space into simple primitives.
+A common approach in computational geometry is to start by triangulating the input, which allows working with simple forms.
+In case of minimum link paths with restricted orientations, rectangles or trapezoids are the most comfortable representations.
+
+
+
+\section{Conclusions}
 
 
 \nocite{*}
