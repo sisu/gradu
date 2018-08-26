@@ -59,31 +59,8 @@ struct Grid {
 	Index<D> stepSize;
 };
 
-#if 0
-template<int D>
-void sortInDir(vector<Point<D>>& pts, int dir) {
-	sort(pts.begin(), pts.end(), [dir](const Point<D>& a, const Point<D>& b) {
-		return (a[dir>>1] < b[dir>>1]) ^ !(dir&1);
-	});
-}
-#endif
-
 template<int D>
 void sweep(Grid<D>& grid, int dir, vector<int>& curP, vector<int>& nextP) {
-#if 0
-	sortInDir(curP, dir);
-	int axis = dir/2;
-	int start = dir&1 ? 0 : grid.size[axis]-1;
-	int end = dir&1 ? grid.size[axis] : -1;
-	int step = dir&1 ? 1 : -1;
-	size_t idx = 0;
-	vector<Point<D>> active;
-	for(int i=start; i!=end; i+=step) {
-		while(idx < curP.size() && curP[idx][axis]==i) {
-			active.push_back(curP[idx]);
-		}
-	}
-#endif
 	size_t origSize = nextP.size();
 	int axis = dir/2;
 	int stepDir = dir&1 ? 1 : -1;
@@ -96,7 +73,7 @@ void sweep(Grid<D>& grid, int dir, vector<int>& curP, vector<int>& nextP) {
 			pt += step;
 		}
 	}
-	for(size_t i=0; i<nextP.size(); ++i) grid[nextP[i]] = -1;
+	for(size_t i=origSize; i<nextP.size(); ++i) grid[nextP[i]] = -1;
 }
 
 } // namespace

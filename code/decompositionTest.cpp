@@ -12,13 +12,6 @@ using testing::ElementsAre;
 using testing::ElementsAreArray;
 using testing::IsEmpty;
 
-constexpr int LEFT = 0;
-constexpr int RIGHT = 1;
-constexpr int UP = 2;
-constexpr int DOWN = 3;
-constexpr int ZMINUS = 4;
-constexpr int ZPLUS = 5;
-
 template<int D>
 Point<D> dirVec(int dir) {
 	Point<D> pt;
