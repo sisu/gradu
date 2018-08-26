@@ -233,16 +233,6 @@ int compare(const Box<A>& a, const Box<B>& b) {
 }
 
 template<int D>
-bool operator<(const Box<D>& a, const Box<D>& b) {
-	for(int i=0; i<D; ++i) {
-		for(int j=0; j<2; ++j) {
-			if (a[i][j] != b[i][j]) return a[i][j] < b[i][j];
-		}
-	}
-	return false;
-}
-
-template<int D>
 vector<pair<int,int>> overlappingBoxes(
 		const vector<Box<D>>& bs1,
 		const vector<Box<D>>& bs2) {

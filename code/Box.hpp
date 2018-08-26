@@ -63,6 +63,17 @@ struct Box {
 	}
 };
 
+template<int D>
+inline bool operator<(const Box<D>& a, const Box<D>& b) {
+	for(int i=0; i<D; ++i) {
+		for(int j=0; j<2; ++j) {
+			if (a[i][j] != b[i][j]) return a[i][j] < b[i][j];
+		}
+	}
+	return false;
+}
+
+
 namespace std {
 	template<int D>
 	struct hash<Box<D>> {
