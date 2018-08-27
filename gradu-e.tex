@@ -39,7 +39,7 @@
 
 \newcommand\epts{\ensuremath{P}\xspace}
 \newcommand\segsize{\ensuremath{m}\xspace}
-\newcommand\inter[1]{\ensuremath{\textsc{interval}(#1)}\xspace}
+\newcommand\inter[1]{\ensuremath{\textsc{intr}(#1)}\xspace}
 \newcommand\leftc[1]{\ensuremath{\textsc{left}(#1)}\xspace}
 \newcommand\rightc[1]{\ensuremath{\textsc{right}(#1)}\xspace}
 \newcommand\reach[1]{\ensuremath{\textsc{light}(#1)}\xspace}
@@ -383,13 +383,74 @@ For each $z$ we perform $O(n)$ such updates, so the total time bound is $O(n^2\l
 \end{proof}
 
 Algorithm~\ref{alg:split3d} divides the space into cuboids, but does not generate any links between them.
+First we bound the number of links.
+The following lemma helps in the analysis.
 
+\begin{lem}\label{lem:decomp2dch}
+Consider two obstacle sets $A$ and $B$ on 2D plane.
+Let $n$ be the total number of obstacle edges in any of them, and $k$ be the number of edges that are present in exactly one of the sets.
+The number of overlapping rectangles in \decomp{x}(A) and \decomp{x}(B) is $O(nk)$.
+\end{lem}
+\begin{proof}Left as an exercise.\end{proof}
+
+\begin{lem}The number of pairs of adjacent cells in the decomposition produced by algorithm~\ref{alg:split3d} is $O(n^2)$.\end{lem}
+\begin{proof}
+Since the number of links produced by algorithm~\ref{alg:split2d} is $O(n)$, any cross section has $O(n)$ links in $x$ and $y$ directions.
+Thus the total number of $x$ and $y$ links is $O(n^2)$.
+
+Let $k_z$ be the number of different obstacles on the cross sections on planes $z=z_k-\varepsilon$ and $z=z_k+\varepsilon$.
+Since the total number of obstacles is $n$, the sum of different $k_z$ values is $n$.
+The number of links between two adjacent layers is $O(nk_z)$ by Lemma~\ref{lem:decomp2dch}.
+Summing up all the changes gives the desired bound $\sum_z O(nk_z) = O(n^2)$.
+\end{proof}
+
+Since we know how to compute links for 2D decomposition, the links in $x$ and $y$ directions can easily be obtained from the cross sections.
+What remains is computing the links in $z$ direction.
+We compute the links between each pair of adjacent cross sections separately by running another 2D sweep after constructing the decompositions for both cross sections.
+
+\dots
 
 \subsection{Higher dimensional decomposition}
 
 
 
 \section{Segment tree}\label{sec:segtree}
+
+Segment tree is a data structure for working with one-dimensional number intervals.
+The structure implementing a wide range of operations in logarithmic time.
+Some example of operations that can be implemented include:
+\begin{itemize}
+	\item Insert and remove interval to the tree.
+	\item Find all the intervals intersecting a given query interval.
+	\item Cut of a given range from all the ranges in the tree.
+\end{itemize}
+
+Rather than as a single data structure that is used as a black box, the segment trees are better viewed as a framework that can be adapted to work in various situations.
+It is straightforward to augment the tree to contain additional information about the intervals, and use the information in queries.
+For example we can associate a number with each interval, and allow efficiently querying for the maximum number overlapping a given query interval.
+We first present the overal idea of the tree, and then show how it can be applied to the minimum link path problem.
+
+Segment trees are typically implemented as semi-dynamic structures.
+This means that the tree can be efficiently modified after it has been build, but we need to specify the set of possible endpoints \epts of intervals in advance.
+This allows implementing most operations in time $O(\log m)$, and the size of the tree is $O(m)$, where $m=\size{\epts}$.
+
+\subsection{Structure of a segment tree}
+
+A segment tree is a binary tree where each node $n$ corresponds to a fixed half-open interval $\inter{n}$.
+Each branch node $s$ has two child nodes \leftc{s} and \rightc{s}.
+The intervals of the children divide the parent interval into two parts:
+$\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
+The root node corresponds the largest supported interval \range{\epts[1]}{\epts[m]}, and the leaf nodes correspond to the smallest possible intervals \range{\epts[i]}{\epts[i+1]}.
+
+The structure of a semi-dynamic segment tree is independent of the intervals added to the tree.
+Thus we can make the structure into an almost complete binary tree, which allows storing the tree nodes in an array similarly to binary heap:
+the root node is stored in index~1, and the child nodes of node $i$ are $2i$ and $2i+1$.
+This representation has very good constant factors, making segment tree a powerful practical tool rather than only a theoretical construct.
+
+\subsection{Canonical nodes}
+
+When an interval $I$ is added to the tree, it is added to several tree nodes called the \emph{canonical nodes} of $I$, denoted by \canon{I}.
+The canonical nodes of $I$ are the smallest set of nodes whose intervals cover $I$ but nothing else: $\cup_{c\in\canon{I}} \inter{c}=I$.
 
 \section{Planar minimum link paths}\label{sec:minlink2d}
 

@@ -251,7 +251,7 @@ Suurin osa kysely- ja p‰ivitysoperaatioista toimii ajassa $O(\log \size{\epts})$
 \end{figure}
 
 Segmenttipuu on bin‰‰ripuu, jonka jokainen solmu $s$ vastaa puoliavointa lukuv‰li‰ $\inter{s}$.
-Solmun $s$ lapsisolmut $\leftc{s}$ ja $\rightc{s}$ jakavat v‰lin $\inter{s}$ kahteen pienemp‰‰n osaan: $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cup\inter{\rightc{s}}=\emptyset$.
+Solmun $s$ lapsisolmut $\leftc{s}$ ja $\rightc{s}$ jakavat v‰lin $\inter{s}$ kahteen pienemp‰‰n osaan: $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
 Puun juurisolmu vastaa suurinta mahdollista, kaikki muut v‰lit sis‰lt‰v‰t lukuv‰li‰, ja lehtisolmut pienimpi‰ mahdollisia v‰lej‰ $\range{\epts[i]}{\epts[i+1]}$.
 Esimerkki segmenttipuun rakenteesta n‰kyy kuvassa~\ref{segpuu}.
 
