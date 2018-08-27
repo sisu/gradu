@@ -198,13 +198,41 @@ This iteration is often called \emph{staged illumination}, because the computati
 This process closely resembles the bredth-first search, but a key difference is that the search is done in continuous space rather than in a graph.
 A nontrivial part in any minimum link path algorithm is maintaining the illuminated area in a data structure that allows efficient computation of \reach{k+1} from \reach{k}.
 
-Representing the illuminated area can be made more simple by first splitting the free space into simple primitives.
+Representing the illuminated area can be simplified by first splitting the free space into simple primitives.
 A common approach in computational geometry is to start by triangulating the input, which allows working with simple forms.
 In case of minimum link paths with restricted orientations, rectangles or trapezoids are the most comfortable representations.
+In section~\ref{sec:decomposition} we present algorithms for construction decompositions suitable for minimum link path computation.
+
+With restricted orientations that the paths can take, we can use \emph{sweepline algorithms} to efficiently compute \reach{k+1} from \reach{k}.
+The idea is to "sweep" over the search space by a line, and use the sweep to calculate how the path can advance into the direction of the sweep line.
+This generic technique allows us to transform the 2-dimensional illumination problem into a series of easier 1-dimensional problems on the sweep line.
+The sweepline technique is discussed in section~\ref{sec:sweep}.
+
+During the sweeps we need to maintain the relationship between the sweepline and the obstacles as well as the region \reach{k}.
+Maintaining this kind of information requires efficient handling of 1-dimensional intervals.
+\emph{Segment tree} is a generic data structure for working with intervals.
+It can be used to efficiently implement all the operations required by the staged illumination.
+Segment trees are described in section~\ref{sec:segtree}.
+
+We combine the aforementioned concepts into an algorithm for finding minimum link paths in section~\ref{sec:minlink2d}.
+The ideas of the two-dimensional solution can also be generalized to work in higher dimensions.
+Many details need to be taken care of, but the basic ideas are relatively straightforward to transfer to more than two dimensions.
+The space is decomposed into cuboids instead of rectangles, and the sweep line is replaced by a sweep plane.
+The segment tree can also be generalized into a higher dimensional structure.
+These elements are combined into an algorithm for finding minimum link paths in higher dimensional domains in section~\ref{sec:minlink3d}.
 
 
+\section{Space decomposition}\label{sec:decomposition}
 
-\section{Conclusions}
+\subsection{Sweepline algorithms}\label{sec:sweep}
+
+\section{Segment tree}\label{sec:segtree}
+
+\section{Planar minimum link paths}\label{sec:minlink2d}
+
+\section{Paths in 3 and higher dimensions}\label{sec:minlink3d}
+
+\section{Conclusions}\label{sec:conclusions}
 
 
 \nocite{*}
