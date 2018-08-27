@@ -62,8 +62,8 @@
 \newcommand\zrange[1]{\ensuremath{z(#1)}\xspace}
 \newcommand\xranget[2]{\ensuremath{x(#1)_{#2}}\xspace}
 \newcommand\yranget[2]{\ensuremath{y(#1)_{#2}}\xspace}
-\newcommand\nbs[1]{\ensuremath{\textsc{neighb}{(#1)}}\xspace}
-\newcommand\nbsd[2]{\ensuremath{\textsc{neighb}_{#2}{(#1)}}\xspace}
+\newcommand\nbs[1]{\ensuremath{\textsc{nbs}{(#1)}}\xspace}
+\newcommand\nbsd[2]{\ensuremath{\textsc{nbs}_{#2}{(#1)}}\xspace}
 
 \newcommand\decomp[1]{\ensuremath{\textsc{dec}_{#1}}\xspace}
 %\newcommand\decompc[1]{\ensuremath{\textsc{hajo}({#1})}\xspace}
@@ -203,12 +203,12 @@ A common approach in computational geometry is to start by triangulating the inp
 In case of minimum link paths with restricted orientations, rectangles or trapezoids are the most comfortable representations.
 In section~\ref{sec:decomposition} we present algorithms for construction decompositions suitable for minimum link path computation.
 
-With restricted orientations that the paths can take, we can use \emph{sweepline algorithms} to efficiently compute \reach{k+1} from \reach{k}.
+With restricted orientations that the paths can take, we can use \emph{sweep line algorithms} to efficiently compute \reach{k+1} from \reach{k}.
 The idea is to "sweep" over the search space by a line, and use the sweep to calculate how the path can advance into the direction of the sweep line.
 This generic technique allows us to transform the 2-dimensional illumination problem into a series of easier 1-dimensional problems on the sweep line.
-The sweepline technique is discussed in section~\ref{sec:sweep}.
+The sweep line technique is discussed in section~\ref{sec:sweep}.
 
-During the sweeps we need to maintain the relationship between the sweepline and the obstacles as well as the region \reach{k}.
+During the sweeps we need to maintain the relationship between the sweep line and the obstacles as well as the region \reach{k}.
 Maintaining this kind of information requires efficient handling of 1-dimensional intervals.
 \emph{Segment tree} is a generic data structure for working with intervals.
 It can be used to efficiently implement all the operations required by the staged illumination.
@@ -222,9 +222,106 @@ The segment tree can also be generalized into a higher dimensional structure.
 These elements are combined into an algorithm for finding minimum link paths in higher dimensional domains in section~\ref{sec:minlink3d}.
 
 
+
 \section{Space decomposition}\label{sec:decomposition}
 
-\subsection{Sweepline algorithms}\label{sec:sweep}
+The domain of the minimum link path problem is a polygon with smaller polygons as obstacles.
+The input is given as a list of polygons, and each polygon is described by a list of vertices.
+This form is inconvenient for path planning algorithms, as many simple operations, such as checking whether we can move from a given point to given direction, require scanning through all the polygons.
+
+In the rectilinear minimum link path problem the obstacle edges are oriented according to the coordinate axis.
+This allows us to decomposition the free space into rectangles, which is a convenient form for rectilinear path computation.
+For each cell of the decomposition we also construct links to neighboring cells and obstacles.
+In other words, the decomposition is a graph with rectangles as vertices and an edge between each pair of adjacent rectangles.
+If the total number of edges in all the obstacles is $n$, we can decompose the space into $O(n)$ cells such the total number of links between cells is also $O(n)$.
+
+A similar structure can also be used for computing minimum link paths in 3-dimensional domains.
+In 3D rectilinear case each obstacle face is a polygon with axis-aligned edges in 3D space.
+In this case the free space can be decomposed into a graph with $O(n^2)$ cuboid as vertices and $O(n^2)$ edges.
+
+
+\subsection{Sweep line algorithms}\label{sec:sweep}
+
+Sweep line algorithms are a generic technique used for a wide range of computational geometry problems.
+The idea is to image a line that crosses over the domain.
+As the sweep line progresses, we gradually update the solution to take into account the parts of the domain that the line has crossed.
+Conceptually the sweep line moves continuously in space, but in practice we only process a discrete set of \emph{events} where some structural change to the solution happens.
+
+
+\subsection{Planar decomposition}\label{sec:decomp2d}
+
+A rectilinear domain can be decomposed into rectangles by extending each horizontal obstacle edge in both directions until the sides hit a vertical obstacle edge.
+This defines the \emph{horizontal decomposition} of the domain, denoted \decomp{x}.
+The vertical decomposition \decomp{y} is defined correspondingly by extending all the vertical edges until they hit a horizontal obstacle.
+
+It is easy to see that each cell of \decomp{x} touches at least one obstacle vertex.
+Since each vertex can be touched by at most two rectangles, the size of the decomposition is $O(n)$.
+Each pair of touching rectangles also shares a common obstacle corner, so the number of links is also $O(n)$.
+
+\decomp{x} can be constructed with a line sweep algorithm.
+We sweep over the domain by a horizontal line moving from $y$ coordinate $-\infty$ (down) to $\infty$ (up).
+During the sweep we maintain the cross section (intersection) of the free space \fspace and the sweep line.
+The intersection consists of non-overlapping intervals, which we store in a binary search tree.
+
+Each element added to the binary tree is a partially constructed rectangle $a$ with the following fields.
+\begin{itemize}
+\item Interval $\xrange{a}=\range{\xranget{a}{1}}{\xranget{a}{2}}$.
+\item Interval $\yrange{a}=\range{\yranget{a}{1}}{\yranget{a}{2}}$.
+\item List of neighbor links $\nbs{a}$.
+\end{itemize}
+
+The sweep stops at each horizontal obstacle edge.
+When moving from down to up, each edge starts either starts or ends an obstacle.
+If the edge starts an obstacle, the $x$-range of the edge is fully contained in one of the intervals in the search tree.
+If the edge ends an obstacle, the $x$-range does not intersect any intervals in the tree, but the left and right endpoints may touch some intervals.
+In both cases the intervals touching the encountered edge are removed from the search tree, and $O(1)$ new intervals are inserted to maintain the sweep line state.
+A more exact description of the algorithm follows below.
+
+\begin{alg}\label{alg:split2d}
+Decomposition of \fspace into a group of rectangular cells \decomp{x}.
+\begin{algorithmic}
+\State $T\gets \text{Empty binary search tree}$.
+\State $E\gets\text{All horizontal obstacle edges}$.
+\State Sort $E$ by the $y$ coordinates of the edges.
+\ForAll{$e\in E$}
+	\If{$e$ starts an obstacle}
+		\Comment Exactly one interval in $T$ intersects \xrange{e}.
+		\State $v\gets\text{Lookup $T$ for interval touching \xrange{e}}$.
+		\State Remove $v$ from $T$.
+		\State $\yranget{v}{2}\gets\y{e}$.
+		\ForAll{$u\gets v\setminus s$}
+			\State $\yranget{u}{1}\gets\y{e}$.
+			\State Insert $v$ to list $\nbs{u}$.
+			\State $a\gets\text{New rectangle}$.
+			\State $\xrange{a}\gets u$.
+			\State $\yranget{a}{1}\gets\y{e}$.
+			\State Insert $a$ to tree $T$.
+		\EndFor
+	\Else\Comment $e$ starts free space.
+		\State $a\gets\text{New rectangle}$
+		\State $\xrange{a}\gets\xrange{e}$.
+		\State $\yranget{a}{1}\gets\y{e}$.
+		\ForAll{$v\in$ lookup $T$ for intervals touching \xrange{e}}
+			\State Remove $v$ from $T$.
+			\State Insert $v$ to list \nbs{a}.
+			\State $\xrange{a}\gets\xrange{a}\cup\xrange{v}$.
+		\EndFor
+		\State Insert $a$ to $T$.
+	\EndIf
+\EndFor
+\end{algorithmic}
+\end{alg}
+
+Let us analyze the complexity of the algorithm.
+
+\begin{lem}Algorithm~\ref{alg:split2d} works in time $O(n\log n)$ and space $O(n)$.\end{lem}
+\begin{proof}
+The algorithm sorts all the horizontal edges in time $O(n\log n)$, and iterates over them in $O(n)$ steps.
+On each step we emit $O(1)$ cells and neighbor links, and perform $O(1)$ operations to the binary search tree.
+The search tree is a balanced binary tree, so each operation to it is carried out in time $O(\log n)$.
+Thus the total complexity of the algorithm is $O(n\log n)$, and we only need $O(n)$ storage for the edge list and the binary search tree.
+\end{proof}
+
 
 \section{Segment tree}\label{sec:segtree}
 
