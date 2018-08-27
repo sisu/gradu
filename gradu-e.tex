@@ -260,7 +260,7 @@ Each pair of touching rectangles also shares a common obstacle corner, so the nu
 
 \decomp{x} can be constructed with a line sweep algorithm.
 We sweep over the domain by a horizontal line moving from $y$ coordinate $-\infty$ (down) to $\infty$ (up).
-During the sweep we maintain the cross section (intersection) of the free space \fspace and the sweep line.
+During the sweep we maintain the intersection of the free space \fspace and the sweep line.
 The intersection consists of non-overlapping intervals, which we store in a binary search tree.
 
 Each element added to the binary tree is a partially constructed rectangle $a$ with the following fields.
@@ -312,15 +312,81 @@ Decomposition of \fspace into a group of rectangular cells \decomp{x}.
 \end{algorithmic}
 \end{alg}
 
-Let us analyze the complexity of the algorithm.
+The complexity of the algorithm can be easily bounded.
 
-\begin{lem}Algorithm~\ref{alg:split2d} works in time $O(n\log n)$ and space $O(n)$.\end{lem}
+\begin{lem}\label{lem:split2dtime}Algorithm~\ref{alg:split2d} works in time $O(n\log n)$ and space $O(n)$.\end{lem}
 \begin{proof}
 The algorithm sorts all the horizontal edges in time $O(n\log n)$, and iterates over them in $O(n)$ steps.
 On each step we emit $O(1)$ cells and neighbor links, and perform $O(1)$ operations to the binary search tree.
 The search tree is a balanced binary tree, so each operation to it is carried out in time $O(\log n)$.
 Thus the total complexity of the algorithm is $O(n\log n)$, and we only need $O(n)$ storage for the edge list and the binary search tree.
 \end{proof}
+
+\subsection{3D cuboid decomposition}
+
+Similarly as a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids.
+Decomposition into cuboids is used in the algorithm for 3D minimum link paths in section~\ref{sec:minlink3d}.
+The running time of the path finding algorithm is heavily depent on the size of the decomposition, so it is desirable to find as small decomposition as possible.
+
+The input is given as a list of 2-dimensional obstacle faces in 3-dimensional space.
+Each obstacle face is a polygon defined by a list of vertices.
+Denote the total number of vertices by $n$.
+
+We present a simple algorithm that uses the algorithm~\ref{alg:split2d} as a subroutine.
+This algorithm produces a decomposition with $O(n^2)$ cells and $O(n^2)$ links.
+There also exists algorithms for finding decompositions with even small number of cells, but the worst case for number of links is superquadratic for all the known solutions.
+
+The solution is a sweep plane algorithm, whichi sweeps through the domain with a plane perpendicular to $z$-axis.
+During the sweep we maintain the intersection of the sweep plane and the domain~\fspace.
+The intersection of the domain and a plane is called a \emph{cross section} of the domain.
+
+In each cross section we form a 2D decomposition of the domain with algorithm~\ref{alg:split2d}, and extend the $xy$-rectangles in $z$-direction so that they fill the whole free space.
+Any common rectangles shared by consecutive cross sections are merged into a single larger cuboid.
+The merging is done by by maintaining a binary search tree of the cells of the previous decomposition.
+
+The description below only calculates the cells, but not the links between them.
+We discuss the computation of links below.
+
+\begin{alg}\label{alg:split3d}
+Decompose the free space defined by a set $E$ of obstacle faces into cuboids.
+\begin{algorithmic}
+\State $Z\gets$ All $z$-coordinates of obstacle vertices.
+\State Sort $Z$ in increasing order.
+\State $R\gets$ Empty list of result cells.
+\State $M\gets$ Empty binary search tree mapping 2D rectangles to indices in $R$.
+\ForAll{$z\in Z$}
+	\State $E_z\gets\set{e \mid e\in E, \zrange{e}\ni z}$.
+	\State $T\gets$ 2D decomposition for $E_z$ using algorithm~\ref{alg:split2d}.
+	\ForAll{$m\in M\setminus T$}
+		\State $c\gets R[M[m]]$.
+		\State Upper $z$-coordinate of $c\gets z$.
+		\State Remove $m$ from $M$.
+	\EndFor
+	\ForAll{$t\in T\setminus M$}
+		\State $c\gets$ New cell with $xy$-bounds $t$ and starting $z$-coordinate $z$.
+		\State Insert $c$ into $R$.
+		\State $M[t]\gets$ index of $c$ in $R$.
+	\EndFor
+\EndFor
+\State Return list $R$.
+\end{algorithmic}
+\end{alg}
+
+The running time of the algorithm is easy to determine using Lemma~\ref{lem:split2dtime}.
+
+\begin{lem}\label{lem:split3dtime}Algorithm~\ref{alg:split3d} has running time $O(n^2\log n)$.\end{lem}
+\begin{proof}
+We loop through $O(n)$ unique $z$-coordinates.
+For each $z$ we construct a set of obstacles in time $O(n)$ and a 2D decomposition in time $O(n\log n)$.
+The map $M$ is implemented as a binary search tree, so each update and lookup can be performed in time $O(\log n)$.
+For each $z$ we perform $O(n)$ such updates, so the total time bound is $O(n^2\log n)$.
+\end{proof}
+
+Algorithm~\ref{alg:split3d} divides the space into cuboids, but does not generate any links between them.
+
+
+\subsection{Higher dimensional decomposition}
+
 
 
 \section{Segment tree}\label{sec:segtree}
