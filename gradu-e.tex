@@ -143,6 +143,9 @@ We present new algorithms to several variations of the minimum link path problem
 
 
 
+\section{Preface}
+
+It was hard to write, it should be hard to read.
 
 \section{Introduction}
 
@@ -471,6 +474,8 @@ Computing the links between all the layers can then be done in time $O(n^2\log n
 Thus the total time complexity is $O(n^2\log n)$, and the total number of cuboids and links is $O(n^2)$.
 \end{proof}
 
+
+
 \subsection{Higher dimensional decomposition}
 
 The ideas of the 3D decomposition can be generalized to allow decomposing 4D and higher dimensional rectilinear domains into hyperrectangles.
@@ -516,7 +521,7 @@ For each cross-section we compute a $(D-1)$-dimensional decomposition, whose siz
 The combination of the $n$ sub-problem results has thus size $O(n^{D-2}n)=O(n^{D-1})$.
 \end{proof}
 
-\begin{lem}The running time of Algorithm~\ref{alg:splitdd} is $O(n^{D-1}\log n)$.\end{lem}
+\begin{lem}\label{lem:splitddtime}The running time of Algorithm~\ref{alg:splitdd} is $O(n^{D-1}\log n)$.\end{lem}
 \begin{proof}
 Proof by indunction on $D$.
 Since we use Algorithm~\ref{alg:split2d} for case $D=2$, Lemma~\ref{lem:split2dtime} proves the base case $D=2$.
@@ -576,19 +581,39 @@ Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ an
 \If{$D=2$}
 	\State Compute the overlapping pairs using algorithm~\ref{alg:overlap2d} and return.
 \EndIf
-\State $Z\gets$ All unique start and end $D$-coordinates of elements of $A$ and $B$.
-\State Sort $Z$ in increasing order.
-\State $R\gets$ Empty list.
-\ForAll{$z\in Z$}
-	\State $A_z\gets\set{a \mid a\in A, a_D\ni z}$.
-	\State $B_z\gets\set{b \mid b\in B, b_D\ni z}$.
-	\State $L\gets$ overlapping pairs between $A_z$ and $B_z$ computed recursively.
-	\State Insert all the links in $L$ to result list $R$.
+\State $E\gets$ List of all faces of hyperrectangles in $A$ and $B$ perpendicular to $D$-axis.
+\State Sort $E$ by $D$-coordinate.
+\State $G\gets$ Groups of consequtive elements of $E$ with equal $D$-coordinate.
+\State $P_A\gets$ Empty set of integers.
+\State $P_B\gets$ Empty set of integers.
+\State $R\gets$ Empty list of pairs.
+\ForAll{$g\in G$}
+	\State $S_A\gets$ Starting elements of $A$ in $g$.
+	\State $S_B\gets$ Starting elements of $B$ in $g$.
+	\State $T_A\gets$ Ending elements of $A$ in $g$.
+	\State $T_B\gets$ Ending elements of $B$ in $g$.
+	\State $P_A\gets P_A\setminus T_A$.
+	\State $P_B\gets P_B\setminus T_B$.
+	\State Recursively compute overlap between $P_A$ and $S_B$ into $R$.
+	\State Recursively compute overlap between $S_A$ and $P_A$ into $R$.
+	\State Recursively compute overlap between $S_A$ and $S_A$ into $R$.
+	\State $P_A\gets P_A\cup S_A$.
+	\State $P_B\gets P_B\cup S_B$.
 \EndFor
+\State Return list $R$.
 \end{algorithmic}
 \end{alg}
 
-The algorithm for the $D$-dimensional overlap computation is much more simple than the special case for $D=2$.
+The algorithm processes each set of events with equal $D$-coordinate as a single unit.
+For each unit we recursively search for new links between the newly added hyperrectangles, as well as between old and new hyperrectangles.
+We maintain the set of hyperrectangles currently intersecting the sweep hyperplane to avoid adding already included intersections to the result twice.
+
+\begin{lem}\label{lem:overlapddok}
+Algorithm~\ref{alg:overlapdd} finds each intersecting pair between the input sets $A$ and $B$ exactly once.
+\end{lem}
+\begin{proof}Left as an exercise.\end{proof}
+
+The algorithm for the $D$-dimensional overlap computation is simpler than the special case for $D=2$.
 However Lemma~\ref{lem:overlap2dtime} cannot be directly extended to higher dimensions, because there is no guarantee that the subproblems are significantly smaller than the original problem.
 Instead we prove a less generic lemma by using the properties of the decompositions.
 
@@ -602,8 +627,21 @@ The base case $D=2$ is proven by Lemma~\ref{lem:overlap2dtime}.
 
 For $D\ge 3$, the decomposition is created by combining the $(D-1)$-dimensional decompositions at each cross section.
 Thus the sweep hyperplane of algorithm~\ref{alg:overlapdd} intersects a $(D-1)$-dimensional decomposition produced by algorithm~\ref{alg:splitdd} at each point of the sweep.
-By induction the time taken by the recursive call is $O(n^{D-2}\log n + u)$, where $u$ is the number of overlapping pairs in the subproblem.
+By Lemma~\ref{lem:splitddcells} this implies that the index sets maintained during the sweep have size $O(n^{D-2})$.
+Performing the set operations on the $n$ steps of the sweep then has total time complexity $O(n^{D-1}\log n)$.
 
+The time taken by each of the 3 recursive calls on each cross section is $O(n^{D-2}\log n + u)$ by induction, where $u$ is the number of overlapping pairs returned from the subproblem.
+By Lemma~\ref{lem:overlapddok} each intersection is found exactly once, so the total complexity of the recursive calls during the sweep is $O(n^{D-1}\log n + k)$.
+\end{proof}
+
+Finally, we can generalize Theorem~\ref{theo:split3dtime} to $D$ dimensions.
+
+\begin{theo}\label{theo:splitddtime}$D$-dimensional rectilinear domain defined by obstacles with a total of $n$ vertices can be decomposed into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1})$ links between them in time $O(n^{D-1}\log n).$\end{theo}
+\begin{proof}
+The cuboids can be constructed in time $O(n^{D-1}\log n)$ according to Lemma~\ref{lem:splitddtime}.
+The total number of links between the nodes is $k=O(n^{D-1})$ according to Lemma~\ref{lem:splitddcount}.
+Computing the links between all the layers can then be done in time $O(n^{D-1}\log n+k)=O(n^2\log n)$ by Lemma~\ref{lem:overlapddtime}.
+Thus the total time complexity is $O(n^{D-1}\log n)$, and the total number of cuboids and links is $O(n^{D-1})$.
 \end{proof}
 
 
