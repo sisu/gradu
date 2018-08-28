@@ -9,3 +9,7 @@ void sortUnique(std::vector<T>& v) {
 	v.erase(std::unique(v.begin(), v.end()), v.end());
 }
 
+inline int toPow2(int x) {
+	while(x & (x-1)) x+=x&-x;
+	return x;
+}

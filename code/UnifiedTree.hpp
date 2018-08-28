@@ -2,17 +2,13 @@
 
 #include "Box.hpp"
 #include "TreeStructure.hpp"
+#include "util.hpp"
 
 #include <array>
 #include <bitset>
 #include <cassert>
 #include <iostream>
 #include <vector>
-
-inline int toPow2(int x) {
-	while(x & (x-1)) x+=x&-x;
-	return x;
-}
 
 template<class T, int D>
 class UnifiedTree {
