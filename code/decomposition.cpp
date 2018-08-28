@@ -2,6 +2,7 @@
 
 #include "Box.hpp"
 #include "Span.hpp"
+#include "overlap.hpp"
 #include "util.hpp"
 
 #include <algorithm>
@@ -230,22 +231,6 @@ int compare(const Box<A>& a, const Box<B>& b) {
 		}
 	}
 	return 0;
-}
-
-template<int D>
-vector<pair<int,int>> overlappingBoxes(
-		const vector<Box<D>>& bs1,
-		const vector<Box<D>>& bs2) {
-	// TODO: more efficient impl
-	vector<pair<int,int>> conns;
-	for(size_t i=0; i<bs1.size(); ++i) {
-		for(size_t j=0; j<bs2.size(); ++j) {
-			if (bs1[i].intersects(bs2[j])) {
-				conns.emplace_back(i,j);
-			}
-		}
-	}
-	return conns;
 }
 
 template<int D>
