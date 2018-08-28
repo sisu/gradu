@@ -78,11 +78,12 @@ inline vector<pair<int,int>> overlappingBoxes(
 	vector<int> old1, old2;
 	for(const auto& item: zToData) {
 		const Data& data = item.second;
+//		std::cout<<"item "<<item.first<<' '<<old1<<' '<<old2<<" : "<<data.begin1<<' '<<data.begin2<<' '<<data.end1<<' '<<data.end2<<'\n';
 		old1 = vectorDifference(old1, data.end1);
 		old2 = vectorDifference(old2, data.end2);
 
 		addOverlappingBoxes(conns, bs1, bs2, old1, data.begin2);
-		addOverlappingBoxes(conns, bs1, bs2, data.begin2, old2);
+		addOverlappingBoxes(conns, bs1, bs2, data.begin1, old2);
 		addOverlappingBoxes(conns, bs1, bs2, data.begin1, data.begin2);
 		old1.insert(old1.end(), data.begin1.begin(), data.begin1.end());
 		old2.insert(old2.end(), data.begin2.begin(), data.begin2.end());

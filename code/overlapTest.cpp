@@ -39,4 +39,20 @@ TEST(OverlapTest3D, Simple) {
 				make_pair(0,0), make_pair(1,1)));
 }
 
+TEST(OverlapTest3D, NoDuplicates) {
+	vector<Box<3>> bs1 = {
+		box3({0,1}, {0,3}, {0,5}),
+		box3({1,2}, {0,3}, {1,6}),
+		box3({2,3}, {0,3}, {2,7})};
+	vector<Box<3>> bs2 = {
+		box3({0,3}, {0,1}, {0,5}),
+		box3({0,3}, {1,2}, {1,6}),
+		box3({0,3}, {2,3}, {2,7})};
+	EXPECT_THAT(overlappingBoxes(bs1, bs2),
+			UnorderedElementsAre(
+				make_pair(0,0), make_pair(0,1), make_pair(0,2),
+				make_pair(1,0), make_pair(1,1), make_pair(1,2),
+				make_pair(2,0), make_pair(2,1), make_pair(2,2)));
+}
+
 } // namespace
