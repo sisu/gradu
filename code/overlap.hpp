@@ -1,4 +1,5 @@
 #include "Box.hpp"
+#include "util.hpp"
 #include <algorithm>
 #include <map>
 #include <utility>
@@ -12,15 +13,33 @@ template<int D>
 inline vector<pair<int,int>> overlappingBoxes(
 		const vector<Box<D>>& bs1,
 		const vector<Box<D>>& bs2) {
+  vector<int> zs;
+  for(const auto& box: bs1) {
+    zs.push_back(box[D-1].from);
+    zs.push_back(box[D-1].to);
+  }
+  sortUnique(zs);
+  vector<Box<D-1>> sub1, sub2;
+  vector<int> idx1, idx2;
 	vector<pair<int,int>> conns;
-	// TODO: more efficient impl
-	for(size_t i=0; i<bs1.size(); ++i) {
-		for(size_t j=0; j<bs2.size(); ++j) {
-			if (bs1[i].intersects(bs2[j])) {
-				conns.emplace_back(i,j);
-			}
-		}
-	}
+  for(int z: zs) {
+    sub1.clear(), sub2.clear(), idx1.clear(), idx2.clear();
+    for(size_t i=0; i<bs1.size(); ++i) {
+      if (bs1[i][D-1].contains(z)) {
+        sub1.push_back(bs1[i].project());
+        idx1.push_back(i);
+      }
+    }
+    for(size_t i=0; i<bs2.size(); ++i) {
+      if (bs2[i][D-1].contains(z)) {
+        sub2.push_back(bs2[i].project());
+        idx2.push_back(i);
+      }
+    }
+    for(auto p : overlappingBoxes(sub1, sub2)) {
+      conns.emplace_back(idx1[p.first], idx2[p.second]);
+    }
+  }
 	return conns;
 }
 
