@@ -10,6 +10,17 @@ using std::pair;
 using std::vector;
 
 template<int D>
+inline vector<int> getOverlappingIndices(const vector<Box<D>>& boxes, int z) {
+	vector<int> res;
+	for(size_t i=0; i<boxes.size(); ++i) {
+		if (boxes[i][D-1].contains(z)) {
+			res.push_back(i);
+		}
+	}
+	return res;
+}
+
+template<int D>
 inline vector<pair<int,int>> overlappingBoxes(
 		const vector<Box<D>>& bs1,
 		const vector<Box<D>>& bs2) {

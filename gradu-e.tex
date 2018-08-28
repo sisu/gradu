@@ -66,7 +66,7 @@
 \newcommand\nbsd[2]{\ensuremath{\textsc{nbs}_{#2}{(#1)}}\xspace}
 
 \newcommand\decomp[1]{\ensuremath{\textsc{dec}_{#1}}\xspace}
-%\newcommand\decompc[1]{\ensuremath{\textsc{hajo}({#1})}\xspace}
+%\newcommand\decompc[1]{\ensuremath{\textsc{dec}({#1})}\xspace}
 \newcommand\sweep[2]{\ensuremath{\textsc{sweep}_{#2}{(#1)}}\xspace}
 \newcommand\stepof[1]{\ensuremath{\textsc{step}{(#1)}}\xspace}
 \newcommand\proj[2]{\ensuremath{\text{proj}_{#1}(#2)}\xspace}
@@ -388,7 +388,7 @@ The following lemma helps in the analysis.
 
 \begin{lem}\label{lem:decomp2dch}
 Consider two obstacle sets $A$ and $B$ on 2D plane.
-Let $n$ be the total number of obstacle edges in any of them, and $k$ be the number of edges that are present in exactly one of the sets.
+Let $n$ be the total number of obstacle edges in $A$ and $B$, and $k$ be the number of edges that are present in exactly one of the sets.
 The number of overlapping rectangles in \decomp{x}(A) and \decomp{x}(B) is $O(nk)$.
 \end{lem}
 \begin{proof}
@@ -401,7 +401,7 @@ Thus each $y$ coordinate contributes $O(k)$ pairs to the overlap.
 Since the number of $y$ coordinates where the domain changes is $O(n)$, the total number of overlapping pairs is $O(nk)$.
 \end{proof}
 
-\begin{lem}The number of pairs of adjacent cells in the decomposition produced by algorithm~\ref{alg:split3d} is $O(n^2)$.\end{lem}
+\begin{lem}\label{lem:split3dcount}The number of pairs of adjacent cells in the decomposition produced by algorithm~\ref{alg:split3d} is $O(n^2)$.\end{lem}
 \begin{proof}
 Since the number of links produced by algorithm~\ref{alg:split2d} is $O(n)$, any cross section has $O(n)$ links in $x$ and $y$ directions.
 Thus the total number of $x$ and $y$ links is $O(n^2)$.
@@ -461,9 +461,150 @@ This requires time $O(\log n+u)$ where $u$ is the number of overlapping pairs.
 Combining the time for sorting, tree additions, deletions and lookups, the total complexity is $O(n\log n + k)$.
 \end{proof}
 
+We are now ready to prove the main result of this section.
+
+\begin{theo}\label{theo:split3dtime}3D rectilinear domain defined by obstacles with a total of $n$ vertices can be decomposed into $O(n^2)$ cuboids with $O(n^2)$ links between them in time $O(n^2\log n).$\end{theo}
+\begin{proof}
+The cuboids can be constructed in time $O(n^2\log n)$ according to Lemma~\ref{lem:split3dtime}.
+The total number of links between the nodes is $k=O(n^2)$ according to Lemma~\ref{lem:split3dcount}.
+Computing the links between all the layers can then be done in time $O(n^2\log n+k)=O(n^2\log n)$ by Lemma~\ref{lem:overlap2dtime}.
+Thus the total time complexity is $O(n^2\log n)$, and the total number of cuboids and links is $O(n^2)$.
+\end{proof}
 
 \subsection{Higher dimensional decomposition}
 
+The ideas of the 3D decomposition can be generalized to allow decomposing 4D and higher dimensional rectilinear domains into hyperrectangles.
+The construction is done recursively, so that $D$-dimensional decomposition is created by solving a sequence of $(D-1)$-dimensional sub-problems.
+The idea is identical to how the 3D decomposition is constructed based on a sequence of 2D decompositions in algorithm~\ref{alg:split3d}.
+
+\begin{alg}\label{alg:splitdd}
+Decompose the free space defined by a set $E$ of $(D-1)$-dimensional obstacle faces into $D$-dimensional hyperrectangles.
+\begin{algorithmic}
+\If{$D=2$}
+	\State Compute the decomposition using algorithm~\ref{alg:split2d} and return.
+\EndIf
+\State $Z\gets$ All $D$-coordinates of obstacle vertices.
+\State Sort $Z$ in increasing order.
+\State $R\gets$ Empty list of result cells.
+\State $M\gets$ Empty binary search tree mapping $D-1$-dimensional rectangles to indices in $R$.
+\ForAll{$z\in Z$}
+	\State $E_z\gets\set{e \mid e\in E, e_D\ni z}$.
+	\State $T\gets$ $(D-1)$-dimensional decomposition for $E_z$ recursively.
+	\ForAll{$m\in M\setminus T$}
+		\State $c\gets R[M[m]]$.
+		\State Upper $D$-coordinate of $c\gets z$.
+		\State Remove $m$ from $M$.
+	\EndFor
+	\ForAll{$t\in T\setminus M$}
+		\State $c\gets$ New cell with the first $D-1$ coordinates defined by $t$ and starting $D$-coordinate $z$.
+		\State Insert $c$ into $R$.
+		\State $M[t]\gets$ index of $c$ in $R$.
+	\EndFor
+\EndFor
+\State Return list $R$.
+\end{algorithmic}
+\end{alg}
+
+The analysis is similar to the 3D case, except that we now use induction on $D$.
+
+\begin{lem}\label{lem:splitddcells}The number of rectangles produced by Algorithm~\ref{alg:splitdd} is $O(n^{D-1})$.\end{lem}
+\begin{proof}
+Proof by induction on $D$.
+Since the size of the horizontal decomposition of 2D space is $O(n)$, the claim is clearly true for $D=2$.
+For $D>2$, we loop over the $O(n)$ unique values of the $D$-coordinate in the obstacles.
+For each cross-section we compute a $(D-1)$-dimensional decomposition, whose size is $O(n^{D-2})$ by induction.
+The combination of the $n$ sub-problem results has thus size $O(n^{D-2}n)=O(n^{D-1})$.
+\end{proof}
+
+\begin{lem}The running time of Algorithm~\ref{alg:splitdd} is $O(n^{D-1}\log n)$.\end{lem}
+\begin{proof}
+Proof by indunction on $D$.
+Since we use Algorithm~\ref{alg:split2d} for case $D=2$, Lemma~\ref{lem:split2dtime} proves the base case $D=2$.
+
+For $D>2$, we solve $O(n)$ sub-problems, each of which can be done in time $O(n^{D-2}\log n)$ by induction.
+The total time of solving all the sub-problems is thus $O(n^{D-1}\log n)$.
+
+We also maintain a mapping from $(D-1)$-dimensional hyperrectangles to result indices.
+The size of the mapping is bounded by the size of the $(D-1)$-dimensional decompositions, which have size $O(n^{D-2})$ by Lemma~\ref{lem:splitddcells}.
+Thus each map operation can be done in time $O(\log{n^{D-2}})=O(\log n)$.
+The number of map operations for each cross-section is $O(n^{D-2})$, so the total time spent in the map operations is $O(nn^{D-2}\log n)=O(n^{D-1}\log n)$.
+\end{proof}
+
+We can similarly prove a bound for the number of links with induction that uses the proofs for 2D and 3D domains as the base case.
+
+\begin{lem}\label{lem:decompddch}
+Consider two obstacle sets $A$ and $B$ that each define a $D$-dimensional domain.
+Let $n$ be the total number of $(D-1)$-dimensional obstacle faces in $A$ and $B$, and $k$ be the number of faces that are present in exactly one of the sets.
+The number of overlapping $D$-dimensional hyperrectangles in the decompositions of $A$ and $B$ is $O(n^{D-1}k)$.
+\end{lem}
+\begin{proof}
+Proof by induction on $D$.
+The base case $D=2$ is proven by Lemma~\ref{lem:decomp2dch}.
+
+For $D\ge 3$ consider how the sweeps of Algorithm~\ref{alg:split3d} advance in domains defined by $A$ and $B$.
+Each of the sweeps stops at $O(n)$ points, producing a $(D-1)$-dimensional decomposition for the cross section.
+For any $D$-coordinate, the cross-sections of the domains of $A$ and $B$ differ by $O(k)$ obstacles, so the number of links at a fixed $D$-coordinate is $O(n^{D-2}k)$ by induction.
+
+The total number of links between the two decompositions is the total number of links counted in each of the $O(n)$ cross-sections.
+This may count some links multiple times, but each link is counted at least once.
+Each cross-section has $O(n^{D-2}k)$ links, so the total number of links has upper bound $O(n^{D-1}k)$.
+\end{proof}
+
+\begin{lem}\label{lem:splitddcount}The number of links between adjacent pairs of hyperrectangles produced by Algorithm~\ref{alg:splitdd} is $O(n^{D-1})$.\end{lem}
+\begin{proof}
+Consider separately the links in direction $D$ and in the other directions.
+For both cases, we count the number of links using induction on $D$.
+For the base case of the induction, the number of links in case $D=2$ is $O(n)$, as shown in Section~\ref{sec:decomp2d}.
+
+The links in directions other than $Z$ can be obtained from the $(D-1)$-dimensional decompositions produced during the sweep.
+By induction, the number of links in each $(D-1)$-decomposition is $O(n^{D-2})$, so the total number of links in directions other than $Z$ is $O(n^{D-1})$.
+
+To count the number of links in direction $D$, observe how the cross-section changes as the sweep hyperplane advances through the domain.
+If two adjacent cross sections differ by $u$ obstacles, the number of links between the cross-sections is $O(n^{D-2}u)$ by Lemma~\ref{lem:decompddch}.
+The total number of obstacles changing during the sweep is $O(n)$, so the total count of the links between all adjacent levels is $O(n^{D-1})$.
+\end{proof}
+
+The proof of Lemma~\ref{lem:splitddcount} gives a hint for designing an algorithm to compute the links.
+Similarly to the proof, we consider separately the links in direction $D$ and in the other directions.
+The links in directions other than $D$ can be obtained recursively from the solutions of the sub-problems.
+The links in direction $D$ are computed by performing an additional sweep between each pair of adjacent cross-sections and using a recursive method similar to the proof above.
+Each sweep finds the direction $D$ links by using the following recursive algorithm.
+
+\begin{alg}\label{alg:overlapdd}
+Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ and $B$.
+\begin{algorithmic}
+\If{$D=2$}
+	\State Compute the overlapping pairs using algorithm~\ref{alg:overlap2d} and return.
+\EndIf
+\State $Z\gets$ All unique start and end $D$-coordinates of elements of $A$ and $B$.
+\State Sort $Z$ in increasing order.
+\State $R\gets$ Empty list.
+\ForAll{$z\in Z$}
+	\State $A_z\gets\set{a \mid a\in A, a_D\ni z}$.
+	\State $B_z\gets\set{b \mid b\in B, b_D\ni z}$.
+	\State $L\gets$ overlapping pairs between $A_z$ and $B_z$ computed recursively.
+	\State Insert all the links in $L$ to result list $R$.
+\EndFor
+\end{algorithmic}
+\end{alg}
+
+The algorithm for the $D$-dimensional overlap computation is much more simple than the special case for $D=2$.
+However Lemma~\ref{lem:overlap2dtime} cannot be directly extended to higher dimensions, because there is no guarantee that the subproblems are significantly smaller than the original problem.
+Instead we prove a less generic lemma by using the properties of the decompositions.
+
+\begin{lem}\label{lem:overlapddtime}
+Let $A$ and $B$ be two decompositions generated by Algorithm~\ref{alg:splitdd} for two different inputs that have a total of $n$ obstacles.
+Then Algorithm~\ref{alg:overlapdd} runs in time $O(n^{D-1}\log n + k)$ for inputs $A$ and $B$, where $k$ is the number of overlapping pairs.
+\end{lem}
+\begin{proof}
+Proof by induction on $D$.
+The base case $D=2$ is proven by Lemma~\ref{lem:overlap2dtime}.
+
+For $D\ge 3$, the decomposition is created by combining the $(D-1)$-dimensional decompositions at each cross section.
+Thus the sweep hyperplane of algorithm~\ref{alg:overlapdd} intersects a $(D-1)$-dimensional decomposition produced by algorithm~\ref{alg:splitdd} at each point of the sweep.
+By induction the time taken by the recursive call is $O(n^{D-2}\log n + u)$, where $u$ is the number of overlapping pairs in the subproblem.
+
+\end{proof}
 
 
 
