@@ -59,26 +59,35 @@ template<int D>
 inline vector<pair<int,int>> overlappingBoxes(
 		const vector<Box<D>>& bs1,
 		const vector<Box<D>>& bs2) {
-	vector<int> zs;
-	for(const auto& box: bs1) {
-		zs.push_back(box[D-1].from);
-		zs.push_back(box[D-1].to);
+	struct Data {
+		vector<int> begin1, begin2, end1, end2;
+	};
+	std::map<int, Data> zToData;
+	for(size_t i=0; i<bs1.size(); ++i) {
+		Range r = bs1[i][D-1];
+		zToData[r.from].begin1.push_back(i);
+		zToData[r.to].end1.push_back(i);
 	}
-	sortUnique(zs);
-	vector<int> old1, old2;
+	for(size_t i=0; i<bs2.size(); ++i) {
+		Range r = bs2[i][D-1];
+		zToData[r.from].begin2.push_back(i);
+		zToData[r.to].end2.push_back(i);
+	}
+
 	vector<pair<int,int>> conns;
-	for(int z: zs) {
-		vector<int> idx1 = getOverlappingIndices(bs1, z);
-		vector<int> idx2 = getOverlappingIndices(bs2, z);
-		vector<int> keep1 = vectorIntersection(old1, idx1);
-		vector<int> keep2 = vectorIntersection(old2, idx2);
-		vector<int> added1 = vectorDifference(old1, idx1);
-		vector<int> added2 = vectorDifference(old2, idx2);
-		addOverlappingBoxes(conns, bs1, bs2, keep1, added2);
-		addOverlappingBoxes(conns, bs1, bs2, added1, keep2);
-		addOverlappingBoxes(conns, bs1, bs2, added1, added2);
-		old1 = std::move(idx1);
-		old2 = std::move(idx2);
+	vector<int> old1, old2;
+	for(const auto& item: zToData) {
+		const Data& data = item.second;
+		old1 = vectorDifference(old1, data.end1);
+		old2 = vectorDifference(old2, data.end2);
+
+		addOverlappingBoxes(conns, bs1, bs2, old1, data.begin2);
+		addOverlappingBoxes(conns, bs1, bs2, data.begin2, old2);
+		addOverlappingBoxes(conns, bs1, bs2, data.begin1, data.begin2);
+		old1.insert(old1.end(), data.begin1.begin(), data.begin1.end());
+		old2.insert(old2.end(), data.begin2.begin(), data.begin2.end());
+		std::sort(old1.begin(), old1.end());
+		std::sort(old2.begin(), old2.end());
 	}
 	return conns;
 }
