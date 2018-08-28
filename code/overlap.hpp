@@ -1,6 +1,8 @@
 #include "Box.hpp"
+#include "print.hpp"
 #include "util.hpp"
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <utility>
 #include <vector>
@@ -20,6 +22,39 @@ inline vector<int> getOverlappingIndices(const vector<Box<D>>& boxes, int z) {
 	return res;
 }
 
+template<class T>
+inline vector<T> vectorDifference(const vector<T>& a, const vector<T>& b) {
+	vector<T> res;
+	std::set_difference(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(res));
+	return res;
+}
+
+template<class T>
+inline vector<T> vectorIntersection(const vector<T>& a, const vector<T>& b) {
+	vector<T> res;
+	std::set_intersection(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(res));
+	return res;
+}
+
+template<int D>
+inline vector<Box<D-1>> getProjected(const vector<Box<D>>& v, const vector<int>& idx) {
+	vector<Box<D-1>> res;
+	res.reserve(idx.size());
+	for(int i: idx) res.push_back(v[i].project());
+	return res;
+}
+
+template<int D>
+void addOverlappingBoxes(vector<pair<int,int>>& result,
+		const vector<Box<D>>& bs1,
+		const vector<Box<D>>& bs2,
+		const vector<int>& idx1,
+		const vector<int>& idx2) {
+	for(auto p : overlappingBoxes(getProjected(bs1, idx1), getProjected(bs2, idx2))) {
+		result.emplace_back(idx1[p.first], idx2[p.second]);
+	}
+}
+
 template<int D>
 inline vector<pair<int,int>> overlappingBoxes(
 		const vector<Box<D>>& bs1,
@@ -30,26 +65,20 @@ inline vector<pair<int,int>> overlappingBoxes(
 		zs.push_back(box[D-1].to);
 	}
 	sortUnique(zs);
-	vector<Box<D-1>> sub1, sub2;
-	vector<int> idx1, idx2;
+	vector<int> old1, old2;
 	vector<pair<int,int>> conns;
 	for(int z: zs) {
-		sub1.clear(), sub2.clear(), idx1.clear(), idx2.clear();
-		for(size_t i=0; i<bs1.size(); ++i) {
-			if (bs1[i][D-1].contains(z)) {
-				sub1.push_back(bs1[i].project());
-				idx1.push_back(i);
-			}
-		}
-		for(size_t i=0; i<bs2.size(); ++i) {
-			if (bs2[i][D-1].contains(z)) {
-				sub2.push_back(bs2[i].project());
-				idx2.push_back(i);
-			}
-		}
-		for(auto p : overlappingBoxes(sub1, sub2)) {
-			conns.emplace_back(idx1[p.first], idx2[p.second]);
-		}
+		vector<int> idx1 = getOverlappingIndices(bs1, z);
+		vector<int> idx2 = getOverlappingIndices(bs2, z);
+		vector<int> keep1 = vectorIntersection(old1, idx1);
+		vector<int> keep2 = vectorIntersection(old2, idx2);
+		vector<int> added1 = vectorDifference(old1, idx1);
+		vector<int> added2 = vectorDifference(old2, idx2);
+		addOverlappingBoxes(conns, bs1, bs2, keep1, added2);
+		addOverlappingBoxes(conns, bs1, bs2, added1, keep2);
+		addOverlappingBoxes(conns, bs1, bs2, added1, added2);
+		old1 = std::move(idx1);
+		old2 = std::move(idx2);
 	}
 	return conns;
 }
