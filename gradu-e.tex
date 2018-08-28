@@ -391,7 +391,15 @@ Consider two obstacle sets $A$ and $B$ on 2D plane.
 Let $n$ be the total number of obstacle edges in any of them, and $k$ be the number of edges that are present in exactly one of the sets.
 The number of overlapping rectangles in \decomp{x}(A) and \decomp{x}(B) is $O(nk)$.
 \end{lem}
-\begin{proof}Left as an exercise.\end{proof}
+\begin{proof}
+Consider how the sweep line of algorithm~\ref{alg:split2d} advances in domains $A$ and $B$.
+Recall that the sweep line is a horizontal line moving in $y$-direction.
+
+The intersection of the sweep line and the free space is a sequence of disjoint intervals for both $A$ and $B$.
+Since there are $O(k)$ changes to the set of obstacles, the edit distance between the interval sets is $O(k)$.
+Thus each $y$ coordinate contributes $O(k)$ pairs to the overlap.
+Since the number of $y$ coordinates where the domain changes is $O(n)$, the total number of overlapping pairs is $O(nk)$.
+\end{proof}
 
 \begin{lem}The number of pairs of adjacent cells in the decomposition produced by algorithm~\ref{alg:split3d} is $O(n^2)$.\end{lem}
 \begin{proof}
@@ -406,11 +414,56 @@ Summing up all the changes gives the desired bound $\sum_z O(nk_z) = O(n^2)$.
 
 Since we know how to compute links for 2D decomposition, the links in $x$ and $y$ directions can easily be obtained from the cross sections.
 What remains is computing the links in $z$ direction.
-We compute the links between each pair of adjacent cross sections separately by running another 2D sweep after constructing the decompositions for both cross sections.
+We compute the links between each pair of adjacent cross sections separately.
 
-\dots
+Let $A$ and $B$ be the sets of rectangles that are different on the horizontal decompositions of two adjacent cross sections.
+Finding the $z$-links in the 3D decomposition is equivalent to finding the set of overlapping pairs between $A$ and $B$.
+The pairs are found by running \emph{another} line sweep algorithm after both $A$ and $B$ have been created by algorithm~\ref{alg:split2d}.
+
+We sweep through the domain again by a horizontal line.
+During the sweep we maintain two binary search tree $T_A$ and $T_B$, containing the rectangles of $A$ and $B$ touching the sweep line respectively.
+The binary search tree is ordered by the $x$-coordinate of the rectangle.
+Note that the rectangles in each of the sets $A$ and $B$ are disjoint, so the $x$-ranges are disjoint as well.
+
+Each time the sweep line arrives into a new rectangle $a\in A$, the tree $T_B$ is queries to find all the rectangles touched by the bottom line of $a$.
+Similarly for each new rectangle $b\in B$, we query the tree $T_A$ for rectangles touching the bottom line of $b$.
+A more exact description of the algorithm is below.
+
+\begin{alg}\label{alg:overlap2d}
+Find all overlapping pairs of two sets of rectangles $A$ and $B$.
+\begin{algorithmic}
+\State $E\gets$ All bottom and top edges of rectangles in $A$ and $B$.
+\State Sort $E$ by $y$-coordinate.
+\State $T_A\gets$ Empty binary search tree.
+\State $T_B\gets$ Empty binary search tree.
+\ForAll{$e\in E$}
+	\State $s\in\set{A,B}\gets$ Group to which $e$ belongs to.
+	\State $t\in\set{A,B}\gets$ Group to which $e$ does not belong to.
+	\If{$e$ starts a rectangle}
+		\State Find all elements from $T_t$ with $x$-range intersection the $x$-range of $e$.
+		\State Add the rectangle to $T_x$.
+	\Else
+		\State Remove the rectangle from $T_x$.
+	\EndIf
+\EndFor
+\end{algorithmic}
+\end{alg}
+
+\begin{lem}\label{lem:overlap2dtime}Algorithm~\ref{alg:overlap2d} runs in time $O(n\log n + k)$, where $n$ is the total size of $A$ and $B$, and $k$ is the number of overlapping pairs.\end{lem}
+\begin{proof}
+First we sort all the top and bottom edges in the input in time $O(n\log n)$.
+We then iterate over all the edges, performing 3 kinds of tree operations: add, remove and lookup.
+
+Each add and lookup operation takes $O(\log n)$ time in a balanced binary search tree.
+The lookup of elements intersecting the given element is done by first finding the leftmost intersecting element in the tree, and then scanning adjacent tree nodes until all the intersecting elements have been found.
+This requires time $O(\log n+u)$ where $u$ is the number of overlapping pairs.
+
+Combining the time for sorting, tree additions, deletions and lookups, the total complexity is $O(n\log n + k)$.
+\end{proof}
+
 
 \subsection{Higher dimensional decomposition}
+
 
 
 
