@@ -941,6 +941,28 @@ The challenging part of minimum link path finding is thus performing BFS in the 
 
 \section{Searching the intersection graph}
 
+Consider again the case where the first link of the path is horizontal.
+We start by constructing the horizontal decomposition with Algorithm~\ref{alg:split2d}.
+The vertical decomposition is used implicitly in the analysis, but there is no need to construct it explicitly.
+
+\reach{0} contains the start point~\spt, and \reach{1} is the horizontal line segment passing through \spt.
+The path finding algorithm works by alternating between two phases:
+
+\begin{enumerate}
+\item For odd $k$, \reach{k} consists of a set of rectangles $R_k\subseteq\decomp{x}$.
+	Inspect which obstacles can be reached by a vertical line starting from any point in \reach{k}, and form $\hat{R}_{k+1}=\set{r \mid r\in\decomp{x}, r\cap\reach{k+1}\neq\emptyset}$.
+\item For even $k$, we simply set $R_{k+1}=\hat{R}_k$.
+	Then $\reach{k+1}=\bigcup_{r\in R_{k+1}}r$ by Lemma~\ref{lem:illum2d}.
+\end{enumerate}
+
+We keep iterating these phases until the endpoint~\ept is reached in either phase.
+
+For performance, it is important to ensure that we don't reilluminate the same parts of the domain many times.
+We avoid the reillumination by marking cells of \decomp{x} as obstacles some time after they have been found.
+If rectangle $r$ is discovered on step $k$, then it is fully illuminated in \reach{k+1}, and each point visible from $r$ is illuminated in \reach{k+2}.
+After this there is no longer any need to illuminate through $r$, so we can mark $r$ as obstacle after 2 steps have passed since the illumination first reached $k$.
+This ensures that each rectangle is illuminated only a constant number of times.
+
 
 \section{Paths in 3 and higher dimensions}\label{sec:minlink3d}
 
