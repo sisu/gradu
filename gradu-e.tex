@@ -44,14 +44,17 @@
 \newcommand\rightc[1]{\ensuremath{\textsc{right}(#1)}\xspace}
 \newcommand\reach[1]{\ensuremath{\textsc{light}(#1)}\xspace}
 \newcommand\reachd[2]{\ensuremath{\textsc{light}_{#2}(#1)}\xspace}
-\newcommand\canon[1]{\ensuremath{\bar{\textsc{c}}(#1)}\xspace}
-\newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
-\newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
+\newcommand\canon[1]{\ensuremath{\textsc{c}(#1)}\xspace}
+%\newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
+%\newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
 \newcommand\canoni[2]{\ensuremath{\textsc{c}_{#2}(#1)}\xspace}
 \newcommand\canonpar[1]{\ensuremath{\textsc{p}_{\textsc{c}}(#1)}\xspace}
 \newcommand\epar[1]{\ensuremath{\textsc{p}(#1)}\xspace}
 \newcommand\visitp{\ensuremath{\textsc{VisitParent}}\xspace}
 \newcommand\visitc{\ensuremath{\textsc{VisitCanonical}}\xspace}
+
+\newcommand\nodecs[1]{\ensuremath{\textsc{ivc}(#1)}\xspace}
+\newcommand\nodeps[1]{\ensuremath{\textsc{ivp}(#1)}\xspace}
 
 \newcommand\pop[1]{\ensuremath{\textsc{pop}(#1)}\xspace}
 
@@ -145,7 +148,7 @@ We present new algorithms to several variations of the minimum link path problem
 
 \section{Preface}
 
-It was hard to write, it should be hard to read.
+"If it was hard to write, it should be hard to read." -- anonymous
 
 \section{Introduction}
 
@@ -649,7 +652,7 @@ Thus the total time complexity is $O(n^{D-1}\log n)$, and the total number of cu
 \section{Segment tree}\label{sec:segtree}
 
 Segment tree is a data structure for working with one-dimensional number intervals.
-The structure implementing a wide range of operations in logarithmic time.
+The structure allows performing a wide range of operations in logarithmic time.
 Some example of operations that can be implemented include:
 \begin{itemize}
 	\item Insert and remove interval to the tree.
@@ -658,13 +661,13 @@ Some example of operations that can be implemented include:
 \end{itemize}
 
 Rather than as a single data structure that is used as a black box, the segment trees are better viewed as a framework that can be adapted to work in various situations.
-It is straightforward to augment the tree to contain additional information about the intervals, and use the information in queries.
-For example we can associate a number with each interval, and allow efficiently querying for the maximum number overlapping a given query interval.
-We first present the overal idea of the tree, and then show how it can be applied to the minimum link path problem.
+Segment trees are straightforward to augment to contain additional information about the intervals, and use the information in queries.
+For example we can associate a number with each interval, and efficiently query for the maximum number overlapping a given query interval.
+We first present the general idea of the tree, and then show how it can be applied to the minimum link path problem.
 
 Segment trees are typically implemented as semi-dynamic structures.
 This means that the tree can be efficiently modified after it has been build, but we need to specify the set of possible endpoints \epts of intervals in advance.
-This allows implementing most operations in time $O(\log m)$, and the size of the tree is $O(m)$, where $m=\size{\epts}$.
+This allows implementing most operations in time $O(\log\segsize)$, and the size of the tree is $O(\segsize)$, where $\segsize=\size{\epts}$.
 
 \subsection{Structure of a segment tree}
 
@@ -672,17 +675,146 @@ A segment tree is a binary tree where each node $n$ corresponds to a fixed half-
 Each branch node $s$ has two child nodes \leftc{s} and \rightc{s}.
 The intervals of the children divide the parent interval into two parts:
 $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
-The root node corresponds the largest supported interval \range{\epts[1]}{\epts[m]}, and the leaf nodes correspond to the smallest possible intervals \range{\epts[i]}{\epts[i+1]}.
+The root node corresponds the largest supported interval \range{\epts[1]}{\epts[\segsize]}, and the leaf nodes correspond to the smallest possible intervals \range{\epts[i]}{\epts[i+1]}.
 
 The structure of a semi-dynamic segment tree is independent of the intervals added to the tree.
-Thus we can make the structure into an almost complete binary tree, which allows storing the tree nodes in an array similarly to binary heap:
+The nodes are commonly arranged into an almost complete binary tree, which allows storing the tree nodes in an array similarly to binary heap:
 the root node is stored in index~1, and the child nodes of node $i$ are $2i$ and $2i+1$.
-This representation has very good constant factors, making segment tree a powerful practical tool rather than only a theoretical construct.
+This representation allows implementing segment tree operations with very low overhead, making segment tree a powerful practical tool in addition to providing asymptotical bounds.
 
 \subsection{Canonical nodes}
 
-When an interval $I$ is added to the tree, it is added to several tree nodes called the \emph{canonical nodes} of $I$, denoted by \canon{I}.
+When an interval $I$ is added to a segment tree, it is added to several tree nodes called the \emph{canonical nodes} of $I$, denoted by \canon{I}.
 The canonical nodes of $I$ are the smallest set of nodes whose intervals cover $I$ but nothing else: $\cup_{c\in\canon{I}} \inter{c}=I$.
+
+Let \canonpar{I} be the set of ancestors of \canon{I}.
+The following two lemmas are useful for proving the running times of segment tree operations.
+
+\begin{lem}\label{lem:canonlog}$\size{\canon{I}}=O(\log\segsize)$ for any interval $I$.\end{lem}
+\begin{proof}
+As the segment tree is a balanced binary tree, it has depth $\Theta(\log\segsize)$.
+We show that $\canon{I}$ contains at most 2 nodes on each depth, which proves the claim.
+
+If a set $N$ contains 3 nodes on the same depth, we can replace the middle one with its parent node without affecting the interval covered by $N$.
+Thus $N$ is not a minimal cover of $I$, and can not be \canon{I}.
+\end{proof}
+
+\begin{lem}\label{lem:canonplog}$\size{\canonpar{I}})=O(\log\segsize)$ for any inverval $I$.\end{lem}
+\begin{proof}
+Similarly to the previous proof we show that \canonpar{I} cannot contain more than 2 nodes on the same depth.
+
+Suppose, for a contradiction, that \canonpar{I} contains 3 nodes on the same depth: $a$, $b$ and $c$ in that order.
+Then $\inter{a}\cap I\neq\emptyset$ and $\inter{c}\cap I\neq\emptyset$, so $\inter{b}\subseteq I$.
+Some grandchild of $b$ belongs to \canon{I}, so \canon{I} is not a minimal cover, which is a contradiction.
+\end{proof}
+
+We can iterate over the canonical nodes and their parents by using the following recursive algorithm starting from the root node.
+
+\begin{alg}\label{alg:segiter}
+Visit all the elements of \canon{I} and \canonpar{I}.
+\begin{algorithmic}
+\Procedure{IterCanonical}{$n$}
+\Comment{Visit the canonical nodes in the subtree rooted at node $n$}
+	\If{$\inter{n}\subseteq I$}
+		\State \visitc($n$)
+	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
+		\State \visitp($n$)
+		\State \textsc{IterCanonical}($\leftc{n}$)
+		\State \textsc{IterCanonical}($\rightc{n}$)
+	\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{alg}
+
+Algorithm~\ref{alg:segiter} can be used to implement other tree operations such as adding intervals to segment tree by defining the called methods \visitc and \visitp appropriately.
+The recursion traverses through the nodes in \canonpar{I}, and stops immediately when it arrives either to a node in \canon{I} or to a node neither in \canon{I} nor in \canonpar{I}.
+Thus the running time is proportional to the sizes of \canon{I} and \canonpar{I}, which is $O(\log\segsize)$ by Lemma~\ref{lem:canonlog} and Lemma~\ref{lem:canonplog}.
+
+\subsection{Tree operations}
+
+We now show how the segment trees can be used for finding intersecting intervals.
+
+\begin{lem}\label{lem:segintersect}Consider any two intervals $I$ and $J$.
+At least one of the following is true if and only if $I\cap J\neq\emptyset$.
+\begin{enumerate}
+\item $\canon{I}\cap\canon{J}\neq\emptyset$,
+\item $\canon{I}\cap\canonpar{J}\neq\emptyset$,
+\item $\canonpar{I}\cap\canon{J}\neq\emptyset$.
+\end{enumerate}
+\end{lem}
+\begin{proof}
+First suppose that $I\cap J\neq\emptyset$.
+Let $x$ be any leaf node of the segment tree such that $\inter{x}\in I\cap J$.
+Let $A$ be the set of ancestors of $x$.
+Since the canonical nodes of an interval cover the whole interval, $A$ intersects both \canon{I} and \canon{J}.
+Let $i$ and $j$ be the nodes where $A$ intersects with \canon{I} and \canon{J} respectively.
+Either $i$ and $j$ are the same node, or one of them is an ancestor of the other, which proves the "if" part of the claim.
+
+For the "only if" part, we look at the three cases separately.
+\begin{enumerate}
+\item If there exists a node $n\in\canon{I}\cap\canon{J}$, then $\inter{n}\subseteq I\cap J$, so $I\cap J\neq\emptyset$.
+\item If there is a node $n\in\canonpar{I}\cap\canon{J}$, then there exists $m\in\canon{I}$ that is a grandchild of $n$. $\inter{m}\subseteq I$ and $\inter{m}\subsetneq\inter{n}\subseteq J$, so $I\cap J\neq\emptyset$.
+\item Identical to the second case.
+\end{enumerate}
+\end{proof}
+
+Lemma~\ref{lem:segintersect} can be used to find intersecting pairs of intervals in a segment tree.
+In each node $n$ of the segment tree, maintain two lists of intervals:
+\begin{itemize}
+\item \nodecs{n}: Intervals $I$ for which $n\in\canon{I}$,
+\item \nodeps{n}: Intervals $I$ for which $n\in\canonpar{I}$.
+\end{itemize}
+When interval $I$ is added to the segment tree, it is added to \nodecs{n} for all $n\in\canon{I}$ and to \nodeps{n} for all $n\in\canonpar{I}$.
+When we look for intervals intersecting a given interval $J$, we report all the intervals in \nodecs{n} for all $n\in\canonpar{J}$ and in \nodeps{n} for all $n\in\canon{J}$.
+By Lemma~\ref{lem:segintersect} this finds exactly the intervals intersecting $J$ and nothing else.
+Note, though, that some intervals might be counted multiple times.
+The structure can be further extended to avoid reporting the duplicates, but for the minimum link paths use case we only need to be able to check whether the query interval overlaps any of the intervals in the tree, so this solution is sufficient.
+
+We also want to support clearing an interval from the tree.
+Clearing interval $I$ means that all the intervals $J$ in the tree are cut into $J\setminus I$, potentially removing $J$ completely or cutting it into two parts.
+
+The clear operation is implemented by visiting all the canonical nodes and their parents recursively similarly to Algorithm~\ref{alg:segiter}.
+When the recursion reaches a canonical node of $I$, the entire subtree is cleared.
+For nodes $n\in\canonpar{I}$ we push down the intervals in \nodecs{n} to the child nodes before proceeding with the recursion.
+This allows us to clear only the parts of the intervals covered by $I$ without removing the other parts.
+After the child nodes are cleared, we also need to regenerate the \nodeps{n} list for the nodes $n\in\canonpar{I}$ to remove intervals that were fully removed from the subtree.
+The regeneration is done by merging the lists in the child nodes of $n$.
+The exact algorithm for clearing is below.
+
+\begin{alg}\label{alg:segrm}
+Clear interval $I$ from a segment tree.
+\begin{algorithmic}
+\Procedure{ClearInterval}{$n$}
+	\Comment Clears interval $I$ from subtree rooted at $n$.
+	\If{$\inter{n}\subseteq I$}
+		\State ClearSubtree($n$).
+	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
+		\State Copy \nodecs{n} to \nodecs{\leftc{n}} and to \nodecs{\rightc{n}}.
+		\State \textsc{IterCanonical}($\leftc{n}$)
+		\State \textsc{IterCanonical}($\rightc{n}$)
+		\State $\nodeps{n}\gets \nodeps{\leftc{n}} \cup \nodeps{\rightc{n}} \cup \nodecs{\leftc{n}} \cup \nodecs{\rightc{n}}$.
+	\EndIf
+\EndProcedure
+
+\Procedure{ClearSubtree}{$n$}
+	\Comment Fully clears the subtree rooted at $n$.
+	\State Clear \nodecs{n}.
+	\If{\nodeps{n} is not empty}
+		\State Clear \nodeps{n}.
+		\State ClearSubtree(\leftc{n}).
+		\State ClearSubtree(\rightc{n}).
+	\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{alg}
+
+
+\subsection{Multidimensional segment tree}
+
+
+\subsection{Unified segment tree}
+
+
 
 \section{Planar minimum link paths}\label{sec:minlink2d}
 
