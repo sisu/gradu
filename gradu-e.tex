@@ -56,6 +56,8 @@
 \newcommand\nodecs[1]{\ensuremath{\textsc{ivc}(#1)}\xspace}
 \newcommand\nodeps[1]{\ensuremath{\textsc{ivp}(#1)}\xspace}
 
+\newcommand\rect[1]{\ensuremath{\textsc{rect}(#1)}\xspace}
+
 \newcommand\pop[1]{\ensuremath{\textsc{pop}(#1)}\xspace}
 
 \newcommand\y[1]{\ensuremath{{#1}_y}\xspace}
@@ -145,7 +147,7 @@ We present new algorithms to several variations of the minimum link path problem
 \mytableofcontents
 
 
-
+\setcounter{section}{-1}
 \section{Preface}
 
 "If it was hard to write, it should be hard to read." -- anonymous
@@ -651,7 +653,7 @@ Thus the total time complexity is $O(n^{D-1}\log n)$, and the total number of cu
 
 \section{Segment tree}\label{sec:segtree}
 
-Segment tree is a data structure for working with one-dimensional number intervals.
+Segment tree is a data structure that allows storing and querying of number intervals.
 The structure allows performing a wide range of operations in logarithmic time.
 Some example of operations that can be implemented include:
 \begin{itemize}
@@ -808,11 +810,84 @@ Clear interval $I$ from a segment tree.
 \end{algorithmic}
 \end{alg}
 
+The running time of Algorithm~\ref{alg:segrm} depends on the time taken for copying and merging the intervals stored in the tree nodes.
+If we are only interested in querying whether a given interval overlaps any interval in the tree rather than finding the overlapping intervals, we can replace the interval lists by booleans indicating whether the list is empty.
+We analyze this more simple case.
+
+\begin{lem}Suppose that the copying and merging of interval sets in Algorithm~\ref{alg:segrm} can be done in constant time.
+Then the time complexity of clearing range $I$ is $O(\log\segsize + k)$, where $k$ is the number of cleared nodes.\end{lem}
+\begin{proof}
+The function $\textsc{ClearInterval}$ traverses through nodes \canon{I} and \canonpar{I}, whose count is $O(\log\segsize)$ by Lemma~\ref{lem:canonlog} and Lemma~\ref{lem:canonplog}.
+In each node we do a constant amount of work, not counting the calls to $\textsc{ClearSubtree}$.
+
+The function $\textsc{ClearSubtree}$ returns immediately for empty nodes, and for cleared nodes performs constant amount of additional work to recurse further.
+Thus all the work in $\textsc{ClearSubtree}$ can be accounted for the cleared nodes, so the total time complexity is $O(\log n + k)$.
+\end{proof}
+
 
 \subsection{Multidimensional segment tree}
 
+The segment tree can be generalized into two or higher dimensional structure.
+A two-dimensional segment tree stores rectangles, and allows efficient queries for rectangular regions.
+Correspondingly a $D$-dimensional segment tree provides efficient operations for $D$-dimensional hyperrectangles.
+
+A multidimensional segment tree is composed of of nested regular segment trees.
+The shape of a $D$-dimensional segment tree is a 1-dimensional segment tree whose each node stores a $(D-1)$-dimensional segment tree.
+
+Each tree dimension represents one of the $D$ coordinate axes.
+Each node $n$ of the innermost segment tree represents a $D$-dimensional hyperrectangle \rect{n}, whose bounds are defined by the position of the node on each of the $D$ tree levels.
+For example the outer tree of a 2-dimensional segment tree represents the $y$ coordinates, and each inner tree represents the $x$ coordinates.
+Each node of the inner tree represents a rectangle whose $x$-bounds are determined by the position of the node in the inner tree, and the $y$-bounds are determined by the node of the outer tree that contains the inner tree.
+
+The concept of canonical nodes can also be extended to higher dimensions.
+The canonical nodes \canon{R} of a $D$-dimensional hyperrectangle $R$ are the smallest set of nodes that fully cover $R$ but nothing else.
+
+In order to compute the canonical nodes, let us look into each axis separately.
+Let interval $R_i$ be the projection of hyperrectangle $R$ into $i$-axis.
+Let $\canoni{R_i}{i}$ be the canonical rectangles of $R_i$ in the 1-dimensional segment tree built for $i$-coordinates.
+
+Consider a 2-dimensional segment tree, and two arbitrary nodes of the projected 1-dimensional trees $c_1\in\canoni{R_1}{1}$ and $c_2\in\canoni{R_2}{2}$.
+Let $c_1\times c_2$ be the node of the 2-dimensional tree that is found in position of $c_1$ in the inner tree, and $c_2$ in the outer tree.
+Similarly for $D$-dimensional trees we define product $c_1\times c_2\times\dots\times c_n$ to be the node of a $D$-dimensional segment tree defined by positions of 1-dimensional tree nodes.
+The following lemma shows how the canonical nodes of 1-dimensional projections can be combined to get the canonical nodes of a $D$-dimensional tree.
+
+\begin{lem}\label{lem:canond}
+For any $D$-dimensional hyperrectangle $R$ applies
+$$\canon{R}=\set{c_1\times c_2\dots\times c_D \mid c_1\in\canoni{R_1}{1}, \dots, c_D\in\canoni{R_D}{D}}.$$
+In other words, \canon{R} is the Cartesian product of one-dimensional canonical sets
+$$\canon{R}=\bigtimes_{i=1}^D \canoni{R_i}{i}.$$
+\end{lem}
+\begin{proof}Left as an exercise.\end{proof}
+
+Combination of Lemma~\ref{lem:canond} and Lemma~\ref{lem:canonlog} gives bound for the size of the canonical set.
+
+\begin{lem}$\size{\canon{R}}=O(\log^D\segsize)$ for any $D$-dimensional rectangle $R$.\end{lem}
+\begin{proof}
+$$
+\size{\canon{R}} = \size{\bigtimes_{i=1}^D \canoni{R_i}{i}}
+= \prod_{i=1}^D \size{\canoni{R_i}{i}}
+= \prod_{i=1}^D O(\log\segsize)
+= O(\log^D\segsize).
+$$
+\end{proof}
+
+For 1-dimensional segment trees there is a clear connection between the child-parent hierarchy and interval overlap.
+For any two tree nodes $a$ and $b$, $\inter{a}\subseteq\inter{b}$ if and only if $b$ is an ancestor of $a$ in the tree.
+In multidimensional case it also applies that if $b$ is an ancestor of $a$, then $\rect{a}\subseteq\rect{b}$.
+However the reverse is not true; $\rect{a}\subseteq\rect{b}$ does not imply that $b$ is an ancestor of $a$ because $b$ can be in a different subtree in some of the outer trees.
+
 
 \subsection{Unified segment tree}
+
+The structure of a multidimensional segment tree depends on how we order the coordinate axes.
+For example a two-dimensional segment tree can have either the outer tree represent $y$-coordinates and each inner tree represent $x$-coordinates, or the other way round.
+The structure and parent-child relationships are different in the two cases, but the sets of rectangles represented by the nodes of the inner trees are exactly the same.
+
+The \emph{unified segment tree} combines the parent-child links of the different multidimensional segment trees into a single structure.
+The unified segment tree is not a tree, but a directed graph.
+Each node $n$ of the graph represents a $D$-dimensional hyperrectangle.
+For each axis $i$ where \rect{n} is not minimal, $n$ has links to two child nodes that divide \rect{n} into two parts along hyperplane perpendicular to $i$-axis.
+Thus each node has between 0 and $2D$ links to child nodes.
 
 
 
