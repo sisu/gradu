@@ -209,25 +209,25 @@ A nontrivial part in any minimum link path algorithm is maintaining the illumina
 Representing the illuminated area can be simplified by first splitting the free space into simple primitives.
 A common approach in computational geometry is to start by triangulating the input, which allows working with simple forms.
 In case of minimum link paths with restricted orientations, rectangles or trapezoids are the most comfortable representations.
-In section~\ref{sec:decomposition} we present algorithms for construction decompositions suitable for minimum link path computation.
+In Section~\ref{sec:decomposition} we present algorithms for construction decompositions suitable for minimum link path computation.
 
 With restricted orientations that the paths can take, we can use \emph{sweep line algorithms} to efficiently compute \reach{k+1} from \reach{k}.
 The idea is to "sweep" over the search space by a line, and use the sweep to calculate how the path can advance into the direction of the sweep line.
 This generic technique allows us to transform the 2-dimensional illumination problem into a series of easier 1-dimensional problems on the sweep line.
-The sweep line technique is discussed in section~\ref{sec:sweep}.
+The sweep line technique is discussed in Section~\ref{sec:sweep}.
 
 During the sweeps we need to maintain the relationship between the sweep line and the obstacles as well as the region \reach{k}.
 Maintaining this kind of information requires efficient handling of 1-dimensional intervals.
 \emph{Segment tree} is a generic data structure for working with intervals.
 It can be used to efficiently implement all the operations required by the staged illumination.
-Segment trees are described in section~\ref{sec:segtree}.
+Segment trees are described in Section~\ref{sec:segtree}.
 
-We combine the aforementioned concepts into an algorithm for finding minimum link paths in section~\ref{sec:minlink2d}.
+We combine the aforementioned concepts into an algorithm for finding minimum link paths in Section~\ref{sec:minlink2d}.
 The ideas of the two-dimensional solution can also be generalized to work in higher dimensions.
 Many details need to be taken care of, but the basic ideas are relatively straightforward to transfer to more than two dimensions.
 The space is decomposed into cuboids instead of rectangles, and the sweep line is replaced by a sweep plane.
 The segment tree can also be generalized into a higher dimensional structure.
-These elements are combined into an algorithm for finding minimum link paths in higher dimensional domains in section~\ref{sec:minlink3d}.
+These elements are combined into an algorithm for finding minimum link paths in higher dimensional domains in Section~\ref{sec:minlink3d}.
 
 
 
@@ -333,14 +333,14 @@ Thus the total complexity of the algorithm is $O(n\log n)$, and we only need $O(
 \subsection{3D cuboid decomposition}
 
 Similarly as a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids.
-Decomposition into cuboids is used in the algorithm for 3D minimum link paths in section~\ref{sec:minlink3d}.
+Decomposition into cuboids is used in the algorithm for 3D minimum link paths in Section~\ref{sec:minlink3d}.
 The running time of the path finding algorithm is heavily depent on the size of the decomposition, so it is desirable to find as small decomposition as possible.
 
 The input is given as a list of 2-dimensional obstacle faces in 3-dimensional space.
 Each obstacle face is a polygon defined by a list of vertices.
 Denote the total number of vertices by $n$.
 
-We present a simple algorithm that uses the algorithm~\ref{alg:split2d} as a subroutine.
+We present a simple algorithm that uses the Algorithm~\ref{alg:split2d} as a subroutine.
 This algorithm produces a decomposition with $O(n^2)$ cells and $O(n^2)$ links.
 There also exists algorithms for finding decompositions with even small number of cells, but the worst case for number of links is superquadratic for all the known solutions.
 
@@ -348,7 +348,7 @@ The solution is a sweep plane algorithm, whichi sweeps through the domain with a
 During the sweep we maintain the intersection of the sweep plane and the domain~\fspace.
 The intersection of the domain and a plane is called a \emph{cross section} of the domain.
 
-In each cross section we form a 2D decomposition of the domain with algorithm~\ref{alg:split2d}, and extend the $xy$-rectangles in $z$-direction so that they fill the whole free space.
+In each cross section we form a 2D decomposition of the domain with Algorithm~\ref{alg:split2d}, and extend the $xy$-rectangles in $z$-direction so that they fill the whole free space.
 Any common rectangles shared by consecutive cross sections are merged into a single larger cuboid.
 The merging is done by by maintaining a binary search tree of the cells of the previous decomposition.
 
@@ -364,7 +364,7 @@ Decompose the free space defined by a set $E$ of obstacle faces into cuboids.
 \State $M\gets$ Empty binary search tree mapping 2D rectangles to indices in $R$.
 \ForAll{$z\in Z$}
 	\State $E_z\gets\set{e \mid e\in E, \zrange{e}\ni z}$.
-	\State $T\gets$ 2D decomposition for $E_z$ using algorithm~\ref{alg:split2d}.
+	\State $T\gets$ 2D decomposition for $E_z$ using Algorithm~\ref{alg:split2d}.
 	\ForAll{$m\in M\setminus T$}
 		\State $c\gets R[M[m]]$.
 		\State Upper $z$-coordinate of $c\gets z$.
@@ -400,7 +400,7 @@ Let $n$ be the total number of obstacle edges in $A$ and $B$, and $k$ be the num
 The number of overlapping rectangles in \decomp{x}(A) and \decomp{x}(B) is $O(nk)$.
 \end{lem}
 \begin{proof}
-Consider how the sweep line of algorithm~\ref{alg:split2d} advances in domains $A$ and $B$.
+Consider how the sweep line of Algorithm~\ref{alg:split2d} advances in domains $A$ and $B$.
 Recall that the sweep line is a horizontal line moving in $y$-direction.
 
 The intersection of the sweep line and the free space is a sequence of disjoint intervals for both $A$ and $B$.
@@ -409,9 +409,9 @@ Thus each $y$ coordinate contributes $O(k)$ pairs to the overlap.
 Since the number of $y$ coordinates where the domain changes is $O(n)$, the total number of overlapping pairs is $O(nk)$.
 \end{proof}
 
-\begin{lem}\label{lem:split3dcount}The number of pairs of adjacent cells in the decomposition produced by algorithm~\ref{alg:split3d} is $O(n^2)$.\end{lem}
+\begin{lem}\label{lem:split3dcount}The number of pairs of adjacent cells in the decomposition produced by Algorithm~\ref{alg:split3d} is $O(n^2)$.\end{lem}
 \begin{proof}
-Since the number of links produced by algorithm~\ref{alg:split2d} is $O(n)$, any cross section has $O(n)$ links in $x$ and $y$ directions.
+Since the number of links produced by Algorithm~\ref{alg:split2d} is $O(n)$, any cross section has $O(n)$ links in $x$ and $y$ directions.
 Thus the total number of $x$ and $y$ links is $O(n^2)$.
 
 Let $k_z$ be the number of different obstacles on the cross sections on planes $z=z_k-\varepsilon$ and $z=z_k+\varepsilon$.
@@ -426,7 +426,7 @@ We compute the links between each pair of adjacent cross sections separately.
 
 Let $A$ and $B$ be the sets of rectangles that are different on the horizontal decompositions of two adjacent cross sections.
 Finding the $z$-links in the 3D decomposition is equivalent to finding the set of overlapping pairs between $A$ and $B$.
-The pairs are found by running \emph{another} line sweep algorithm after both $A$ and $B$ have been created by algorithm~\ref{alg:split2d}.
+The pairs are found by running \emph{another} line sweep algorithm after both $A$ and $B$ have been created by Algorithm~\ref{alg:split2d}.
 
 We sweep through the domain again by a horizontal line.
 During the sweep we maintain two binary search tree $T_A$ and $T_B$, containing the rectangles of $A$ and $B$ touching the sweep line respectively.
@@ -485,13 +485,13 @@ Thus the total time complexity is $O(n^2\log n)$, and the total number of cuboid
 
 The ideas of the 3D decomposition can be generalized to allow decomposing 4D and higher dimensional rectilinear domains into hyperrectangles.
 The construction is done recursively, so that $D$-dimensional decomposition is created by solving a sequence of $(D-1)$-dimensional sub-problems.
-The idea is identical to how the 3D decomposition is constructed based on a sequence of 2D decompositions in algorithm~\ref{alg:split3d}.
+The idea is identical to how the 3D decomposition is constructed based on a sequence of 2D decompositions in Algorithm~\ref{alg:split3d}.
 
 \begin{alg}\label{alg:splitdd}
 Decompose the free space defined by a set $E$ of $(D-1)$-dimensional obstacle faces into $D$-dimensional hyperrectangles.
 \begin{algorithmic}
 \If{$D=2$}
-	\State Compute the decomposition using algorithm~\ref{alg:split2d} and return.
+	\State Compute the decomposition using Algorithm~\ref{alg:split2d} and return.
 \EndIf
 \State $Z\gets$ All $D$-coordinates of obstacle vertices.
 \State Sort $Z$ in increasing order.
@@ -584,7 +584,7 @@ Each sweep finds the direction $D$ links by using the following recursive algori
 Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ and $B$.
 \begin{algorithmic}
 \If{$D=2$}
-	\State Compute the overlapping pairs using algorithm~\ref{alg:overlap2d} and return.
+	\State Compute the overlapping pairs using Algorithm~\ref{alg:overlap2d} and return.
 \EndIf
 \State $E\gets$ List of all faces of hyperrectangles in $A$ and $B$ perpendicular to $D$-axis.
 \State Sort $E$ by $D$-coordinate.
@@ -631,7 +631,7 @@ Proof by induction on $D$.
 The base case $D=2$ is proven by Lemma~\ref{lem:overlap2dtime}.
 
 For $D\ge 3$, the decomposition is created by combining the $(D-1)$-dimensional decompositions at each cross section.
-Thus the sweep hyperplane of algorithm~\ref{alg:overlapdd} intersects a $(D-1)$-dimensional decomposition produced by algorithm~\ref{alg:splitdd} at each point of the sweep.
+Thus the sweep hyperplane of Algorithm~\ref{alg:overlapdd} intersects a $(D-1)$-dimensional decomposition produced by Algorithm~\ref{alg:splitdd} at each point of the sweep.
 By Lemma~\ref{lem:splitddcells} this implies that the index sets maintained during the sweep have size $O(n^{D-2})$.
 Performing the set operations on the $n$ steps of the sweep then has total time complexity $O(n^{D-1}\log n)$.
 
@@ -892,6 +892,55 @@ Thus each node has between 0 and $2D$ links to child nodes.
 
 
 \section{Planar minimum link paths}\label{sec:minlink2d}
+
+In this section we study the rectilinear minimum link path in a plane.
+In the rectilinear problem both the obstacle segments as well as the links of the path to be produced must be aligned to coordinate axes.
+We present a simple algorithm with time complexity $O(n\log n)$ and space complexity $O(n)$.
+The ideas develoepd for the the simple algorithm are later generalized to solve the more difficult 3D minimum link path problem in Section~\ref{sec:minlink3d}.
+
+\subsection{Intersection graph}
+
+We solve the minimum link path problem by applying the staged illumination paradigm outlined in Section~\ref{sec:overview}.
+Initialize \reach{0} to contain the starting point, and iteratively expand the illuminated area by computing \reach{k+1} based on \reach{k}.
+The iteration is continued until we find the desired endpoint.
+
+It is easy to see that in any minimum link path consists of alternation between horizontal and vertical links.
+We split the problem into two subproblems, based on whether the first link is horizontal or vertical.
+The minimum link path can be found by solving both subproblems and choosing the shorter of the two solutions.
+
+Consider the case with the first link horizontal.
+It is easy to see that \reach{k+1} consists of points that can be reached by starting from \reach{k} and moving either horizontally or vertically, depending on the parity of $k$.
+The regions that are illuminated on each step can be expressed using the horizontal and vertical decompositions defined in Section~\ref{sec:decomp2d}.
+This is shown by the following lemma.
+
+\begin{lem}\label{lem:illum2d}
+For even $k>0$, the region \reach{k+1} consists of the rectangles $r\in\decomp{x}$ that intersect the region \reach{k}.
+For odd $k$ the same applies for \decomp{y}.
+\end{lem}
+\begin{proof}
+Let $k>0$ be even.
+The region \reach{k} is formed by illuminating in vertical direction from \reach{k-1}.
+Let $h$ be any rectangle in $decomp{x}$ that is at least partially illuminated in \reach{k}, and $p$ any point in $h\cap\reach{k}$.
+Since \reach{k} is formed by illuminating vertically from \reach{k-1}, the vertical line segment passing between top and bottom edges of $h$ through $p$ must entirely belong to \reach{k}.
+Illuminating horizontally from the vertical line passing through $h$ illuminated the entire rectangle, so $h\subseteq\reach{k+1}$.
+Thus each rectangle of \decomp{x} intersected by \reach{k} is entirely contained in \reach{k+1}.
+
+For odd $k$ we form \reach{k+1} by illuminating in vertical direction from \reach{k}, and the same proof applies for \decomp{y}.
+\end{proof}
+
+For a set of geometric objects (such as rectangles) $G$, the \emph{intersection graph} of $G$ is a graph whose nodes are the elements of $G$, and there is an edge between each each pair of intersecting objects.
+Consider the intersection graph of $\decomp{x}\cup\decomp{y}$.
+This graph has rectangles as nodes, and intersection rectangles between \decomp{x} and \decomp{y} are combined by an edge.
+Let $k$ be an even number and $r\in\decomp{x}$ contained in \reach{k}.
+Then for each neighbor $n$ of $r$ in the intersection graph applies $n\subseteq\reach{k+1}$ by Lemma~\ref{lem:illum2d}.
+In other words, the staged illumination finds the rectangles in the same order as breadth-first search in the intersection graph.
+
+The rectilinear minimum link path problem can thus be solved by forming the intersection graph and searching for the shortest path using breadth-first search.
+The intersection graph has quadratic size, so we don't want to form the graph explicitly.
+The challenging part of minimum link path finding is thus performing BFS in the intersection graph without explicitly forming the graph.
+
+\section{Searching the intersection graph}
+
 
 \section{Paths in 3 and higher dimensions}\label{sec:minlink3d}
 
