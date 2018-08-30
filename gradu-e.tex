@@ -69,6 +69,7 @@
 \newcommand\yranget[2]{\ensuremath{y(#1)_{#2}}\xspace}
 \newcommand\nbs[1]{\ensuremath{\textsc{nbs}{(#1)}}\xspace}
 \newcommand\nbsd[2]{\ensuremath{\textsc{nbs}_{#2}{(#1)}}\xspace}
+\newcommand\obsd[2]{\ensuremath{\textsc{obs}_{#2}{(#1)}}\xspace}
 
 \newcommand\decomp[1]{\ensuremath{\textsc{dec}_{#1}}\xspace}
 %\newcommand\decompc[1]{\ensuremath{\textsc{dec}({#1})}\xspace}
@@ -960,8 +961,93 @@ We keep iterating these phases until the endpoint~\ept is reached in either phas
 For performance, it is important to ensure that we don't reilluminate the same parts of the domain many times.
 We avoid the reillumination by marking cells of \decomp{x} as obstacles some time after they have been found.
 If rectangle $r$ is discovered on step $k$, then it is fully illuminated in \reach{k+1}, and each point visible from $r$ is illuminated in \reach{k+2}.
-After this there is no longer any need to illuminate through $r$, so we can mark $r$ as obstacle after 2 steps have passed since the illumination first reached $k$.
+After this there is no longer any need to illuminate through $r$, so we can treat $r$ as an obstacle after 2 steps have passed since the illumination first reached $k$.
 This ensures that each rectangle is illuminated only a constant number of times.
+
+Next we show how to implement illumination in $y$-direction starting from \reach{k}, which is represented as a set of rectangles $R\in\subseteq\decomp{x}$.
+The illuminated area is computed with two line sweeps, in in direction $+y$ and the other in direction $-y$.
+
+The sweep line stops at each rectangle to be illuminated.
+During the sweep we maintain the intersection between the sweep line and the newly illuminated region \reach{k+1}.
+The intersection consists of non-overlapping intervals stored in a binary search tree.
+
+Let \nbsd{r}{d} and \obsd{r}{d} be the neighbor cell and the adjacent obstacles of rectangle $r$ in direction $d$ in \decomp{x}.
+The algorithm below displays the illumination in direction $+y$.
+The sweep in direction $-y$ is analogous.
+
+\begin{alg}\label{alg:light2d}
+Compute illuminated rectangles from group $R$ into direction $+y$.
+\begin{algorithmic}
+\State $Q\gets\text{Priority queue containing the rectangles of $R$, ordered by the highest $y$-coordinate}$.
+\State $T\gets\text{Empty binary search tree}$.
+\While{$Q$ is not empty}
+	\State $r\gets\pop{Q}$.
+	\If{$r\in R$}
+		\State Insert \xrange{r} into $T$.
+	\EndIf
+	\ForAll{$o\in\obsd{r}{+y}$}
+		\ForAll{$t\in T$ touching \xrange{o}}
+			\State Replace $t$ by $t\setminus\xrange{o}$, possibly removing it or splitting it into two parts.
+		\EndFor
+	\EndFor
+	\ForAll{$n\in\nbsd{r}{+y}$}
+		\If{$\xrange{n}$ touches any range in $T$ and $n\notin Q$}
+			\State Insert $n$ into $Q$.
+		\EndIf
+	\EndFor
+\EndWhile
+\end{algorithmic}
+\end{alg}
+
+\begin{lem}\label{lem:light2dtime}The running time of Algorithm~\ref{alg:light2d} is $O(m\log m)$ where $m$ is the number of visited rectangles and their neighbor links.\end{lem}
+\begin{proof}
+The outermost loop processes a different rectangle $r$ each time, so it is executed $O(m)$ times.
+For each obstacle adjacent to $r$ we cut of all the intersections with the obstacle from the binary search tree.
+At most two of the intersected intervals remain in the tree, the others are removed, so the cost of the clearing operation can be accounted to the point when the nodes where added to the tree.
+Thus the cost of processing an obstacle if $O(\log m)$ when the removing time is accounted to the insertions.
+For each rectangle adjacent to $r$ we perform a single binary tree operation and possibly a single operation to the binary queue, which can both be done in time $O(\log m)$.
+Thus the total time complexity is $O(m\log m)$.
+\end{proof}
+
+The link distance between \spt and \ept can be computed by iteratively performing the illumination sweeps in $+y$ and $-y$ directions until the endpoint is found.
+
+\begin{alg}\label{alg:minlink2d}
+Run staged illumination starting from \spt within \fspace such that the first link is horizontal.
+\begin{algorithmic}
+\State Form \decomp{x} for \fspace with Algorithm~\ref{alg:split2d}.
+\State $R\gets\set{r\in\decomp{x} \mid \spt\in r}$
+\State $k\gets 1$
+\While{$R\neq\emptyset$}
+	\ForAll{$r\in R$}
+		\If{$\stepof{r}$ is not set}
+			\State $\stepof{r}\gets k$
+		\ElsIf{$\stepof{r} \le k-2$}
+			\State Mark $r$ to be treated as obstacle during the sweeps.
+			\State Remove $r$ from $R$.
+		\EndIf
+	\EndFor
+	\State $H_{+y}\gets H$ illuminated in direction $+y$ by Algorithm~\ref{alg:light2d}.
+	\State $H_{-y}\gets H$ illuminated in direction $-y$ by Algorithm~\ref{alg:light2d}.
+	\State $H\gets H_{+y}\cup H_{-y}$.
+	\State $k\gets k+1$
+\EndWhile
+\end{algorithmic}
+\end{alg}
+
+\begin{theo}Algorithm~\ref{alg:minlink2d} has time complexity $O(n\log n)$.\end{theo}
+\begin{proof}
+\decomp{x} is formed in time $O(n\log n)$ by Lemma~\ref{lem:split2dtime}.
+\decomp{x} has $O(n)$ cells and links between cells.
+Each cell is marked as an obstacle 2 steps after it has been found.
+On each iteration of the main loop we perform two sweeps, so each cell can be visited at most 4 times by the sweeps.
+The complexity of a single sweep is $O(m\log m)$ by Lemma~\ref{lem:light2dtime}, where $m$ is the number of visited rectangles.
+Since each rectangle can be visited O(1) times, the total complexity of all the sweeps is $O(n\log n)$.
+\end{proof}
+
+The link distance between \spt and a target point \ept can be found by stopping the illumination process as soon as \ept becomes illuminated.
+\epts can become illuminated either during a vertical sweep, or the implicit horizontal sweep that happens when we assign $H_{+y}\cup H_{-y}$ into $H$.
+To construct the minimum link path between \spt and \ept, augment the algorithm such that we store into each rectangle how it was initially illuminated, and trace back the path when \ept gets illuminated.
+
 
 
 \section{Paths in 3 and higher dimensions}\label{sec:minlink3d}
