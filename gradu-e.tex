@@ -83,9 +83,12 @@
 \newcommand\intert[2]{\ensuremath{\textsc{interval}_{#1}(#2)}\xspace}
 \newcommand\point[1]{\ensuremath{\left ({#1}\right )}\xspace}
 
-\newcommand\cellevt{\ensuremath{\texttt{CellEvent}}\xspace}
-\newcommand\obsevt{\ensuremath{\texttt{ObstacleEvent}}\xspace}
-\newcommand\addrectevt{\ensuremath{\texttt{AddRectEvent}}\xspace}
+\newcommand\cellE{\ensuremath{\mathsf{CellEvent}}}
+\newcommand\obsE{\ensuremath{\mathsf{ObstacleEvent}}}
+\newcommand\addE{\ensuremath{\mathsf{AddRangeEvent}}\xspace}
+\newcommand\addEs{\ensuremath{\mathsf{AddRangeEvent}}s\xspace}
+\newcommand\cellof[1]{\ensuremath{\text{cell}(#1)}\xspace}
+\newcommand\rectof[1]{\ensuremath{\text{rect}(#1)}\xspace}
 
 
 \title{Minimum Link Paths In Two and More Dimensions}
@@ -331,7 +334,7 @@ The search tree is a balanced binary tree, so each operation to it is carried ou
 Thus the total complexity of the algorithm is $O(n\log n)$, and we only need $O(n)$ storage for the edge list and the binary search tree.
 \end{proof}
 
-\subsection{3D cuboid decomposition}
+\subsection{3D cuboid decomposition}\label{sec:split3d}
 
 Similarly as a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids.
 Decomposition into cuboids is used in the algorithm for 3D minimum link paths in Section~\ref{sec:minlink3d}.
@@ -878,7 +881,7 @@ In multidimensional case it also applies that if $b$ is an ancestor of $a$, then
 However the reverse is not true; $\rect{a}\subseteq\rect{b}$ does not imply that $b$ is an ancestor of $a$ because $b$ can be in a different subtree in some of the outer trees.
 
 
-\subsection{Unified segment tree}
+\subsection{Unified segment tree}\label{sec:unifiedtree}
 
 The structure of a multidimensional segment tree depends on how we order the coordinate axes.
 For example a two-dimensional segment tree can have either the outer tree represent $y$-coordinates and each inner tree represent $x$-coordinates, or the other way round.
@@ -1051,6 +1054,81 @@ To construct the minimum link path between \spt and \ept, augment the algorithm 
 
 
 \section{Paths in 3 and higher dimensions}\label{sec:minlink3d}
+
+In this section we study the rectilinear minimum link path problem in 3D domain.
+We present an algorithm that has time complexity $O(n^2\log^2n)$ and space complexity $O(n^2)$.
+We also extend the algorithm to work in higher dimensions.
+For any constant $D\ge 1$, the presented algorithm works in time $O(n^D\log^Dn)$.
+
+Some of the basic ideas of the 2D minimum link path algorithm can also be applied to the 3D case.
+The path is computed using the staged illumination paradigm, and on each step we compute \reach{k+1} from \reach{k} by using sweep plane algorithms in all the coordinate axis directions.
+However in 3D case the representation of the illuminated space becomes more complicated, and also the sweep algorithms require more sophisticated logic.
+
+We use the decomposition presented in Section~\ref{sec:split3d} to maintain the illuminated set and to guide the illumination during the sweeps.
+Unlike the 2D case, the algorithm does not use any specific properties of the decomposition, but can be used with any space decomposition.
+The running time of the algorithm is heavily dependend on the number of cells and links between them, and the decomposition we use has the advantage of having only a small number of links compared to other decompositions.
+
+The decomposition is used to implement plane sweep algorithm for computing \reach{k+1} from \reach{k}.
+On each step we run 6 sweeps, one in each of the directions $\pm x$, $\pm y$ and $\pm z$.
+By combining the results of sweeping in each direction we form the whole region \reach{k+1}.
+Next we discuss how the sweep plane algorithm is implemented, and then show how the minimum link path algorithm is built around it.
+
+\subsection{Illumination by plane sweep}
+
+We use a sweep plane algorithm to compute \reach{k+1} from \reach{k}.
+The sweep algorithm performs two functions: it discovers which cells can be illuminated from \reach{k}, and it constructs the boundary of the illuminated region.
+The boundary is used on the next step to compute \reach{k+2} from \reach{k+1}.
+
+During the sweep we maintain the intersection of the sweep plane with the newly illuminated region, and a priority queue of events.
+The events belong to one of the following types:
+
+\begin{description}
+\item[\addE] where a previously illuminated region is added to the sweep plane.
+\item[\cellE] which occurs when the sweep plane reaches the end of a cell that potentially intersects with the illuminated region.
+\item[\obsE] which occurs when the sweep plane encounters an obstacle face with normal opposite of the sweep direction.
+\end{description}
+
+Suppose that we are performing the sweep in direction $+z$.
+In \cellE we first check whether the reached cell $c$ is truly illuminated.
+If yes, we add a \cellE for each neighbor of $c$ in direction $+z$, and an \obsE for each obstacle adjacent to $c$ in direction $+z$.
+In \obsE the projection of the encountered obstacle is cleared from the sweep plane.
+Additionally the cleared rectangles are used to construct new \addEs on the boundary of the illuminated region to be used on the next illumination step.
+
+During the sweep, the intersection of the illuminated region with the sweep plane is stored in the Unified 2D segment tree presented in Section~\ref{sec:unifiedtree}.
+Each \addE inserts a new rectangle to the tree.
+Each illuminated canonical node of the tree stores reference to the event that was used to generate it.
+If multiple \addEs illuminate the same canonical rectangle, only the one inserted first is stored.
+This reference is used to determine the $z$-range of the \addEs generated during \obsE, as well as for tracing back the path from \ept to \spt after the illumination is finished.
+
+Pseudocode for the illumination plane sweep is as following.
+
+\begin{alg}
+Illuminate by plane sweep in direction $+z$ starting from a provided event set $E$.
+\begin{algorithmic}
+\State $Q\gets$ Priority queue containing $E$.
+\State $T\gets$ Empty 2D segment tree.
+\While{$Q$ is not empty}
+	\State $e\gets\pop{Q}$.
+	\If{$e$ is \addE}
+		\State Insert \rectof{e} to $T$.
+	\ElsIf{$e$ is \cellE}
+		\If{\rectof{e} touches any rectangle in $T$}
+			\State $c\gets\cellof{e}$.
+			\ForAll{$o\in\obsd{c}{z+}$}
+				\State Insert \obsE for $o$ to $Q$.
+			\EndFor
+			\ForAll{$n\in\nbsd{c}{z+}$}
+				\State Insert \cellE for $n$ to $Q$.
+			\EndFor
+		\EndIf
+	\ElsIf{$e$ is \obsE}
+		\State Clear \rectof{e} from $T$.
+		\State Generate \addEs for the cleared canonical rectangles.
+	\EndIf
+\EndWhile
+\end{algorithmic}
+\end{alg}
+
 
 \section{Conclusions}\label{sec:conclusions}
 
