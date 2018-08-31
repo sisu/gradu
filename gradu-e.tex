@@ -1133,7 +1133,7 @@ Illuminate by plane sweep in direction $+z$ starting from a provided event set $
 
 We can write down the basic pseudocode for the staged illumination by iteratively applying the sweep algorithm.
 
-\begin{alg}
+\begin{alg}\label{alg:minlink3d}
 Run staged illumination in 3D domain \fspace starting from point \spt.
 \begin{algorithmic}
 \State $D\gets$ decomposition of \fspace into cells using Algorithm~\ref{alg:split3d}.
@@ -1166,6 +1166,64 @@ Thus there is no longer need to add \addEs for \obsEs on $o$, as any point illum
 \subsection{Event generation}
 
 We now discuss how the \addEs for the next round are generated when the sweep processes an \obsE.
+We again explain only the case for $+z$ sweep, as the other cases are identical.
+The goal is to generate \addEs on the boundary of the space illuminated on step $k$, such that the sweeps on step $k+1$ correctly generate \reach{k+1}.
+
+During the $+z$ sweep we generate \addEs in directions $\pm x$ and $\pm y$.
+On a \obsE we perform a clear operation on the Unified tree containing the sweep plane status.
+Thus operations clears some of the tree nodes.
+As a first step in even generation, we create an \addEs on each side of every cleared canonical rectangle.
+This can create an unnecessarily large amount of events, because rectangles added to the tree are split to up to $(\log^2 n)$ canonical rectangles.
+
+To reduce the number of generated events, we perform the following two steps after generating the events:
+\begin{enumerate}
+\item Remove all the pairs of \addEs with the position but opposite direction.
+\item Merge all sets of aligned displays with the same $z$-range into a single larger display.
+\end{enumerate}
+
+The operations allow us to bound the number of \addEs generated during the illumination.
+
+\subsection{Complexity}
+
+We now prove the complexity of the minimum link computation algorithm.
+
+\begin{lem}\label{lem:adde3}The number of \addEs generated during the illumation after after filtering is $O(n^2)$.\end{lem}
+\begin{proof}
+Left as an exerice to the reader.
+\end{proof}
+
+We also need to bound the number of \obsEs and \cellEs.
+
+\begin{lem}\label{lem:obse3}For each obstacle we generate \obsE on at most 9 steps of the illumination.\end{lem}
+\begin{proof}
+Left as an exerice to the reader.
+\end{proof}
+
+\begin{lem}\label{lem:celle3}For each cell we generate \cellE on at most 9 steps of the illumination.\end{lem}
+\begin{proof}
+Left as an exerice to the reader.
+\end{proof}
+
+We are ready to prove the main result of this section.
+
+\begin{theo}Algorithm~\ref{alg:minlink3d} computes 3D minimum link path in time $O(n^2\log^2n)$.\end{theo}
+\begin{proof}
+By Lemma~\ref{lem:celle3} each cell is visited $O(1)$ times during the illumination.
+On each \cellE we perform a single lookup to the Unified tree in time $O(\log^2 n)$, and iterate over the neighbors of the cell.
+Since the decomposition has $O(n^2)$ cells and $O(n^2)$ links between cells, the total time taken in processing \cellEs is $O(n^2\log^2 n)$.
+
+On each \addE we insert a new rectangle to the Unified tree in time $O(\log^2 n)$.
+Since the number of \addEs is $O(n^2)$ by Lemma~\ref{lem:adde3}, the total time used in processing them is $O(n^2\log^2 n)$.
+
+On each \obsE we clear a rectangle from the tree.
+The clearing takes $O(n\log n + k)$, where $k$ is the number of cleared rectangles.
+The total number of rectangles cleared is bounded by the total number of \addEs, which is $O(n^2)$.
+There are $O(n)$ \obsEs by Lemma~\ref{lem:obse3}, so the total time taken in \obsEs is $O(n^2\log n)$.
+
+As all parts of the algorithm are done in time $O(n^2\log^2 n)$ or less, the total complexity is $O(m^2\log^2 n)$.
+\end{proof}
+
+\subsection{Higher dimensional paths}
 
 
 
@@ -1175,6 +1233,15 @@ We have shown algorithms for the rectilinear minimum link path problem for many 
 The 2D case is solved in time $O(n\log n)$, which was shown initially by~TODO.
 A new result is that a similar algorithm can be created for 3 dimensions, which works in time $O(n^2\log^2 n)$.
 We also showed how this result can be further generalized to work for any dimension $D$ in time $O(n^{D-1}\log^{D-1}n)$.
+
+A natural follow up question is, whether these results could be improved further.
+The 2D case was shown to be equivalently difficult as sorting the input, so the result is asymptotically optimal.
+For the higher dimensional results no such upper bound is known.
+
+The main bottleneck in the higher dimensional algorithms are operations on segment tree.
+Segment trees and their applications are a broad research topic.
+For example we can create a segment tree that supports adding intervals, and finding the maximal number of overlapping any point in a query interval in time $O(\log n)$.
+It is an open question whether this can be generalized to two or more dimensions: can we create a structure that supports adding and querying for maximally overlapping rectangles in polylogarithmic time?
 
 
 \nocite{*}
