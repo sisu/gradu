@@ -93,7 +93,7 @@
 \newcommand\rectof[1]{\ensuremath{\text{rect}(#1)}\xspace}
 
 
-\title{Minimum Link Paths In Two and More Dimensions}
+\title{Rectilinear minimum link paths in high dimensions}
 \author{Mikko Sysikaski}
 \date{\today}
 \level{Master's thesis}
@@ -1163,10 +1163,18 @@ We create \addEs for the next step when a plane sweep hits an obstacle.
 If the illumination first reaches an obstacle face $o$ on step $k$, then after step $k+2$ all the points touching $o$ are illuminated, so after step $k+3$ all the points visible from $o$ are illuminated.
 Thus there is no longer need to add \addEs for \obsEs on $o$, as any point illuminated through such events has been illuminated already.
 
+\subsection{Event generation}
+
+We now discuss how the \addEs for the next round are generated when the sweep processes an \obsE.
 
 
 
 \section{Conclusions}\label{sec:conclusions}
+
+We have shown algorithms for the rectilinear minimum link path problem for many different dimensions.
+The 2D case is solved in time $O(n\log n)$, which was shown initially by~TODO.
+A new result is that a similar algorithm can be created for 3 dimensions, which works in time $O(n^2\log^2 n)$.
+We also showed how this result can be further generalized to work for any dimension $D$ in time $O(n^{D-1}\log^{D-1}n)$.
 
 
 \nocite{*}
@@ -1179,7 +1187,13 @@ Thus there is no longer need to add \addEs for \obsEs on $o$, as any point illum
 
 \pagestyle{empty}
 
-%\internalappendix{1}{Model ABC}
+\internalappendix{1}{Source code location}
+
+An implementation of the high-dimensional rectilinear minimum link path algorithm presented in the thesis is available in the following URL: \\
+\url{https://github.com/sisu/gradu/tree/master/code}
+
+The code is written in standard C++ using the C++14 standard.
+The implementation does not depend on any libraries besides the C++ standard library, but the associated unit tests are written using the Google Test framework.
 
 \end{document}
 
