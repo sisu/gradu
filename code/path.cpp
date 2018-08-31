@@ -79,26 +79,24 @@ void mergeAdjacentElements(vector<T>& vec, M&& tryMerge) {
 }
 
 template<int D>
-void mergeAdjacentEvents(vector<Event<D>>& events,
-		int eventAxis, int mergeAxis) {
-	int projAxis = mergeAxis - (mergeAxis > eventAxis);
-	sort(events.begin(), events.end(), [projAxis](const Event<D>& a, const Event<D>& b) {
+void mergeAdjacentEvents(vector<Event<D>>& events, int axis) {
+	sort(events.begin(), events.end(), [axis](const Event<D>& a, const Event<D>& b) {
 		if (a.position != b.position) return a.position < b.position;
-		for(int i=0; i<D-1; ++i) if (i != projAxis) {
+		for(int i=0; i<D-1; ++i) if (i != axis) {
 			for(int j=0; j<2; ++j) {
 				if (a.box[i][j] != b.box[i][j]) return a.box[i][j] < b.box[i][j];
 			}
 		}
 		for(int j=0; j<2; ++j) {
-			if (a.box[projAxis][j] != b.box[projAxis][j]) return a.box[projAxis][j] < b.box[projAxis][j];
+			if (a.box[axis][j] != b.box[axis][j]) return a.box[axis][j] < b.box[axis][j];
 		}
 		return false;
 	});
-	mergeAdjacentElements(events, [projAxis](Event<D>& a, Event<D>& b) {
+	mergeAdjacentElements(events, [axis](Event<D>& a, Event<D>& b) {
 		if (a.position != b.position) return false;
-		for(int i=0; i<D-1; ++i) if (i != projAxis && a.box[i] != b.box[i]) return false;
-		if (a.box[projAxis].to < b.box[projAxis].from) return false;
-		a.box[projAxis].to = max(a.box[projAxis].to, b.box[projAxis].to);
+		for(int i=0; i<D-1; ++i) if (i != axis && a.box[i] != b.box[i]) return false;
+		if (a.box[axis].to < b.box[axis].from) return false;
+		a.box[axis].to = max(a.box[axis].to, b.box[axis].to);
 		return true;
 	});
 }
@@ -127,8 +125,9 @@ struct EventSet {
 		}
 		for(int a=0; a<D; ++a) {
 			for(int m=0; m<D; ++m) if (a!=m) {
-				mergeAdjacentEvents(events[2*a], a, m);
-				mergeAdjacentEvents(events[2*a+1], a, m);
+				int axis = m - m>a;
+				mergeAdjacentEvents(events[2*a], axis);
+				mergeAdjacentEvents(events[2*a+1], axis);
 			}
 		}
 	}

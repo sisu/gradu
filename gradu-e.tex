@@ -1305,9 +1305,35 @@ The operations below are performed to \addEs produced by sweep in direction $+D$
 
 The definition of aligned \addEs is a bit more complicated in high-dimensional case.
 A pair of \addEs can be aligned along multiple axes.
-%For two \addEs to be aligned, they need to in the event set for the 
-%The aligned displays are those that have identical bounds in direction $D$ and in $D-2$ of the remaining $D-1$ direction.
-%In the last direction.
+For two \addEs to be aligned, they need to in the event set for the same direction, and share the same coordinate where the events occur.
+Let $a$ be any axis other than $D$.
+The events are aligned in direction $a$ if the bounds of their hyperrectangles are identical in all the directions except $a$, and the bounds in direction $a$ touch each other at endpoints.
+
+The filtering step allows us to again bound the numberor of \addEs processed during the illumination.
+
+\begin{lem}\label{lem:added}The number of \addEs generated during the illumation after after filtering is $O(n^{D-1})$.\end{lem}
+\begin{proof}
+Left as an exerice to the reader.
+\end{proof}
+
+We also need to bound the number of \obsEs and \cellEs.
+
+\begin{lem}\label{lem:obsed}For each obstacle we generate \obsE on at most 9 steps of the illumination.\end{lem}
+\begin{proof}
+Left as an exerice to the reader.
+\end{proof}
+
+\begin{lem}\label{lem:celled}For each cell we generate \cellE on at most 9 steps of the illumination.\end{lem}
+\begin{proof}
+Left as an exerice to the reader.
+\end{proof}
+
+These lemmas allow us to prove the final result.
+
+\begin{theo}Algorithm~\ref{alg:minlinkdd} computes $D$-dimensional minimum link path in time $O(n^{D-1}\log^{D-1}n)$.\end{theo}
+\begin{proof}
+Left as an exerice to the reader.
+\end{proof}
 
 
 
