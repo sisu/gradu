@@ -42,6 +42,8 @@
 \newcommand\inter[1]{\ensuremath{\textsc{intr}(#1)}\xspace}
 \newcommand\leftc[1]{\ensuremath{\textsc{left}(#1)}\xspace}
 \newcommand\rightc[1]{\ensuremath{\textsc{right}(#1)}\xspace}
+\newcommand\leftu[2]{\ensuremath{\textsc{fst}_{#2}(#1)}\xspace}
+\newcommand\rightu[2]{\ensuremath{\textsc{snd}_{#2}(#1)}\xspace}
 \newcommand\reach[1]{\ensuremath{\textsc{light}(#1)}\xspace}
 \newcommand\reachd[2]{\ensuremath{\textsc{light}_{#2}(#1)}\xspace}
 \newcommand\canon[1]{\ensuremath{\textsc{c}(#1)}\xspace}
@@ -961,10 +963,22 @@ Query whether rectangle $R$ intersects with any rectangle in the tree.
 \begin{proof}
 Proof by induction on $D$.
 For the base case $D=0$ both algorithm finishes in constant time.
-For $D\ge 1$, algorithms iterate over the canonical nodes and their parents in the outer tree, making $\log{n}$ calls to the inner trees.
+For $D\ge 1$, algorithms iterate over the canonical nodes and their ancestors in the outer tree, making $\log{n}$ calls to the inner trees.
 By induction the inner tree operations are done in time $O(\log^{D-1}n)$, so the total time complexity is $O(\log^D n)$.
 \end{proof}
 
+Note that \subtree{} and \subtreep{} are used in opposite ways in the two operations.
+In \adddt{} we recurse down to \subtree{} for canonical nodes, and to \subtreep{} for their ancestors, whereas in \checkdt{} we recurse to \subtree{} in the ancestor nodes, and to both of the trees in the canonical nodes.
+This allows us to ensure that \adddt{} and \checkdt{} arrive in the same node exactly in the case where the conditions of Lemma~\ref{lem:rectintersect} are fulfilled.
+
+Suppose we first add rectangle $A$ and then query for rectangle $B$ in the tree.
+The \checkdt operation returns true if the two operations end up in the same dimension-0 node.
+The only way the two operations end up in a common node is if in each dimension $d$ we are in a canonical node of at least one of $A_d$ and $B_d$, and in either a canonical node or an ancestor for the other rectangle.
+If \adddt{} and \checkdt{} operations end up in the same level-0 node, then in each dimension we are in the canonical node of at least either
+
+Thus we can efficiently support inserting and querying for $D$-dimensional hyperrectangles by a nested structure consisting of multiple levels of segment trees.
+However clearing a rectangle in this structure is considerable more difficult to support.
+For that we turn into another variant of the multidimensional segment tree, the unified segment tree.
 
 \subsection{Unified segment tree}\label{sec:unifiedtree}
 
@@ -977,7 +991,52 @@ The unified segment tree is not a tree, but a directed graph.
 Each node $n$ of the graph represents a $D$-dimensional hyperrectangle.
 For each axis $i$ where \rect{n} is not minimal, $n$ has links to two child nodes that divide \rect{n} into two parts along hyperplane perpendicular to $i$-axis.
 Thus each node has between 0 and $2D$ links to child nodes.
+The children splitting the node $n$ along axis $i$ are denoted by \leftu{n}{i} and \rightu{n}{i}.
 
+Note that in the unified tree there is no distinction between outer and inner tree.
+In the regular multidimensional segment tree the nodes of nested tree represent ranges in one of the coordinate axes, and the innermost nodes represent their cartesian product.
+In the unified tree, there are no outer and inner nodes, and each node represents a $D$-dimensional hyperrectangle.
+
+The operations \adddt and \checkdt for unified tree are largely similar to the algorithms for the regular multidimensional tree.
+
+\begin{alg}\label{alg:uadd}
+Add rectangle $R$ to $D$-dimensional unified tree.
+\begin{algorithmic}
+\Procedure{InsertToTree}{$D,n$}
+\Comment{Insert to the subtree rooted at node $n$}
+	\If{$D=0$}
+		\State $\hasrect{n}\gets\texttt{true}$.
+	\ElsIf{$\inter{n}\subseteq R_D$}
+		\State $\adddt(D-1,\subtree{n})$.
+	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
+		\State $\adddt(D-1,\subtreep{n})$.
+		\State $\adddt(D,\leftc{n})$.
+		\State $\adddt(D,\rightc{n})$.
+	\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{alg}
+
+\begin{alg}\label{alg:ucheck}
+Query whether rectangle $R$ intersects with any rectangle in the unified tree.
+\begin{algorithmic}
+\Procedure{QueryTree}{$D,n$}
+\Comment{Check subtree rooted at node $n$}
+	\State $R\gets\texttt{false}$.
+	\If{$D=0$}
+		\State $R\gets\hasrect{n}$.
+	\ElsIf{$\inter{n}\subseteq R_D$}
+		\State $R\gets \checkdt(D-1,\subtree{n})$.
+		\State $R\gets R$ or $\checkdt(D-1,\subtreep{n})$.
+	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
+		\State $R\gets \checkdt(D-1,\subtree{n})$.
+		\State $R\gets R$ or $\checkdt(D,\leftc{n})$.
+		\State $R\gets R$ or $\checkdt(D,\rightc{n})$.
+	\EndIf
+	\State Return $R$.
+\EndProcedure
+\end{algorithmic}
+\end{alg}
 
 
 \section{Planar minimum link paths}\label{sec:minlink2d}
