@@ -13,14 +13,6 @@
 template<class T, int D>
 class UnifiedTree {
 public:
-#if 0
-	struct Visitor {
-		virtual ~Visitor() {}
-		virtual bool visitParent(T* children[D]) = 0;
-		virtual bool exitParent(T* children[D]) = 0;
-		virtual bool visitCanonical(T* children[D]) = 0;
-	};
-#endif
 	using Index = std::array<int, D>;
 
 	UnifiedTree(Index sizes) {
@@ -101,11 +93,9 @@ private:
 				addRec(index + step*bp, axis+1, covered, box, value);
 			}
 			if (a&1) {
-//				std::cout<<"add a "<<a<<'\n';
 				addRec(index + step*a++, axis+1, covered | (1U << axis), box, value);
 			}
 			if (!(b&1)) {
-//				std::cout<<"add b "<<b<<'\n';
 				addRec(index + step*b--, axis+1, covered | (1U << axis), box, value);
 			}
 		}
@@ -126,7 +116,6 @@ private:
 	bool checkRec(int index, int axis, Mask covered, const Box<D>& box) const {
 		if (axis == D) {
 			const Item& x = data[index];
-//			std::cout<<"check "<<index<<' '<<covered<<' '<<data.size()<<'\n';
 			return x.hasData[covered ^ ALL_MASK];
 		}
 		int s = size[axis];
@@ -135,7 +124,6 @@ private:
 		if (range.size()==0) return false;
 		int a,b,ap,bp;
 		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
-//			std::cout<<"check "<<a<<' '<<b<<' '<<ap<<' '<<bp<<'\n';
 			if (a != ap && checkRec(index + step*ap, axis+1, covered, box)) return true;
 			if (b != bp && ap!=bp && checkRec(index + step*bp, axis+1, covered, box)) return true;
 			if ((a&1) && checkRec(index + step*a++, axis+1, covered | (1U << axis), box)) return true;
@@ -152,7 +140,6 @@ private:
 	void removeRec(Index index, int axis, Mask covered, const Box<D>& box, V&& visitor) {
 		if (axis == D) {
 			int totalIndex = computeIndex(index);
-//			std::cout<<"rm "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
 			Item& x = data[totalIndex];
 			if (covered != ALL_MASK && x.hasData[ALL_MASK]) {
 				int splitAxis = 0;
@@ -160,7 +147,6 @@ private:
 				int step = stepSize[splitAxis];
 				int i = index[splitAxis];
 				int baseIndex = totalIndex - step * i;
-//				std::cout<<"push to children "<<baseIndex<<' '<<step<<' '<<i<<'\n';
 				assignItem(baseIndex + step * (2*i), x.data);
 				assignItem(baseIndex + step * (2*i+1), x.data);
 			}
@@ -169,7 +155,6 @@ private:
 		}
 		int i = index[axis];
 		Range range = rangeForIndex(axis, i);
-//		std::cout<<"removerec "<<axis<<' '<<i<<' '<<range<<" ; "<<box<<'\n';
 		if (!box[axis].intersects(range)) return;
 		if (box[axis].contains(range)) {
 			removeRec(index, axis+1, covered | (1U << axis), box, visitor);
@@ -214,8 +199,6 @@ private:
 	void postRemove(Index index, int axis, Mask covered, const Box<D>& box) {
 		if (axis == D) {
 			int totalIndex = computeIndex(index);
-//			std::cout<<"postRemove "<<totalIndex<<' '<<covered<<' '<<box<<'\n';
-//			for(int i: index)std::cout<<i<<' ';std::cout<<'\n';
 			Item& t = data[totalIndex];
 			t.hasData.reset();
 			for(int d=0; d<D; ++d) {
@@ -225,10 +208,8 @@ private:
 				int baseIndex = totalIndex - step*x;
 				const auto& a = data[baseIndex + step*(2*x)];
 				const auto& b = data[baseIndex + step*(2*x+1)];
-//				std::cout<<"trying to get data from "<<baseIndex<<' '<<x<<" : "<<baseIndex+step*(2*x)<<'\n';
 				for(Mask i=0; i<1<<D; ++i) {
 					if (!(1 & (i>>d)) && (covered | i) != ALL_MASK) {
-//						std::cout<<"copy subset "<<i<<" : "<<a.hasData[i]<<' '<<b.hasData[i]<<'\n';
 						t.hasData[i] = t.hasData[i] | a.hasData[i] | b.hasData[i];
 					}
 				}
@@ -237,10 +218,8 @@ private:
 		}
 		int s = size[axis];
 		Range range = box[axis];
-//		std::cout<<"range "<<range<<'\n';
 		int a,b,ap,bp;
 		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
-//			std::cout<<"loop "<<a<<' '<<b<<' '<<ap<<' '<<bp<<'\n';
 			if (a != ap) {
 				postRemove(withIndex(index, axis, ap), axis+1, covered, box);
 			}
@@ -255,7 +234,6 @@ private:
 			}
 		}
 		for(; ap > 0; ap/=2, bp/=2) {
-//			std::cout<<"loop2 "<<ap<<' '<<bp<<'\n';
 			postRemove(withIndex(index, axis, ap), axis+1, covered, box);
 			if (ap != bp) {
 				postRemove(withIndex(index, axis, bp), axis+1, covered, box);
@@ -274,16 +252,6 @@ private:
 		return r;
 	}
 
-#if 0
-	bool VisitRec(int idx, int endIdx, int axis, T* children[D], Visitor& visitor) {
-		if (axis == D) {
-			return visitor.VisitCanonical(children);
-		}
-		int step = stepSize[axis];
-		if (idx + step < endIdx) {
-		}
-	}
-#endif
 	static constexpr Mask ALL_MASK = (1U<<D)-1;
 
 	Index size = {};
