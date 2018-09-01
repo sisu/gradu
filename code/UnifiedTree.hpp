@@ -150,7 +150,7 @@ private:
 				assignItem(baseIndex + step * (2*i), x.data);
 				assignItem(baseIndex + step * (2*i+1), x.data);
 			}
-			clearSubtree(0, index, 0, covered, visitor);
+			clearSubtree(index, 0, covered, visitor);
 			return;
 		}
 		int i = index[axis];
@@ -168,9 +168,10 @@ private:
 	}
 
 	template<class V>
-	bool clearSubtree(int totalIndex, Index index, int axis, Mask covered, V&& visitor) {
+	bool clearSubtree(Index index, int axis, Mask covered, V&& visitor) {
 		while(axis<D && !(1&(covered>>axis))) ++axis;
 		if (axis == D) {
+			int totalIndex = computeIndex(index);
 			Item& t = data[totalIndex];
 			if (t.hasData[ALL_MASK]) {
 				visitor(index, t.data);
@@ -183,15 +184,14 @@ private:
 			}
 			return res;
 		}
-		int step = stepSize[axis];
 		int i = index[axis];
-		bool res = clearSubtree(totalIndex + step * i, index, axis+1, covered, visitor);
+		bool res = clearSubtree(index, axis+1, covered, visitor);
 		if (!res) return false;
 		if (i < size[axis]) {
 			index[axis] = 2*i;
-			clearSubtree(totalIndex, index, axis, covered, visitor);
+			clearSubtree(index, axis, covered, visitor);
 			index[axis] = 2*i+1;
-			clearSubtree(totalIndex, index, axis, covered, visitor);
+			clearSubtree(index, axis, covered, visitor);
 		}
 		return true;
 	}
