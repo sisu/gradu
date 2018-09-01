@@ -57,12 +57,14 @@
 \newcommand\visitc{\ensuremath{\textsc{VisitCanonical}}\xspace}
 \newcommand\adddt{\ensuremath{\textsc{InsertToTree}}\xspace}
 \newcommand\checkdt{\ensuremath{\textsc{QueryTree}}\xspace}
+\newcommand\maskof[1]{\ensuremath{\textsc{NodeMask}(#1)}\xspace}
 
 \newcommand\nodecs[1]{\ensuremath{\textsc{ivc}(#1)}\xspace}
 \newcommand\nodeps[1]{\ensuremath{\textsc{ivp}(#1)}\xspace}
 \newcommand\subtree[1]{\ensuremath{\texttt{subtree}(#1)}\xspace}
 \newcommand\subtreep[1]{\ensuremath{\texttt{subtreeP}(#1)}\xspace}
 \newcommand\hasrect[1]{\ensuremath{\texttt{hasrect}(#1)}\xspace}
+\newcommand\hasbits[2]{\ensuremath{\texttt{hasbits}(#1)[#2]}\xspace}
 
 \newcommand\rect[1]{\ensuremath{\textsc{rect}(#1)}\xspace}
 
@@ -929,7 +931,7 @@ Add rectangle $R$ to $D$-dimensional tree.
 		\State $\hasrect{n}\gets\texttt{true}$.
 	\ElsIf{$\inter{n}\subseteq R_D$}
 		\State $\adddt(D-1,\subtree{n})$.
-	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
+	\ElsIf{$\inter{n}\cap R_D\neq\emptyset$}
 		\State $\adddt(D-1,\subtreep{n})$.
 		\State $\adddt(D,\leftc{n})$.
 		\State $\adddt(D,\rightc{n})$.
@@ -949,7 +951,7 @@ Query whether rectangle $R$ intersects with any rectangle in the tree.
 	\ElsIf{$\inter{n}\subseteq R_D$}
 		\State $R\gets \checkdt(D-1,\subtree{n})$.
 		\State $R\gets R$ or $\checkdt(D-1,\subtreep{n})$.
-	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
+	\ElsIf{$\inter{n}\cap R_D\neq\emptyset$}
 		\State $R\gets \checkdt(D-1,\subtree{n})$.
 		\State $R\gets R$ or $\checkdt(D,\leftc{n})$.
 		\State $R\gets R$ or $\checkdt(D,\rightc{n})$.
@@ -998,24 +1000,55 @@ In the regular multidimensional segment tree the nodes of nested tree represent 
 In the unified tree, there are no outer and inner nodes, and each node represents a $D$-dimensional hyperrectangle.
 
 The operations \adddt and \checkdt for unified tree are largely similar to the algorithms for the regular multidimensional tree.
+We consider again checking whether the query rectangle intersects with any of the hyperrectangles in the tree rather than reporting all the intersecting hyperrectangles.
+Each tree node stores $2^D$ bits of information about the hyperrectangles stored in the subtree.
+When a hyperrectangle $R$ is added to node $n$, the bits are used to define whether $n$ represents a canonical node or a parent of a canonical node along each coordinate axis.
+The $2^D$ bits allow us to detect when the conditions of Lemma~\ref{lem:rectintersect} become fulfilled for the query rectangle and a rectangle in the tree.
+The following function computes the mask for a rectangle and a tree node.
+
+\begin{alg}\label{alg:maskof}
+Compute bitmask representing how hyperrectangle $R$ is stored in unified tree node $n$.
+\begin{algorithmic}
+\Procedure{NodeMask}{$R,n$}
+	\State $m\gets 0$
+	\ForAll{$d \in 1\dots D$}
+		\If{$\rect{n}_d\subseteq R_D$}
+			\State $m\gets m + 2^d$
+		\EndIf
+	\EndFor
+	\State Return $m$.
+\EndProcedure
+\end{algorithmic}
+\end{alg}
+
+We can write procedures \adddt and \checkdt by using this function.
 
 \begin{alg}\label{alg:uadd}
 Add rectangle $R$ to $D$-dimensional unified tree.
 \begin{algorithmic}
-\Procedure{InsertToTree}{$D,n$}
-\Comment{Insert to the subtree rooted at node $n$}
-	\If{$D=0$}
+\Procedure{InsertToTree}{$d,n$}
+\Comment{Insert to the subtree rooted at node $n$ by moving along axes $1\dots d$}
+	\If{$d=0$}
+		\State $m\gets\maskof{R,n}$.
+		\ForAll{$b \in 0\dots 2^D-1$}
+			\If{All bits of $b$ are set in $m$}
+				\State $\hasbits{n}{b}\gets\texttt{true}.$
+			\EndIf
+		\EndFor
 		\State $\hasrect{n}\gets\texttt{true}$.
-	\ElsIf{$\inter{n}\subseteq R_D$}
-		\State $\adddt(D-1,\subtree{n})$.
-	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
-		\State $\adddt(D-1,\subtreep{n})$.
-		\State $\adddt(D,\leftc{n})$.
-		\State $\adddt(D,\rightc{n})$.
+	\ElsIf{$\rect{n}_d\subseteq R_d$}
+		\State $\adddt(d-1,n)$.
+	\ElsIf{$\rect{n}_d\cap R_d\neq\emptyset$}
+		\State $\adddt(d-1,n)$.
+		\State $\adddt(d,\leftu{n}{d})$.
+		\State $\adddt(d,\rightu{n}{d})$.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
 \end{alg}
+
+For \checkdt we use function $\texttt{reverseBits}$, which reverses the bits of a $2^D$-bit input.
+For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
 
 \begin{alg}\label{alg:ucheck}
 Query whether rectangle $R$ intersects with any rectangle in the unified tree.
@@ -1024,19 +1057,26 @@ Query whether rectangle $R$ intersects with any rectangle in the unified tree.
 \Comment{Check subtree rooted at node $n$}
 	\State $R\gets\texttt{false}$.
 	\If{$D=0$}
-		\State $R\gets\hasrect{n}$.
+		\State $R\gets\hasbits{n}{\texttt{reverseBits}(\maskof{R,n})}$.
 	\ElsIf{$\inter{n}\subseteq R_D$}
-		\State $R\gets \checkdt(D-1,\subtree{n})$.
-		\State $R\gets R$ or $\checkdt(D-1,\subtreep{n})$.
+		\State $R\gets\checkdt(d-1,n)$.
 	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
-		\State $R\gets \checkdt(D-1,\subtree{n})$.
-		\State $R\gets R$ or $\checkdt(D,\leftc{n})$.
-		\State $R\gets R$ or $\checkdt(D,\rightc{n})$.
+		\State $R\gets\checkdt(d-1,n)$.
+		\State $R\gets R$ or $\checkdt(d,\leftu{n}{d})$.
+		\State $R\gets R$ or $\checkdt(d,\rightu{n}{d})$.
 	\EndIf
 	\State Return $R$.
 \EndProcedure
 \end{algorithmic}
 \end{alg}
+
+The interesting part of the query algorithm is checking if the tree node contains a rectangle by expression $\hasbits{n}{\texttt{reverseBits}(\maskof{R,n})}$ when querying for hyperrectangle $R$.
+When adding a hyperrectangle $A$, we set $\hasbits{n}{b}$ for each bitmask $b$ whose bits are contained in $\maskof{A,n}$.
+Thus the expression in \checkdt detects $A$ if $\maskof{A,n}|\maskof{R,n}=2^D-1$, where $x|y$ represents the bitwise OR operation of $x$ and $y$.
+This is equivalent to condition that $\rect{n}_d$ is the range of a canonical node of either $R_d$ or $A_d$ in each dimension $d$.
+This matches the conditions of Lemma~\ref{lem:rectintersect} for rectangle intersection, so the intersection is returned if and only if $R$ and $A$ truly intersect.
+
+Next we consider clearing a rectangle from the unified tree.
 
 
 \section{Planar minimum link paths}\label{sec:minlink2d}
