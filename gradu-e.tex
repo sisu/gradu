@@ -58,6 +58,9 @@
 \newcommand\adddt{\ensuremath{\textsc{InsertToTree}}\xspace}
 \newcommand\checkdt{\ensuremath{\textsc{QueryTree}}\xspace}
 \newcommand\maskof[1]{\ensuremath{\textsc{NodeMask}(#1)}\xspace}
+\newcommand\cleardt{\ensuremath{\textsc{ClearFromTree}}\xspace}
+\newcommand\clearst{\ensuremath{\textsc{ClearSubtree}}\xspace}
+\newcommand\recomp{\ensuremath{\textsc{RecomputeSubtreeData}}\xspace}
 
 \newcommand\nodecs[1]{\ensuremath{\textsc{ivc}(#1)}\xspace}
 \newcommand\nodeps[1]{\ensuremath{\textsc{ivp}(#1)}\xspace}
@@ -727,7 +730,7 @@ Then $\inter{a}\cap I\neq\emptyset$ and $\inter{c}\cap I\neq\emptyset$, so $\int
 Some grandchild of $b$ belongs to \canon{I}, so \canon{I} is not a minimal cover, which is a contradiction.
 \end{proof}
 
-We can iterate over the canonical nodes and their parents by using the following recursive algorithm starting from the root node.
+We can iterate over the canonical nodes and their ancestors by using the following recursive algorithm starting from the root node.
 
 \begin{alg}\label{alg:segiter}
 Visit all the elements of \canon{I} and \canonpar{I}.
@@ -749,7 +752,7 @@ Algorithm~\ref{alg:segiter} can be used to implement other tree operations such 
 The recursion traverses through the nodes in \canonpar{I}, and stops immediately when it arrives either to a node in \canon{I} or to a node neither in \canon{I} nor in \canonpar{I}.
 Thus the running time is proportional to the sizes of \canon{I} and \canonpar{I}, which is $O(\log\segsize)$ by Lemma~\ref{lem:canonlog} and Lemma~\ref{lem:canonplog}.
 
-\subsection{Tree operations}
+\subsection{Tree operations}\label{sec:treeops}
 
 We now show how the segment trees can be used for finding intersecting intervals.
 
@@ -791,14 +794,19 @@ The structure can be further extended to avoid reporting the duplicates, but for
 
 We also want to support clearing an interval from the tree.
 Clearing interval $I$ means that all the intervals $J$ in the tree are cut into $J\setminus I$, potentially removing $J$ completely or cutting it into two parts.
+The clear operation is performed in the following three steps:
+\begin{enumerate}
+\item Split rectangles that touch $I$ but are not contained by $I$ into smaller parts.
+\item Completely clear each each subtree rooted in any node $n\in\canon{I}$.
+\item Recompute \nodeps{n} to match the remaining nodes for all nodes $n\in\canonpar{I}$.
+\end{enumerate}
 
-The clear operation is implemented by visiting all the canonical nodes and their parents recursively similarly to Algorithm~\ref{alg:segiter}.
-When the recursion reaches a canonical node of $I$, the entire subtree is cleared.
+All the tree operations can be done in parallel during a single recursive traversal of the tree.
 For nodes $n\in\canonpar{I}$ we push down the intervals in \nodecs{n} to the child nodes before proceeding with the recursion.
-This allows us to clear only the parts of the intervals covered by $I$ without removing the other parts.
-After the child nodes are cleared, we also need to regenerate the \nodeps{n} list for the nodes $n\in\canonpar{I}$ to remove intervals that were fully removed from the subtree.
+When we arrive in a node $n\in\canon{I}$, the entire subtree rooted at $n$ is cleared.
+After the child nodes are cleared, we also need to regenerate the \nodeps{n} list for the nodes $n\in\canonpar{I}$ to account for the intervals that are no longer present in the subtree.
 The regeneration is done by merging the lists in the child nodes of $n$.
-The exact algorithm for clearing is below.
+The exact algorithm for clearing is shown below.
 
 \begin{alg}\label{alg:segrm}
 Clear interval $I$ from a segment tree.
@@ -806,7 +814,7 @@ Clear interval $I$ from a segment tree.
 \Procedure{ClearInterval}{$n$}
 	\Comment Clears interval $I$ from subtree rooted at $n$.
 	\If{$\inter{n}\subseteq I$}
-		\State ClearSubtree($n$).
+		\State \clearst($n$).
 	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
 		\State Copy \nodecs{n} to \nodecs{\leftc{n}} and to \nodecs{\rightc{n}}.
 		\State \textsc{IterCanonical}($\leftc{n}$)
@@ -820,8 +828,8 @@ Clear interval $I$ from a segment tree.
 	\State Clear \nodecs{n}.
 	\If{\nodeps{n} is not empty}
 		\State Clear \nodeps{n}.
-		\State ClearSubtree(\leftc{n}).
-		\State ClearSubtree(\rightc{n}).
+		\State \clearst(\leftc{n}).
+		\State \clearst(\rightc{n}).
 	\EndIf
 \EndProcedure
 \end{algorithmic}
@@ -888,7 +896,7 @@ $$
 $$
 \end{proof}
 
-For 1-dimensional segment trees there is a clear connection between the child-parent hierarchy and interval overlap.
+For 1-dimensional segment trees there is a clear connection between the parent-child hierarchy and interval overlap.
 For any two tree nodes $a$ and $b$, $\inter{a}\subseteq\inter{b}$ if and only if $b$ is an ancestor of $a$ in the tree.
 In multidimensional case it also applies that if $b$ is an ancestor of $a$, then $\rect{a}\subseteq\rect{b}$.
 However the reverse is not true; $\rect{a}\subseteq\rect{b}$ does not imply that $b$ is an ancestor of $a$ because $b$ can be in a different subtree in some of the outer trees.
@@ -1002,7 +1010,7 @@ In the unified tree, there are no outer and inner nodes, and each node represent
 The operations \adddt and \checkdt for unified tree are largely similar to the algorithms for the regular multidimensional tree.
 We consider again checking whether the query rectangle intersects with any of the hyperrectangles in the tree rather than reporting all the intersecting hyperrectangles.
 Each tree node stores $2^D$ bits of information about the hyperrectangles stored in the subtree.
-When a hyperrectangle $R$ is added to node $n$, the bits are used to define whether $n$ represents a canonical node or a parent of a canonical node along each coordinate axis.
+When a hyperrectangle $R$ is added to node $n$, the bits are used to define whether $n$ represents a canonical node or an ancestor of a canonical node along each coordinate axis.
 The $2^D$ bits allow us to detect when the conditions of Lemma~\ref{lem:rectintersect} become fulfilled for the query rectangle and a rectangle in the tree.
 The following function computes the mask for a rectangle and a tree node.
 
@@ -1053,12 +1061,12 @@ For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
 \begin{alg}\label{alg:ucheck}
 Query whether rectangle $R$ intersects with any rectangle in the unified tree.
 \begin{algorithmic}
-\Procedure{QueryTree}{$D,n$}
+\Procedure{QueryTree}{$d,n$}
 \Comment{Check subtree rooted at node $n$}
 	\State $R\gets\texttt{false}$.
-	\If{$D=0$}
+	\If{$d=0$}
 		\State $R\gets\hasbits{n}{\texttt{reverseBits}(\maskof{R,n})}$.
-	\ElsIf{$\inter{n}\subseteq R_D$}
+	\ElsIf{$\inter{n}\subseteq R_d$}
 		\State $R\gets\checkdt(d-1,n)$.
 	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
 		\State $R\gets\checkdt(d-1,n)$.
@@ -1078,6 +1086,80 @@ This matches the conditions of Lemma~\ref{lem:rectintersect} for rectangle inter
 
 Next we consider clearing a rectangle from the unified tree.
 Clearing a rectangle $R$ means that all the rectangles in the tree are cut such that the region of $R$ becomes empty.
+The clear operation is implemented using the same three operations as we used for the 1-dimensional tree in Section~\ref{sec:treeops}:
+split touching intervals, clear subtrees of the canonical nodes, and finally recompute the information about hyperrectangles stored in the descendants.
+
+We perform the three steps by making two recursive traversals in the tree.
+On the first traversal we push down all the hyperrectangles stored in \canonpar{R} and clear all the subtrees rooted at \canon{R}.
+On the second tree traversal we recompute the information about the subtree to each node in \canonpar{R}.
+
+\begin{alg}
+Clear rectangle $R$ from $D$-dimensional unified segment tree.
+\begin{algorithmic}
+\State \cleardt($D,\texttt{root}$).
+\State \recomp($D,\texttt{root}$).
+\end{algorithmic}
+\end{alg}
+
+The procedures \cleardt and \recomp are defined below.
+
+\begin{algorithmic}
+\Procedure{ClearFromTree}{$d,n$}
+	\If{$d=0$}
+		\State \clearst($D,n,\maskof{R,n}$)
+	\ElsIf{$\inter{n}\subseteq R_d$}
+		\State $\cleardt(d-1,n)$.
+	\ElsIf{$\rect{n}_d\cap R_d\neq\emptyset$}
+		\State $\cleardt(d-1,n)$.
+		\State $\cleardt(d,\leftu{n}{d})$.
+		\State $\cleardt(d,\rightu{n}{d})$.
+	\EndIf
+\EndProcedure
+
+\Procedure{ClearSubtree}{$d,n,m$}
+	\Comment Fully clears the subtree rooted at $n$.
+	\If{$\neg\hasbits{n}{0}$}
+		\State Return.
+	\EndIf
+	\While{$d>0$ and $m$ does not have bit $d$ set}
+		\State $d\gets d-1$.
+	\EndWhile
+	\If{$d=0$}
+		\ForAll{$b \in 0\dots 2^D-1$}
+			\If{$b|m = 2^D-1$}
+				\State $\hasbits{n}{b}\gets\texttt{false}.$
+			\EndIf
+		\EndFor
+	\Else
+		\State $\clearst(d-1,n,m)$.
+		\State $\clearst(d,\leftu{n}{d},m)$.
+		\State $\clearst(d,\rightu{n}{d},m)$.
+	\EndIf
+\EndProcedure
+
+\Procedure{RecomputeSubtreeData}{$d,n$}
+	\If{$d=0$}
+		\State Reset all bits of $\hasbits{n}{}$ to $\texttt{false}$.
+		\State $m\gets\maskof{R,n}$.
+		\ForAll{$a \in 1\dots D$}
+			\State $c_1\gets\leftu{n}{a}$.
+			\State $2_1\gets\rightu{n}{a}$.
+			\ForAll{$b \in 0 \dots 2^D-1$}
+				\If{$b$ does not have bit $a$ set and $b|m\neq 2^N$}
+					\State $\hasbits{n}{b}\gets \hasbits{n}{b}$ or $\hasbits{c_1}{b}$ or $\hasbits{c_2}{b}$.
+				\EndIf
+			\EndFor
+		\EndFor
+	\ElsIf{$\inter{n}\subseteq R_d$}
+		\State $\recomp(d-1,n)$.
+	\ElsIf{$\rect{n}_d\cap R_d\neq\emptyset$}
+		\State $\recomp(d-1,n)$.
+		\State $\recomp(d,\leftu{n}{d})$.
+		\State $\recomp(d,\rightu{n}{d})$.
+	\EndIf
+\EndProcedure
+\end{algorithmic}
+
 
 
 \section{Planar minimum link paths}\label{sec:minlink2d}
