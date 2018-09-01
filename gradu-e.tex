@@ -49,12 +49,18 @@
 %\newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
 \newcommand\canoni[2]{\ensuremath{\textsc{c}_{#2}(#1)}\xspace}
 \newcommand\canonpar[1]{\ensuremath{\textsc{p}_{\textsc{c}}(#1)}\xspace}
+\newcommand\canonpari[2]{\ensuremath{\textsc{p}_{\textsc{c},#2}(#1)}\xspace}
 \newcommand\epar[1]{\ensuremath{\textsc{p}(#1)}\xspace}
 \newcommand\visitp{\ensuremath{\textsc{VisitParent}}\xspace}
 \newcommand\visitc{\ensuremath{\textsc{VisitCanonical}}\xspace}
+\newcommand\adddt{\ensuremath{\textsc{InsertToTree}}\xspace}
+\newcommand\checkdt{\ensuremath{\textsc{QueryTree}}\xspace}
 
 \newcommand\nodecs[1]{\ensuremath{\textsc{ivc}(#1)}\xspace}
 \newcommand\nodeps[1]{\ensuremath{\textsc{ivp}(#1)}\xspace}
+\newcommand\subtree[1]{\ensuremath{\texttt{subtree}(#1)}\xspace}
+\newcommand\subtreep[1]{\ensuremath{\texttt{subtreeP}(#1)}\xspace}
+\newcommand\hasrect[1]{\ensuremath{\texttt{hasrect}(#1)}\xspace}
 
 \newcommand\rect[1]{\ensuremath{\textsc{rect}(#1)}\xspace}
 
@@ -882,6 +888,82 @@ For 1-dimensional segment trees there is a clear connection between the child-pa
 For any two tree nodes $a$ and $b$, $\inter{a}\subseteq\inter{b}$ if and only if $b$ is an ancestor of $a$ in the tree.
 In multidimensional case it also applies that if $b$ is an ancestor of $a$, then $\rect{a}\subseteq\rect{b}$.
 However the reverse is not true; $\rect{a}\subseteq\rect{b}$ does not imply that $b$ is an ancestor of $a$ because $b$ can be in a different subtree in some of the outer trees.
+
+Instead of looking for parent-child relationships directly in the tree, we can look at them separately on each coordinate axis.
+This allows us to generalize Lemma~\ref{lem:segintersect} for segment interaction to work for rectangles.
+
+\begin{lem}\label{lem:rectintersect}Consider any two $D$-dimensional hyperrectangles $A$ and $B$.
+If $A\cap B\neq\emptyset$, then the following holds for each coordinate axis $d\in\set{1,\dots,D}$.
+\begin{enumerate}
+\item $\canoni{A_d}{d}\cap\canoni{B_d}{d}\neq\emptyset$,
+\item $\canoni{A_d}{d}\cap\canonpari{B_d}{d}\neq\emptyset$,
+\item $\canonpari{A_d}{d}\cap\canoni{B_d}{d}\neq\emptyset$.
+\end{enumerate}
+Furthermore, if $A\cap B=\emptyset$, then there is at least one coordinate axis for which none of the conditions hold.
+\end{lem}
+\begin{proof}
+$A$ and $B$ overlap if and only if their projections to each coordinate axis overlap.
+Suppose that $A\cap B\neq\emptyset$.
+Then $A_d$ and $B_d$ overlap for each $d$, and by Lemma~\ref{lem:segintersect} the condition holds for each $d$.
+If $A\cap B=\emptyset$, then there exists some $d$ for which $A_d\cap B_d=\emptyset$, so again by Lemma~\ref{lem:segintersect} none of the conditions hold for $d$.
+\end{proof}
+
+To apply Lemma~\ref{lem:rectintersect} to detect intersecting rectangles, we create \emph{two} $D-1$ dimensional inner trees to every outer node of a $D$-dimensional segment tree:
+\begin{description}
+\item[\subtree{n}] where we store rectangles $R$ for which $n\in\canoni{R_D}{D}$,
+\item[\subtreep{n}] where we store rectangles $R$ for which $n\in\canonpari{R_D}{D}$.
+\end{description}
+
+We can write rectangle insertion and query operations by using these fields.
+For simplicity we only support checking whether a query rectangle intersects any rectangle in the tree rather than returning the matching rectangles.
+The nodes $n$ of the innermost tree have dimension 0, and they contain only a single boolean \hasrect{n}, which indicates that at least one rectangle is inserted to this subtree.
+
+\begin{alg}\label{alg:rectadd}
+Add rectangle $R$ to $D$-dimensional tree.
+\begin{algorithmic}
+\Procedure{InsertToTree}{$D,n$}
+\Comment{Insert to the subtree rooted at node $n$}
+	\If{$D=0$}
+		\State $\hasrect{n}\gets\texttt{true}$.
+	\ElsIf{$\inter{n}\subseteq R_D$}
+		\State $\adddt(D-1,\subtree{n})$.
+	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
+		\State $\adddt(D-1,\subtreep{n})$.
+		\State $\adddt(D,\leftc{n})$.
+		\State $\adddt(D,\rightc{n})$.
+	\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{alg}
+
+\begin{alg}\label{alg:rectcheck}
+Query whether rectangle $R$ intersects with any rectangle in the tree.
+\begin{algorithmic}
+\Procedure{QueryTree}{$D,n$}
+\Comment{Check subtree rooted at node $n$}
+	\State $R\gets\texttt{false}$.
+	\If{$D=0$}
+		\State $R\gets\hasrect{n}$.
+	\ElsIf{$\inter{n}\subseteq R_D$}
+		\State $R\gets \checkdt(D-1,\subtree{n})$.
+		\State $R\gets R$ or $\checkdt(D-1,\subtreep{n})$.
+	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
+		\State $R\gets \checkdt(D-1,\subtree{n})$.
+		\State $R\gets R$ or $\checkdt(D,\leftc{n})$.
+		\State $R\gets R$ or $\checkdt(D,\rightc{n})$.
+	\EndIf
+	\State Return $R$.
+\EndProcedure
+\end{algorithmic}
+\end{alg}
+
+\begin{lem}\adddt and \checkdt both have time complexity $O(\log^D n)$.\end{lem}
+\begin{proof}
+Proof by induction on $D$.
+For the base case $D=0$ both algorithm finishes in constant time.
+For $D\ge 1$, algorithms iterate over the canonical nodes and their parents in the outer tree, making $\log{n}$ calls to the inner trees.
+By induction the inner tree operations are done in time $O(\log^{D-1}n)$, so the total time complexity is $O(\log^D n)$.
+\end{proof}
 
 
 \subsection{Unified segment tree}\label{sec:unifiedtree}
