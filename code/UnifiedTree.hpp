@@ -185,7 +185,7 @@ private:
 	void removeInSubtree(Index index, int axis, const Box<D>& box, V&& visitor) {
 		int totalIndex = computeIndex(index);
 		Item& item = data[totalIndex];
-//		if (!item.hasData[0]) return;
+		if (!item.hasData[0]) return;
 		if (axis == D) {
 #if 0
 			Mask covered = getCovered(index, box);
