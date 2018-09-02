@@ -60,6 +60,7 @@
 \newcommand\maskof[1]{\ensuremath{\textsc{NodeMask}(#1)}\xspace}
 \newcommand\cleardt{\ensuremath{\textsc{ClearFromTree}}\xspace}
 \newcommand\clearst{\ensuremath{\textsc{ClearSubtree}}\xspace}
+\newcommand\pdst{\ensuremath{\textsc{PushDownSubtree}}\xspace}
 \newcommand\recomp{\ensuremath{\textsc{RecomputeSubtreeData}}\xspace}
 
 \newcommand\nodecs[1]{\ensuremath{\textsc{ivc}(#1)}\xspace}
@@ -68,6 +69,7 @@
 \newcommand\subtreep[1]{\ensuremath{\texttt{subtreeP}(#1)}\xspace}
 \newcommand\hasrect[1]{\ensuremath{\texttt{hasrect}(#1)}\xspace}
 \newcommand\hasbits[2]{\ensuremath{\texttt{hasbits}(#1)[#2]}\xspace}
+\newcommand\hasbita[1]{\ensuremath{\texttt{hasbits}(#1)}\xspace}
 
 \newcommand\rect[1]{\ensuremath{\textsc{rect}(#1)}\xspace}
 
@@ -1096,69 +1098,71 @@ On the second tree traversal we recompute the information about the subtree to e
 \begin{alg}
 Clear rectangle $R$ from $D$-dimensional unified segment tree.
 \begin{algorithmic}
-\State \cleardt($D,\texttt{root}$).
-\State \recomp($D,\texttt{root}$).
-\end{algorithmic}
-\end{alg}
-
-The procedures \cleardt and \recomp are defined below.
-
-\begin{algorithmic}
 \Procedure{ClearFromTree}{$d,n$}
+	\If{$\neg\hasbits{n}{0}$ or $\inter{n}\cap R_d=\emptyset$}
+		\State Return.
+	\EndIf
 	\If{$d=0$}
-		\State \clearst($D,n,\maskof{R,n}$)
-	\ElsIf{$\inter{n}\subseteq R_d$}
-		\State $\cleardt(d-1,n)$.
-	\ElsIf{$\rect{n}_d\cap R_d\neq\emptyset$}
-		\State $\cleardt(d-1,n)$.
+		\State $\hasbita{n}\gets\texttt{false}$.
+		\State Return.
+	\EndIf
+	\If{$\rect{n}_d\nsubseteq R_d$}
+		\State $\pdst(d-1,n,d)$.
+	\EndIf
+	\State $\cleardt(d-1,n)$.
+	\If{\leftu{n}{d} and \rightu{n}{d} defined}
 		\State $\cleardt(d,\leftu{n}{d})$.
 		\State $\cleardt(d,\rightu{n}{d})$.
 	\EndIf
+	\If{$\rect{n}_d\nsubseteq R_d$}
+		\State $\recomp(d,n)$.
+	\EndIf
 \EndProcedure
 
-\Procedure{ClearSubtree}{$d,n,m$}
-	\Comment Fully clears the subtree rooted at $n$.
-	\If{$\neg\hasbits{n}{0}$}
+\Procedure{PushDownSubtree}{$d,n,a$}
+	\Comment Pushes down values in subtree $n$ along axis $a$.
+	\If{$d=0$}
+		\State $\hasbita{\leftu{n}{a}}\gets \hasbita{\leftu{n}{a}} | \hasbita{n}$.
+		\State $\hasbita{\rightu{n}{a}}\gets \hasbita{\rightu{n}{a}} | \hasbita{n}$.
+		\State Return.
+	\ElsIf{$\rect{n}_d\cap R_d=\emptyset$}
 		\State Return.
 	\EndIf
-	\While{$d>0$ and $m$ does not have bit $d$ set}
-		\State $d\gets d-1$.
-	\EndWhile
-	\If{$d=0$}
-		\ForAll{$b \in 0\dots 2^D-1$}
-			\If{$b|m = 2^D-1$}
-				\State $\hasbits{n}{b}\gets\texttt{false}.$
-			\EndIf
-		\EndFor
-	\Else
-		\State $\clearst(d-1,n,m)$.
-		\State $\clearst(d,\leftu{n}{d},m)$.
-		\State $\clearst(d,\rightu{n}{d},m)$.
+	\State $\clearst(d-1,n,a)$.
+	\If{\leftu{n}{d} and \rightu{n}{d} defined}
+		\State $\clearst(d,\leftu{n}{d},a)$.
+		\State $\clearst(d,\rightu{n}{d},a)$.
 	\EndIf
 \EndProcedure
 
 \Procedure{RecomputeSubtreeData}{$d,n$}
 	\If{$d=0$}
-		\State Reset all bits of $\hasbits{n}{}$ to $\texttt{false}$.
+		\State $\hasbita{n}\gets\texttt{false}$.
 		\State $m\gets\maskof{R,n}$.
 		\ForAll{$a \in 1\dots D$}
+			\If{$\rect{n}_a \subseteq R_a$}
+				Continue.
+			\EndIf
 			\State $c_1\gets\leftu{n}{a}$.
-			\State $2_1\gets\rightu{n}{a}$.
+			\State $c_1\gets\rightu{n}{a}$.
 			\ForAll{$b \in 0 \dots 2^D-1$}
-				\If{$b$ does not have bit $a$ set and $b|m\neq 2^N$}
+				\If{$b$ does not have bit $a$ set}
 					\State $\hasbits{n}{b}\gets \hasbits{n}{b}$ or $\hasbits{c_1}{b}$ or $\hasbits{c_2}{b}$.
 				\EndIf
 			\EndFor
 		\EndFor
-	\ElsIf{$\inter{n}\subseteq R_d$}
-		\State $\recomp(d-1,n)$.
-	\ElsIf{$\rect{n}_d\cap R_d\neq\emptyset$}
-		\State $\recomp(d-1,n)$.
+		\State Return.
+	\ElsIf{$\inter{n}\cap R_d=\emptyset$}
+		\State Return.
+	\EndIf
+	\State $\recomp(d-1,n)$.
+	\If{\leftu{n}{d} and \rightu{n}{d} defined}
 		\State $\recomp(d,\leftu{n}{d})$.
 		\State $\recomp(d,\rightu{n}{d})$.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
+\end{alg}
 
 
 

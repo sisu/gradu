@@ -171,12 +171,10 @@ private:
 			int baseIndex = totalIndex - step*x;
 			const auto& a = data[baseIndex + step*(2*x)];
 			const auto& b = data[baseIndex + step*(2*x+1)];
-			for(Mask i=0; i<1<<D; ++i) {
-				if (!(1 & (i>>d))) {
-//					std::cout<<"pr "<<d<<' '<<i<<' '<<a.hasData[i]<<' '<<b.hasData[i]<<'\n';
-					t.hasData[i] = t.hasData[i] | a.hasData[i] | b.hasData[i];
-				}
-			}
+
+			std::bitset<1<<D> dirMask = 0;
+			for(Mask i=0; i<1<<D; ++i) if (!(1 & i>>d)) dirMask.set(i);
+			t.hasData = t.hasData | ((a.hasData | b.hasData) & dirMask);
 		}
 //		std::cout<<"Postremove res for "<<index<<' '<<covered<<" : "<<t.hasData.to_ulong()<<'\n';
 	}
