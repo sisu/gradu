@@ -301,9 +301,9 @@ TEST(UnifiedTreeTest2D, RandomAddCheck32) {
 }
 
 TEST(UnifiedTreeTest2D, RandomAddRemove32) {
-	constexpr int size = 4;
-	for(int i=0; i<10000; ++i) {
-		cout<<"\nRun "<<i<<'\n';
+	constexpr int size = 32;
+	for(int i=0; i<1000; ++i) {
+//		cout<<"\nRun "<<i<<'\n';
 		UnifiedTree<Item<2>, 2> tree{{size, size}};
 		mt19937 rng(i);
 		runOps(tree, genRandomOps<2>(size, 4, {OType::ADD, OType::REMOVE, OType::CHECK}, rng));

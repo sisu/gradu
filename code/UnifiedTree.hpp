@@ -85,7 +85,7 @@ private:
 
 	void addRec(int index, int axis, Mask covered, const Box<D>& box, const T& value) {
 		if (axis == D) {
-			std::cout<<"add "<<toIndex(index)<<' '<<covered<<' '<<box<<'\n';
+//			std::cout<<"add "<<toIndex(index)<<' '<<covered<<' '<<box<<'\n';
 			Item& x = data[index];
 			if (covered == ALL_MASK && !x.hasData[ALL_MASK]) {
 				assignItem(index, value);
@@ -134,7 +134,7 @@ private:
 	bool checkRec(int index, int axis, Mask covered, const Box<D>& box) const {
 		if (axis == D) {
 			const Item& x = data[index];
-			std::cout<<"check "<<toIndex(index)<<' '<<covered<<' '<<x.hasData[covered ^ ALL_MASK]<<'\n';
+//			std::cout<<"check "<<toIndex(index)<<' '<<covered<<' '<<x.hasData[covered ^ ALL_MASK]<<'\n';
 			return x.hasData[covered ^ ALL_MASK];
 		}
 		int s = size[axis];
@@ -159,7 +159,7 @@ private:
 		int totalIndex = computeIndex(index);
 		Item& t = data[totalIndex];
 		if (t.hasData[ALL_MASK]) {
-			std::cout<<"skip postremove for node "<<index<<'\n';
+//			std::cout<<"skip postremove for node "<<index<<'\n';
 			return;
 		}
 		t.hasData.reset();
@@ -173,12 +173,12 @@ private:
 			const auto& b = data[baseIndex + step*(2*x+1)];
 			for(Mask i=0; i<1<<D; ++i) {
 				if (!(1 & (i>>d))) {
-					std::cout<<"pr "<<d<<' '<<i<<' '<<a.hasData[i]<<' '<<b.hasData[i]<<'\n';
+//					std::cout<<"pr "<<d<<' '<<i<<' '<<a.hasData[i]<<' '<<b.hasData[i]<<'\n';
 					t.hasData[i] = t.hasData[i] | a.hasData[i] | b.hasData[i];
 				}
 			}
 		}
-		std::cout<<"Postremove res for "<<index<<' '<<covered<<" : "<<t.hasData.to_ulong()<<'\n';
+//		std::cout<<"Postremove res for "<<index<<' '<<covered<<" : "<<t.hasData.to_ulong()<<'\n';
 	}
 
 	template<class V>
@@ -201,16 +201,16 @@ private:
 				visitor(index, item.data);
 			}
 #endif
-			std::cout<<"Clear "<<index<<'\n';
+//			std::cout<<"Clear "<<index<<'\n';
 			item.hasData.reset();
 			return;
 		}
 		Range range = rangeForIndex(axis, index[axis]);
 		if (!range.intersects(box[axis])) return;
-		std::cout<<" Enter remove "<<index<<' '<<axis<<'\n';
+//		std::cout<<" Enter remove "<<index<<' '<<axis<<'\n';
 		bool isParent = !box[axis].contains(range);
 		if (isParent) {
-			std::cout<<"splitting subtree "<<index<<' '<<axis<<'\n';
+//			std::cout<<"splitting subtree "<<index<<' '<<axis<<'\n';
 			propagateInSubtree(index, axis+1, box, axis);
 		}
 		removeInSubtree(index, axis+1, box, visitor);
@@ -220,10 +220,10 @@ private:
 			removeInSubtree(withIndex(index, axis, 2*i+1), axis, box, visitor);
 		}
 		if (isParent) {
-			std::cout<<"computing child data for "<<index<<' '<<axis<<'\n';
+//			std::cout<<"computing child data for "<<index<<' '<<axis<<'\n';
 			computeChildData(index, axis+1, box);
 		}
-		std::cout<<" Exit remove "<<index<<' '<<axis<<'\n';
+//		std::cout<<" Exit remove "<<index<<' '<<axis<<'\n';
 	}
 
 	void propagateInSubtree(Index index, int axis, const Box<D>& box, int splitAxis) {
@@ -235,7 +235,7 @@ private:
 			int step = stepSize[splitAxis];
 			int i = index[splitAxis];
 			int baseIndex = totalIndex - step * i;
-			std::cout<<"   SPLIT "<<index<<" by "<<splitAxis<<' '<<t.hasData[ALL_MASK]<<'\n';
+//			std::cout<<"   SPLIT "<<index<<" by "<<splitAxis<<' '<<t.hasData[ALL_MASK]<<'\n';
 			if (t.hasData[ALL_MASK]) {
 				assignItem(baseIndex + step * (2*i), t.data);
 				assignItem(baseIndex + step * (2*i+1), t.data);
@@ -274,7 +274,7 @@ private:
 				Range r = rangeForIndex(i, index[i]);
 				covered |= box[i].contains(r) << i;
 			}
-			std::cout<<"calling gensub "<<index<<' '<<covered<<' '<<box<<' '<<boxForIndex(index)<<'\n';
+//			std::cout<<"calling gensub "<<index<<' '<<covered<<' '<<box<<' '<<boxForIndex(index)<<'\n';
 			return genSubtreeState(index, covered);
 		}
 //		Range range = rangeForIndex(axis, index[axis]);
