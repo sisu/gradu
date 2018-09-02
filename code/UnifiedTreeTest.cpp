@@ -306,7 +306,17 @@ TEST(UnifiedTreeTest2D, RandomAddRemove32) {
 //		cout<<"\nRun "<<i<<'\n';
 		UnifiedTree<Item<2>, 2> tree{{size, size}};
 		mt19937 rng(i);
-		runOps(tree, genRandomOps<2>(size, 4, {OType::ADD, OType::REMOVE, OType::CHECK}, rng));
+		runOps(tree, genRandomOps<2>(size, 10, {OType::ADD, OType::REMOVE, OType::CHECK}, rng));
+	}
+}
+
+TEST(UnifiedTreeTest3D, RandomAddRemove32) {
+	constexpr int size = 32;
+	for(int i=0; i<10; ++i) {
+//		cout<<"\nRun "<<i<<'\n';
+		UnifiedTree<Item<3>, 3> tree{{size, size, size}};
+		mt19937 rng(i);
+		runOps(tree, genRandomOps<3>(size, 10, {OType::ADD, OType::REMOVE, OType::CHECK}, rng));
 	}
 }
 
