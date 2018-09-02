@@ -25,7 +25,6 @@ public:
 			total *= 2*s;
 		}
 		data.resize(total);
-//		clearedIndices.resize(total);
 	}
 
 	void add(const Box<D>& box, const T& value) {
@@ -42,38 +41,10 @@ public:
 
 	template<class V>
 	void remove(Box<D> box, V&& visitor) {
-//		clearedIndices.clear();
 		for(int i=0; i<D; ++i) if (box[i].size()==0) return;
 		Index ones;
 		for(int i=0; i<D; ++i) ones[i]=1;
-		removeRec(ones,0,0,box, visitor);
-#if 1
-		postRemove2(box);
-//		postRemove(ones,0,0,box);
-#else
-		std::reverse(clearedIndices.begin(), clearedIndices.end());
-		for(Index index: clearedIndices) {
-			int totalIndex = computeIndex(index);
-			Item& t = data[totalIndex];
-			t.hasData.reset();
-			Mask covered = getCovered(index, box);
-			for(int d=0; d<D; ++d) {
-				if (index[d] >= size[d]) continue;
-				int x = index[d];
-				int step = stepSize[d];
-				int baseIndex = totalIndex - step*x;
-				const auto& a = data[baseIndex + step*(2*x)];
-				const auto& b = data[baseIndex + step*(2*x+1)];
-				for(Mask i=0; i<1<<D; ++i) {
-					if (!(1 & (i>>d)) && (covered | i) != ALL_MASK) {
-						std::cout<<"pr "<<d<<' '<<i<<' '<<a.hasData[i]<<' '<<b.hasData[i]<<'\n';
-						t.hasData[i] = t.hasData[i] | a.hasData[i] | b.hasData[i];
-					}
-				}
-			}
-			std::cout<<"Postremove res for "<<index<<' '<<box<<" : "<<t.hasData.to_ulong()<<'\n';
-		}
-#endif
+		removeInSubtree(ones, 0, box, visitor);
 	}
 
 	Index getSize() const { return size; }
@@ -184,143 +155,7 @@ private:
 		return false;
 	}
 
-	template<class V>
-	void removeRec(Index index, int axis, Mask covered, const Box<D>& box, V&& visitor) {
-		if (axis == D) {
-//			clearedIndices.set(computeIndex(index));
-#if 0
-			int totalIndex = computeIndex(index);
-			Item& x = data[totalIndex];
-			if (covered != ALL_MASK && x.hasData[ALL_MASK]) {
-				int splitAxis = 0;
-				while(1 & (covered >> splitAxis)) ++splitAxis;
-				int step = stepSize[splitAxis];
-				int i = index[splitAxis];
-				int baseIndex = totalIndex - step * i;
-				std::cout<<"split "<<index<<" by "<<splitAxis<<'\n';
-				assignItem(baseIndex + step * (2*i), x.data);
-				assignItem(baseIndex + step * (2*i+1), x.data);
-			}
-#endif
-			std::cout<<"Clear subtree "<<index<<' '<<covered<<'\n';
-			clearSubtree(index, 0, covered, visitor);
-			return;
-		}
-		int i = index[axis];
-		Range range = rangeForIndex(axis, i);
-		if (!box[axis].intersects(range)) return;
-		if (box[axis].contains(range)) {
-			removeRec(index, axis+1, covered | (1U << axis), box, visitor);
-		} else {
-			removeRec(index, axis+1, covered, box, visitor);
-			index[axis] = 2*i;
-			removeRec(index, axis, covered, box, visitor);
-			index[axis] = 2*i+1;
-			removeRec(index, axis, covered, box, visitor);
-		}
-	}
-
-	template<class V>
-	void clearSubtree(Index index, int axis, Mask covered, V&& visitor) {
-		while(axis<D && !(1&(covered>>axis))) ++axis;
-		if (axis == D) {
-			int totalIndex = computeIndex(index);
-//			clearedIndices.set(totalIndex);
-			Item& t = data[totalIndex];
-			if (covered != ALL_MASK && t.hasData[ALL_MASK]) {
-				int splitAxis = 0;
-				while(1 & (covered >> splitAxis)) ++splitAxis;
-				int step = stepSize[splitAxis];
-				int i = index[splitAxis];
-				int baseIndex = totalIndex - step * i;
-				std::cout<<"split "<<index<<" by "<<splitAxis<<'\n';
-				assignItem(baseIndex + step * (2*i), t.data);
-				assignItem(baseIndex + step * (2*i+1), t.data);
-			} else if (t.hasData[ALL_MASK]) {
-				visitor(index, t.data);
-			}
-//			bool res = t.hasData[0];
-			std::cout<<"rm "<<index<<' '<<covered<<" : "<<t.hasData.to_ulong()<<'\n';
-			for(Mask i=0; i<1<<D; ++i) {
-				if ((i | covered) == ALL_MASK) {
-					t.hasData.reset(i);
-				}
-			}
-			return;
-		}
-		int i = index[axis];
-		clearSubtree(index, axis+1, covered, visitor);
-		if (i < size[axis]) {
-			index[axis] = 2*i;
-			clearSubtree(index, axis, covered, visitor);
-			index[axis] = 2*i+1;
-			clearSubtree(index, axis, covered, visitor);
-		}
-	}
-
-	void postRemove(Index index, int axis, Mask covered, const Box<D>& box) {
-		if (axis == D) {
-			genSubtreeState(index);
-			return;
-		}
-		int s = size[axis];
-		Range range = box[axis];
-		int a,b,ap,bp;
-		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
-			if (a != ap) {
-				postRemove(withIndex(index, axis, ap), axis+1, covered, box);
-			}
-			if (b != bp) {
-				postRemove(withIndex(index, axis, bp), axis+1, covered, box);
-			}
-			if (a&1) {
-				postRemove(withIndex(index, axis, a++), axis+1, covered | (1U<<axis), box);
-			}
-			if (!(b&1)) {
-				postRemove(withIndex(index, axis, b--), axis+1, covered | (1U<<axis), box);
-			}
-		}
-		for(; ap > 0; ap/=2, bp/=2) {
-			postRemove(withIndex(index, axis, ap), axis+1, covered, box);
-			if (ap != bp) {
-				postRemove(withIndex(index, axis, bp), axis+1, covered, box);
-			}
-		}
-	}
-
-	void postRemove2(const Box<D>& box) {
-		int s = size[0];
-		Range range = box[0];
-		int a,b,ap,bp;
-		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
-			if (a != ap) fixSubtreeStates(ap);
-			if (b != bp) fixSubtreeStates(bp);
-			if (a&1) fixSubtreeStates(a++);
-			if (!(b&1)) fixSubtreeStates(b--);
-		}
-		for(; ap > 0; ap/=2, bp/=2) {
-			fixSubtreeStates(ap);
-			if (ap != bp) fixSubtreeStates(bp);
-		}
-	}
-
-	void fixSubtreeStates(int firstIndex) {
-		Index index;
-		for(int i=0; i<D; ++i) index[i]=0;
-		index[0] = firstIndex;
-		assert(D >= 1);
-		fixSubtreeStatesRec(index, 1);
-	}
-	void fixSubtreeStatesRec(Index index, int axis) {
-		if (axis == D) {
-			return genSubtreeState(index);
-		}
-		for(int i=2*size[axis]-1; i>=0; --i) {
-			fixSubtreeStatesRec(withIndex(index, axis, i), axis+1);
-		}
-	}
-
-	void genSubtreeState(Index index) {
+	void genSubtreeState(Index index, Mask covered = 0) {
 		int totalIndex = computeIndex(index);
 		Item& t = data[totalIndex];
 		if (t.hasData[ALL_MASK]) {
@@ -330,6 +165,7 @@ private:
 		t.hasData.reset();
 		for(int d=0; d<D; ++d) {
 			if (index[d] >= size[d]) continue;
+			if (1 & (covered >> d)) continue;
 			int x = index[d];
 			int step = stepSize[d];
 			int baseIndex = totalIndex - step*x;
@@ -342,35 +178,116 @@ private:
 				}
 			}
 		}
-		std::cout<<"Postremove res for "<<index<<" : "<<t.hasData.to_ulong()<<'\n';
+		std::cout<<"Postremove res for "<<index<<' '<<covered<<" : "<<t.hasData.to_ulong()<<'\n';
 	}
 
-	void removeInSubtree(Index index, int axis, const Box<D>& box) {
-		Range range = rangeForIndex(axis, index[axis]);
-		if (!range.intersects(box[axis])) return;
+	template<class V>
+	void removeInSubtree(Index index, int axis, const Box<D>& box, V&& visitor) {
 		int totalIndex = computeIndex(index);
 		Item& item = data[totalIndex];
-		if (!item.hasData(0)) return;
+//		if (!item.hasData[0]) return;
 		if (axis == D) {
+#if 0
+			Mask covered = getCovered(index, box);
+			if (item.hasData[ALL_MASK] && covered != ALL_MASK) {
+				visitor(index, item.data);
+			} else if (item.hasData[ALL_MASK]) {
+				int splitAxis = 0;
+				while(1 & (covered >> splitAxis)) ++splitAxis;
+				std::cout<<"split2 "<<index<<' '<<box<<' '<<covered<<' '<<splitAxis<<'\n';
+			}
+#else
 			if (item.hasData[ALL_MASK]) {
 				visitor(index, item.data);
 			}
+#endif
+			std::cout<<"Clear "<<index<<'\n';
 			item.hasData.reset();
 			return;
 		}
+		Range range = rangeForIndex(axis, index[axis]);
+		if (!range.intersects(box[axis])) return;
+		std::cout<<" Enter remove "<<index<<' '<<axis<<'\n';
 		bool isParent = !box[axis].contains(range);
 		if (isParent) {
+			std::cout<<"splitting subtree "<<index<<' '<<axis<<'\n';
+			propagateInSubtree(index, axis+1, box, axis);
 		}
+		removeInSubtree(index, axis+1, box, visitor);
 		int i = index[axis];
 		if (i < size[axis]) {
-			removeInSubtree(withIndex(index, axis, 2*i), axis, box);
-			removeInSubtree(withIndex(index, axis, 2*i+1), axis, box);
+			removeInSubtree(withIndex(index, axis, 2*i), axis, box, visitor);
+			removeInSubtree(withIndex(index, axis, 2*i+1), axis, box, visitor);
 		}
 		if (isParent) {
+			std::cout<<"computing child data for "<<index<<' '<<axis<<'\n';
+			computeChildData(index, axis+1, box);
+		}
+		std::cout<<" Exit remove "<<index<<' '<<axis<<'\n';
+	}
+
+	void propagateInSubtree(Index index, int axis, const Box<D>& box, int splitAxis) {
+		if (axis == D) {
+			int totalIndex = computeIndex(index);
+			Item& t = data[totalIndex];
+			if (!t.hasData[0]) return;
+//			Mask covered = getCovered(index, box);
+			int step = stepSize[splitAxis];
+			int i = index[splitAxis];
+			int baseIndex = totalIndex - step * i;
+			std::cout<<"   SPLIT "<<index<<" by "<<splitAxis<<' '<<t.hasData[ALL_MASK]<<'\n';
+			if (t.hasData[ALL_MASK]) {
+				assignItem(baseIndex + step * (2*i), t.data);
+				assignItem(baseIndex + step * (2*i+1), t.data);
+				t.hasData.reset(ALL_MASK);
+			} else if (t.hasData[1 << splitAxis]) {
+				Item& left = data[baseIndex + step * (2*i)];
+				Item& right = data[baseIndex + step * (2*i+1)];
+#if 0
+				for(int i=0; i<1<<D; ++i) {
+					if ((covered | i) != ALL_MASK) {
+						left.hasData[i] = left.hasData[i] | t.hasData[i];
+						right.hasData[i] = right.hasData[i] | t.hasData[i];
+					}
+				}
+#else
+				left.hasData = left.hasData | t.hasData;
+				right.hasData = right.hasData | t.hasData;
+#endif
+			}
+			return;
+		}
+		Range range = rangeForIndex(axis, index[axis]);
+		if (!range.intersects(box[axis])) return;
+		propagateInSubtree(index, axis+1, box, splitAxis);
+		int i = index[axis];
+		if (i < size[axis]) {
+			propagateInSubtree(withIndex(index, axis, 2*i), axis, box, splitAxis);
+			propagateInSubtree(withIndex(index, axis, 2*i+1), axis, box, splitAxis);
 		}
 	}
 
-	static Index& withIndex(Index& index, int axis, int x) {
+	void computeChildData(Index index, int axis, const Box<D>& box) {
+		if (axis == D) {
+			Mask covered = 0;
+			for(int i=0; i<D; ++i) {
+				Range r = rangeForIndex(i, index[i]);
+				covered |= box[i].contains(r) << i;
+			}
+			std::cout<<"calling gensub "<<index<<' '<<covered<<' '<<box<<' '<<boxForIndex(index)<<'\n';
+			return genSubtreeState(index, covered);
+		}
+//		Range range = rangeForIndex(axis, index[axis]);
+//		if (!range.intersects(box[axis])) return;
+		int i = index[axis];
+		if (i < size[axis]) {
+			computeChildData(withIndex(index, axis, 2*i), axis, box);
+			computeChildData(withIndex(index, axis, 2*i+1), axis, box);
+		}
+		computeChildData(withIndex(index, axis, i), axis+1, box);
+	}
+
+	static Index withIndex(Index index, int axis, int x) {
 		index[axis] = x;
 		return index;
 	}
@@ -386,5 +303,4 @@ private:
 	Index size = {};
 	Index stepSize = {};
 	std::vector<Item> data;
-//	std::vector<Index> clearedIndices;
 };
