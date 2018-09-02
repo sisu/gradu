@@ -235,6 +235,51 @@ TEST(UnifiedTreeTest2D, AddCheckUnitTree) {
 	runOps(tree, ops);
 }
 
+TEST(UnifiedTreeTest2D, AddCheckRemove1) {
+	UnifiedTree<Item<2>, 2> tree{{4, 4}};
+	vector<Operation<2>> ops = {
+		makeOp2(OType::ADD, {2,3}, {0,4}),
+		makeOp2(OType::REMOVE, {1,4}, {1,4}),
+		makeOp2(OType::CHECK, {0,4}, {0,3})};
+	runOps(tree, ops);
+}
+
+TEST(UnifiedTreeTest2D, AddCheckRemove2) {
+	UnifiedTree<Item<2>, 2> tree{{4, 4}};
+	vector<Operation<2>> ops = {
+		makeOp2(OType::ADD, {2,3}, {0,4}),
+		makeOp2(OType::REMOVE, {1,4}, {2,3}),
+		makeOp2(OType::CHECK, {2,4}, {0,3})};
+	runOps(tree, ops);
+}
+
+TEST(UnifiedTreeTest2D, AddCheckRemove3) {
+	UnifiedTree<Item<2>, 2> tree{{4, 4}};
+	vector<Operation<2>> ops = {
+		makeOp2(OType::ADD, {0,4}, {0,1}),
+		makeOp2(OType::REMOVE, {1,2}, {0,4}),
+		makeOp2(OType::CHECK, {0,2}, {0,3})};
+	runOps(tree, ops);
+}
+
+TEST(UnifiedTreeTest2D, AddCheckRemove4) {
+	UnifiedTree<Item<2>, 2> tree{{4, 4}};
+	vector<Operation<2>> ops = {
+		makeOp2(OType::ADD, {0,2}, {1,4}),
+		makeOp2(OType::REMOVE, {0,3}, {2,3}),
+		makeOp2(OType::CHECK, {0,3}, {0,2})};
+	runOps(tree, ops);
+}
+
+TEST(UnifiedTreeTest2D, AddCheckRemove5) {
+	UnifiedTree<Item<2>, 2> tree{{4, 4}};
+	vector<Operation<2>> ops = {
+		makeOp2(OType::ADD, {0,3}, {1,3}),
+		makeOp2(OType::REMOVE, {0,4}, {1,3}),
+		makeOp2(OType::CHECK, {1,4}, {2,4})};
+	runOps(tree, ops);
+}
+
 TEST(UnifiedTreeTest2D, RandomAddCheck32) {
 	for(int i=0; i<5; ++i) {
 //		cout<<"\nRun "<<i<<'\n';
@@ -245,12 +290,12 @@ TEST(UnifiedTreeTest2D, RandomAddCheck32) {
 }
 
 TEST(UnifiedTreeTest2D, RandomAddRemove32) {
-	constexpr int size = 32;
-	for(int i=0; i<5; ++i) {
-//		cout<<"\nRun "<<i<<'\n';
+	constexpr int size = 4;
+	for(int i=0; i<10000; ++i) {
+		cout<<"\nRun "<<i<<'\n';
 		UnifiedTree<Item<2>, 2> tree{{size, size}};
-		mt19937 rng(2);
-		runOps(tree, genRandomOps<2>(size, 20, {OType::ADD, OType::REMOVE, OType::CHECK}, rng));
+		mt19937 rng(i);
+		runOps(tree, genRandomOps<2>(size, 4, {OType::ADD, OType::REMOVE, OType::CHECK}, rng));
 	}
 }
 

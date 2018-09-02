@@ -2,6 +2,7 @@
 
 #include "Box.hpp"
 #include "TreeStructure.hpp"
+#include "print.hpp"
 #include "util.hpp"
 
 #include <array>
@@ -24,6 +25,7 @@ public:
 			total *= 2*s;
 		}
 		data.resize(total);
+//		clearedIndices.resize(total);
 	}
 
 	void add(const Box<D>& box, const T& value) {
@@ -40,11 +42,38 @@ public:
 
 	template<class V>
 	void remove(Box<D> box, V&& visitor) {
+//		clearedIndices.clear();
 		for(int i=0; i<D; ++i) if (box[i].size()==0) return;
 		Index ones;
 		for(int i=0; i<D; ++i) ones[i]=1;
 		removeRec(ones,0,0,box, visitor);
-		postRemove(ones,0,0,box);
+#if 1
+		postRemove2(box);
+//		postRemove(ones,0,0,box);
+#else
+		std::reverse(clearedIndices.begin(), clearedIndices.end());
+		for(Index index: clearedIndices) {
+			int totalIndex = computeIndex(index);
+			Item& t = data[totalIndex];
+			t.hasData.reset();
+			Mask covered = getCovered(index, box);
+			for(int d=0; d<D; ++d) {
+				if (index[d] >= size[d]) continue;
+				int x = index[d];
+				int step = stepSize[d];
+				int baseIndex = totalIndex - step*x;
+				const auto& a = data[baseIndex + step*(2*x)];
+				const auto& b = data[baseIndex + step*(2*x+1)];
+				for(Mask i=0; i<1<<D; ++i) {
+					if (!(1 & (i>>d)) && (covered | i) != ALL_MASK) {
+						std::cout<<"pr "<<d<<' '<<i<<' '<<a.hasData[i]<<' '<<b.hasData[i]<<'\n';
+						t.hasData[i] = t.hasData[i] | a.hasData[i] | b.hasData[i];
+					}
+				}
+			}
+			std::cout<<"Postremove res for "<<index<<' '<<box<<" : "<<t.hasData.to_ulong()<<'\n';
+		}
+#endif
 	}
 
 	Index getSize() const { return size; }
@@ -66,8 +95,26 @@ private:
 	};
 	using Mask = unsigned;
 
+	Mask getCovered(const Index& index, const Box<D>& box) const {
+		Mask res = 0;
+		for(int i=0; i<D; ++i) {
+			res |= box[i].contains(rangeForIndex(i, index[i])) << i;
+		}
+		return res;
+	}
+	Index toIndex(int idx) const {
+		Index res = {};
+		for(int i=D-1; i>=0; --i) {
+			if (!size[i]) continue;
+			res[i] = idx % (2*size[i]);
+			idx /= 2*size[i];
+		}
+		return res;
+	}
+
 	void addRec(int index, int axis, Mask covered, const Box<D>& box, const T& value) {
 		if (axis == D) {
+			std::cout<<"add "<<toIndex(index)<<' '<<covered<<' '<<box<<'\n';
 			Item& x = data[index];
 			if (covered == ALL_MASK && !x.hasData[ALL_MASK]) {
 				assignItem(index, value);
@@ -116,6 +163,7 @@ private:
 	bool checkRec(int index, int axis, Mask covered, const Box<D>& box) const {
 		if (axis == D) {
 			const Item& x = data[index];
+			std::cout<<"check "<<toIndex(index)<<' '<<covered<<' '<<x.hasData[covered ^ ALL_MASK]<<'\n';
 			return x.hasData[covered ^ ALL_MASK];
 		}
 		int s = size[axis];
@@ -139,6 +187,8 @@ private:
 	template<class V>
 	void removeRec(Index index, int axis, Mask covered, const Box<D>& box, V&& visitor) {
 		if (axis == D) {
+//			clearedIndices.set(computeIndex(index));
+#if 0
 			int totalIndex = computeIndex(index);
 			Item& x = data[totalIndex];
 			if (covered != ALL_MASK && x.hasData[ALL_MASK]) {
@@ -147,9 +197,12 @@ private:
 				int step = stepSize[splitAxis];
 				int i = index[splitAxis];
 				int baseIndex = totalIndex - step * i;
+				std::cout<<"split "<<index<<" by "<<splitAxis<<'\n';
 				assignItem(baseIndex + step * (2*i), x.data);
 				assignItem(baseIndex + step * (2*i+1), x.data);
 			}
+#endif
+			std::cout<<"Clear subtree "<<index<<' '<<covered<<'\n';
 			clearSubtree(index, 0, covered, visitor);
 			return;
 		}
@@ -168,52 +221,46 @@ private:
 	}
 
 	template<class V>
-	bool clearSubtree(Index index, int axis, Mask covered, V&& visitor) {
+	void clearSubtree(Index index, int axis, Mask covered, V&& visitor) {
 		while(axis<D && !(1&(covered>>axis))) ++axis;
 		if (axis == D) {
 			int totalIndex = computeIndex(index);
+//			clearedIndices.set(totalIndex);
 			Item& t = data[totalIndex];
-			if (t.hasData[ALL_MASK]) {
+			if (covered != ALL_MASK && t.hasData[ALL_MASK]) {
+				int splitAxis = 0;
+				while(1 & (covered >> splitAxis)) ++splitAxis;
+				int step = stepSize[splitAxis];
+				int i = index[splitAxis];
+				int baseIndex = totalIndex - step * i;
+				std::cout<<"split "<<index<<" by "<<splitAxis<<'\n';
+				assignItem(baseIndex + step * (2*i), t.data);
+				assignItem(baseIndex + step * (2*i+1), t.data);
+			} else if (t.hasData[ALL_MASK]) {
 				visitor(index, t.data);
 			}
-			bool res = t.hasData[0];
+//			bool res = t.hasData[0];
+			std::cout<<"rm "<<index<<' '<<covered<<" : "<<t.hasData.to_ulong()<<'\n';
 			for(Mask i=0; i<1<<D; ++i) {
 				if ((i | covered) == ALL_MASK) {
 					t.hasData.reset(i);
 				}
 			}
-			return res;
+			return;
 		}
 		int i = index[axis];
-		bool res = clearSubtree(index, axis+1, covered, visitor);
-		if (!res) return false;
+		clearSubtree(index, axis+1, covered, visitor);
 		if (i < size[axis]) {
 			index[axis] = 2*i;
 			clearSubtree(index, axis, covered, visitor);
 			index[axis] = 2*i+1;
 			clearSubtree(index, axis, covered, visitor);
 		}
-		return true;
 	}
 
 	void postRemove(Index index, int axis, Mask covered, const Box<D>& box) {
 		if (axis == D) {
-			int totalIndex = computeIndex(index);
-			Item& t = data[totalIndex];
-			t.hasData.reset();
-			for(int d=0; d<D; ++d) {
-				if (index[d] >= size[d]) continue;
-				int x = index[d];
-				int step = stepSize[d];
-				int baseIndex = totalIndex - step*x;
-				const auto& a = data[baseIndex + step*(2*x)];
-				const auto& b = data[baseIndex + step*(2*x+1)];
-				for(Mask i=0; i<1<<D; ++i) {
-					if (!(1 & (i>>d)) && (covered | i) != ALL_MASK) {
-						t.hasData[i] = t.hasData[i] | a.hasData[i] | b.hasData[i];
-					}
-				}
-			}
+			genSubtreeState(index);
 			return;
 		}
 		int s = size[axis];
@@ -241,6 +288,88 @@ private:
 		}
 	}
 
+	void postRemove2(const Box<D>& box) {
+		int s = size[0];
+		Range range = box[0];
+		int a,b,ap,bp;
+		for(a=s+range.from, b=s+range.to-1, ap=a, bp=b; a<=b; a/=2, b/=2, ap/=2, bp/=2) {
+			if (a != ap) fixSubtreeStates(ap);
+			if (b != bp) fixSubtreeStates(bp);
+			if (a&1) fixSubtreeStates(a++);
+			if (!(b&1)) fixSubtreeStates(b--);
+		}
+		for(; ap > 0; ap/=2, bp/=2) {
+			fixSubtreeStates(ap);
+			if (ap != bp) fixSubtreeStates(bp);
+		}
+	}
+
+	void fixSubtreeStates(int firstIndex) {
+		Index index;
+		for(int i=0; i<D; ++i) index[i]=0;
+		index[0] = firstIndex;
+		assert(D >= 1);
+		fixSubtreeStatesRec(index, 1);
+	}
+	void fixSubtreeStatesRec(Index index, int axis) {
+		if (axis == D) {
+			return genSubtreeState(index);
+		}
+		for(int i=2*size[axis]-1; i>=0; --i) {
+			fixSubtreeStatesRec(withIndex(index, axis, i), axis+1);
+		}
+	}
+
+	void genSubtreeState(Index index) {
+		int totalIndex = computeIndex(index);
+		Item& t = data[totalIndex];
+		if (t.hasData[ALL_MASK]) {
+			std::cout<<"skip postremove for node "<<index<<'\n';
+			return;
+		}
+		t.hasData.reset();
+		for(int d=0; d<D; ++d) {
+			if (index[d] >= size[d]) continue;
+			int x = index[d];
+			int step = stepSize[d];
+			int baseIndex = totalIndex - step*x;
+			const auto& a = data[baseIndex + step*(2*x)];
+			const auto& b = data[baseIndex + step*(2*x+1)];
+			for(Mask i=0; i<1<<D; ++i) {
+				if (!(1 & (i>>d))) {
+					std::cout<<"pr "<<d<<' '<<i<<' '<<a.hasData[i]<<' '<<b.hasData[i]<<'\n';
+					t.hasData[i] = t.hasData[i] | a.hasData[i] | b.hasData[i];
+				}
+			}
+		}
+		std::cout<<"Postremove res for "<<index<<" : "<<t.hasData.to_ulong()<<'\n';
+	}
+
+	void removeInSubtree(Index index, int axis, const Box<D>& box) {
+		Range range = rangeForIndex(axis, index[axis]);
+		if (!range.intersects(box[axis])) return;
+		int totalIndex = computeIndex(index);
+		Item& item = data[totalIndex];
+		if (!item.hasData(0)) return;
+		if (axis == D) {
+			if (item.hasData[ALL_MASK]) {
+				visitor(index, item.data);
+			}
+			item.hasData.reset();
+			return;
+		}
+		bool isParent = !box[axis].contains(range);
+		if (isParent) {
+		}
+		int i = index[axis];
+		if (i < size[axis]) {
+			removeInSubtree(withIndex(index, axis, 2*i), axis, box);
+			removeInSubtree(withIndex(index, axis, 2*i+1), axis, box);
+		}
+		if (isParent) {
+		}
+	}
+
 	static Index& withIndex(Index& index, int axis, int x) {
 		index[axis] = x;
 		return index;
@@ -257,4 +386,5 @@ private:
 	Index size = {};
 	Index stepSize = {};
 	std::vector<Item> data;
+//	std::vector<Index> clearedIndices;
 };
