@@ -187,20 +187,9 @@ private:
 		Item& item = data[totalIndex];
 		if (!item.hasData[0]) return;
 		if (axis == D) {
-#if 0
-			Mask covered = getCovered(index, box);
-			if (item.hasData[ALL_MASK] && covered != ALL_MASK) {
-				visitor(index, item.data);
-			} else if (item.hasData[ALL_MASK]) {
-				int splitAxis = 0;
-				while(1 & (covered >> splitAxis)) ++splitAxis;
-				std::cout<<"split2 "<<index<<' '<<box<<' '<<covered<<' '<<splitAxis<<'\n';
-			}
-#else
 			if (item.hasData[ALL_MASK]) {
 				visitor(index, item.data);
 			}
-#endif
 //			std::cout<<"Clear "<<index<<'\n';
 			item.hasData.reset();
 			return;
@@ -243,17 +232,8 @@ private:
 			} else if (t.hasData[1 << splitAxis]) {
 				Item& left = data[baseIndex + step * (2*i)];
 				Item& right = data[baseIndex + step * (2*i+1)];
-#if 0
-				for(int i=0; i<1<<D; ++i) {
-					if ((covered | i) != ALL_MASK) {
-						left.hasData[i] = left.hasData[i] | t.hasData[i];
-						right.hasData[i] = right.hasData[i] | t.hasData[i];
-					}
-				}
-#else
 				left.hasData = left.hasData | t.hasData;
 				right.hasData = right.hasData | t.hasData;
-#endif
 			}
 			return;
 		}
@@ -274,7 +254,6 @@ private:
 				Range r = rangeForIndex(i, index[i]);
 				covered |= box[i].contains(r) << i;
 			}
-//			std::cout<<"calling gensub "<<index<<' '<<covered<<' '<<box<<' '<<boxForIndex(index)<<'\n';
 			return genSubtreeState(index, covered);
 		}
 //		Range range = rangeForIndex(axis, index[axis]);
