@@ -726,7 +726,7 @@ Each branch node $s$ has two child nodes \leftc{s} and \rightc{s}.
 The intervals of the children divide the parent interval into two parts:
 $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
 The root node corresponds the largest supported interval \range{\epts[1]}{\epts[\segsize]}, and the leaf nodes correspond to the smallest possible intervals \range{\epts[i]}{\epts[i+1]}.
-Figure~\ref{fig:segtree} displays a segment where $\segsize=9$.
+Figure~\ref{fig:segtree} displays an example of a segment tree.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.7,page=1]{fig/segtree}
@@ -742,6 +742,12 @@ This representation allows implementing segment tree operations with very low ov
 
 When an interval $I$ is added to a segment tree, it is added to several tree nodes called the \emph{canonical nodes} of $I$, denoted by \canon{I}.
 The canonical nodes of $I$ are the smallest set of nodes whose intervals cover $I$ but nothing else: $\cup_{c\in\canon{I}} \inter{c}=I$.
+Figure~\ref{fig:canon} displays examples of canonical nodes.
+
+\begin{figure}\centering
+	\includegraphics[scale=0.7,page=1]{fig/canon}
+	\caption{Two intervals, red and blue, and their canonical nodes in the segment tree.}\label{fig:canon}
+\end{figure}
 
 Let \canonpar{I} be the set of ancestors of \canon{I}.
 The following two lemmas are useful for proving the running times of segment tree operations.
@@ -895,8 +901,14 @@ Each node of the inner tree represents a rectangle whose $x$-bounds are determin
 
 The concept of canonical nodes can also be extended to higher dimensions.
 The canonical nodes \canon{R} of a $D$-dimensional hyperrectangle $R$ are the smallest set of nodes that fully cover $R$ but nothing else.
+Figure~\ref{fig:canon2d} displays an example of canonical nodes of a 2-dimensional segment tree.
 
-In order to compute the canonical nodes, let us look into each axis separately.
+\begin{figure}\centering
+	\includegraphics[scale=0.7,page=1]{fig/canon2d}
+	\caption{Rectangle in a two-dimensional segment tree. The original rectangle is drawn with solid line, and its canonical nodes with dotted lines.}\label{fig:canon2d}
+\end{figure}
+
+In order to compute the canonical nodes we look into each axis separately.
 Let interval $R_i$ be the projection of hyperrectangle $R$ into $i$-axis.
 Let $\canoni{R_i}{i}$ be the canonical rectangles of $R_i$ in the 1-dimensional segment tree built for $i$-coordinates.
 
@@ -1248,7 +1260,15 @@ Thus each rectangle of \decomp{x} intersected by \reach{k} is entirely contained
 For odd $k$ we form \reach{k+1} by illuminating in vertical direction from \reach{k}, and the same proof applies for \decomp{y}.
 \end{proof}
 
+\begin{figure}\centering
+	\includegraphics[scale=0.7,page=1]{fig/inter}
+	\hfil
+	\includegraphics[scale=0.7,page=2]{fig/inter}
+	\caption{Group of four rectangles and their intersection graph. Each pair of overlapping objects has an edge between them in the intersection graph.}\label{fig:inter}
+\end{figure}
+
 For a set of geometric objects (such as rectangles) $G$, the \emph{intersection graph} of $G$ is a graph whose nodes are the elements of $G$, and there is an edge between each each pair of intersecting objects.
+Figure~\ref{fig:inter} displays an example of a intersection graph.
 Consider the intersection graph of $\decomp{x}\cup\decomp{y}$.
 This graph has rectangles as nodes, and intersection rectangles between \decomp{x} and \decomp{y} are combined by an edge.
 Let $k$ be an even number and $r\in\decomp{x}$ contained in \reach{k}.
