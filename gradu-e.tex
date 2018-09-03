@@ -187,6 +187,12 @@ The topic of this thesis is finding geometric path the do minimum amount of turn
 Consider a path consisting of a finite number of straight line segments.
 The \emph{link distance} of the path is the number of segments.
 A \emph{minimum link path} between two points is a path that minimizes the link distance.
+Figure~\ref{fig:paths} displays an example of two kinds of minimum link paths as well as the regular shortest path.
+
+\begin{figure}\centering
+	\includegraphics{fig/paths}
+	\caption{There are many variants of the path finding problem in the plane producing different kind of paths.}\label{fig:paths}
+\end{figure}
 
 Finding minimum link paths is a well studied algorithmic problem.
 The basic idea employed by most known algorithms is a simple extension of bredth-first search:
@@ -225,6 +231,18 @@ Let \reach{k} be the set of points reachable by at most $k$ links from \spt.
 Start by defining $\reach{0}=\set{\spt}$, and iteratively compute \reach{k+1} from \reach{k}.
 The iteration continues until we find $k$ such that $\ept\in\reach{k}$.
 This iteration is often called \emph{staged illumination}, because the computation of \reach{k+1} can be illustrated by setting a light source in all points of \reach{k}, and selecting all the lit points.
+Figure~\ref{fig:staged} displays an example of the staged illumination process.
+
+\begin{figure}\centering
+	\includegraphics[scale=0.5,page=1]{fig/staged}
+	\hfil
+	\includegraphics[scale=0.5,page=2]{fig/staged}
+	\hfil
+	\includegraphics[scale=0.5,page=3]{fig/staged}
+	\hfil
+	\includegraphics[scale=0.5,page=4]{fig/staged}
+	\caption{Four steps of staged illumination from a single starting point. The new areas are illuminated through the red windows on each step.}\label{fig:staged}
+\end{figure}
 
 This process closely resembles the bredth-first search, but a key difference is that the search is done in continuous space rather than in a graph.
 A nontrivial part in any minimum link path algorithm is maintaining the illuminated area in a data structure that allows efficient computation of \reach{k+1} from \reach{k}.
