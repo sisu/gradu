@@ -1503,11 +1503,11 @@ On each \addE we insert a new rectangle to the unified tree in time $O(\log^2 n)
 The number of \addEs is $O(n^2)$ by Lemma~\ref{lem:adde3}, so the event filtering can be done in time $O(n^2\log n)$, and the total time used in processing them is $O(n^2\log^2 n)$.
 
 On each \obsE we clear a rectangle from the tree.
-The clearing takes $O(n\log n + k)$, where $k$ is the number of cleared rectangles.
-The total number of rectangles cleared is bounded by the total number of \addEs, which is $O(n^2)$.
-There are $O(n)$ \obsEs by Lemma~\ref{lem:obse3}, so the total time taken in \obsEs is $O(n^2\log n)$.
+The clearing takes $O(n\log n + k)$, where $k$ is the number of cleared canonical rectangles.
+Each \addE adds $O(\log^2 n)$ canonical rectangles to the tree, so the total number of rectangles to be cleared is $O(n^2\log^2 n)$.
+There are $O(n)$ \obsEs by Lemma~\ref{lem:obse3}, so the total time taken in \obsEs is $O(n^2\log^2 n)$.
 
-As all parts of the algorithm are done in time $O(n^2\log^2 n)$ or less, the total complexity is $O(m^2\log^2 n)$.
+As all parts of the algorithm are done in time $O(n^2\log^2 n)$, the total complexity is $O(n^2\log^2 n)$.
 \end{proof}
 
 \subsection{Higher dimensional paths}
