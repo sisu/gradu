@@ -57,6 +57,7 @@
 \newcommand\visitc{\ensuremath{\textsc{VisitCanonical}}\xspace}
 \newcommand\adddt{\ensuremath{\textsc{InsertToTree}}\xspace}
 \newcommand\checkdt{\ensuremath{\textsc{QueryTree}}\xspace}
+\newcommand\cleariv{\ensuremath{\textsc{ClearInterval}}\xspace}
 \newcommand\maskof[1]{\ensuremath{\textsc{NodeMask}(#1)}\xspace}
 \newcommand\cleardt{\ensuremath{\textsc{ClearFromTree}}\xspace}
 \newcommand\clearst{\ensuremath{\textsc{ClearSubtree}}\xspace}
@@ -815,23 +816,20 @@ Clear interval $I$ from a segment tree.
 \begin{algorithmic}
 \Procedure{ClearInterval}{$n$}
 	\Comment Clears interval $I$ from subtree rooted at $n$.
-	\If{$\inter{n}\subseteq I$}
-		\State \clearst($n$).
-	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
-		\State Copy \nodecs{n} to \nodecs{\leftc{n}} and to \nodecs{\rightc{n}}.
-		\State \textsc{IterCanonical}($\leftc{n}$)
-		\State \textsc{IterCanonical}($\rightc{n}$)
-		\State $\nodeps{n}\gets \nodeps{\leftc{n}} \cup \nodeps{\rightc{n}} \cup \nodecs{\leftc{n}} \cup \nodecs{\rightc{n}}$.
+	\If{$\inter{n}\cap I=\emptyset$ or $\nodeps{n}$ is empty}
+		Return.
 	\EndIf
-\EndProcedure
-
-\Procedure{ClearSubtree}{$n$}
-	\Comment Fully clears the subtree rooted at $n$.
+	\If{$\inter{n}\nsubseteq I$}
+		\State Copy \nodecs{n} to \nodecs{\leftc{n}} and to \nodecs{\rightc{n}}.
+	\EndIf
 	\State Clear \nodecs{n}.
-	\If{\nodeps{n} is not empty}
-		\State Clear \nodeps{n}.
-		\State \clearst(\leftc{n}).
-		\State \clearst(\rightc{n}).
+	\State Clear \nodeps{n}.
+	\If{\leftc{n} and \rightc{n} defined}
+		\State $\cleariv(\leftc{n})$.
+		\State $\cleariv(\rightc{n})$.
+	\EndIf
+	\If{$\inter{n}\cap I\neq\emptyset$}
+		\State $\nodeps{n}\gets \nodeps{\leftc{n}} \cup \nodeps{\rightc{n}} \cup \nodecs{\leftc{n}} \cup \nodecs{\rightc{n}}$.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
@@ -841,14 +839,12 @@ The running time of Algorithm~\ref{alg:segrm} depends on the time taken for copy
 If we are only interested in querying whether a given interval overlaps any interval in the tree rather than finding the overlapping intervals, we can replace the interval lists by booleans indicating whether the list is empty.
 We analyze this more simple case.
 
-\begin{lem}Suppose that the copying and merging of interval sets in Algorithm~\ref{alg:segrm} can be done in constant time.
+\begin{lem}\label{lem:segrmtime}Suppose that the copying and merging of interval sets in Algorithm~\ref{alg:segrm} can be done in constant time.
 Then the time complexity of clearing range $I$ is $O(\log\segsize + k)$, where $k$ is the number of cleared nodes.\end{lem}
 \begin{proof}
-The function $\textsc{ClearInterval}$ traverses through nodes \canon{I} and \canonpar{I}, whose count is $O(\log\segsize)$ by Lemma~\ref{lem:canonlog} and Lemma~\ref{lem:canonplog}.
-In each node we do a constant amount of work, not counting the calls to $\textsc{ClearSubtree}$.
-
-The function $\textsc{ClearSubtree}$ returns immediately for empty nodes, and for cleared nodes performs constant amount of additional work to recurse further.
-Thus all the work in $\textsc{ClearSubtree}$ can be accounted for the cleared nodes, so the total time complexity is $O(\log n + k)$.
+The function $\textsc{ClearInterval}$ traverses through nodes \canon{I}, \canonpar{I}, and the descendants of the canonical nodes, stopping immediately if it ends up in a non-empty subtree.
+In each descendant node we either clear the node or return immediately, so the cost of visiting the descendants can be accounted to the cleared nodes.
+The number of canonical nodes and their ancestors is $O(\log\segsize)$, so the total complexity is $O(\log\segsize + k)$.
 \end{proof}
 
 
@@ -1091,15 +1087,16 @@ Clearing a rectangle $R$ means that all the rectangles in the tree are cut such 
 The clear operation is implemented using the same three operations as we used for the 1-dimensional tree in Section~\ref{sec:treeops}:
 split touching intervals, clear subtrees of the canonical nodes, and finally recompute the information about hyperrectangles stored in the descendants.
 
-We perform the three steps by making two recursive traversals in the tree.
-On the first traversal we push down all the hyperrectangles stored in \canonpar{R} and clear all the subtrees rooted at \canon{R}.
-On the second tree traversal we recompute the information about the subtree to each node in \canonpar{R}.
+The three operations are performed by a recursive function \cleardt that traverses through the tree.
+The function guides the tree traversal with two arguments: the current subtree root $n$, and the axis where we are moving $d$.
+In each canonical parent $n\in\canonpari{R_d}{d}$ we split the contents of the subtree along axis $d$ before proceeding, and recompute the descendant information after finishing clearing the subtree.
+The full algorithm is described below.
 
-\begin{alg}
+\begin{alg}\label{alg:segurm}
 Clear rectangle $R$ from $D$-dimensional unified segment tree.
 \begin{algorithmic}
 \Procedure{ClearFromTree}{$d,n$}
-	\If{$\neg\hasbits{n}{0}$ or $\inter{n}\cap R_d=\emptyset$}
+	\If{$\inter{n}\cap R_d=\emptyset$ or $\neg\hasbits{n}{0}$}
 		\State Return.
 	\EndIf
 	\If{$d=0$}
@@ -1128,10 +1125,10 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 	\ElsIf{$\rect{n}_d\cap R_d=\emptyset$}
 		\State Return.
 	\EndIf
-	\State $\clearst(d-1,n,a)$.
+	\State $\pdst(d-1,n,a)$.
 	\If{\leftu{n}{d} and \rightu{n}{d} defined}
-		\State $\clearst(d,\leftu{n}{d},a)$.
-		\State $\clearst(d,\rightu{n}{d},a)$.
+		\State $\pdst(d,\leftu{n}{d},a)$.
+		\State $\pdst(d,\rightu{n}{d},a)$.
 	\EndIf
 \EndProcedure
 
@@ -1164,6 +1161,23 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 \end{algorithmic}
 \end{alg}
 
+\begin{lem}Algorithm~\ref{alg:segurm} has running time $O(\segsize^{D-1}\log\segsize + k)$, where $k$ is the number of cleared canonical nodes.\end{lem}
+\begin{proof}
+We start by proving that \pdst and \recomp have running time $O(\segsize^d)$ by induction on the argument $d$.
+Clearly the functions perform $O(1)$ work in case $d=0$, which proves the base case.
+If $d\ge 1$, then both functions recursively iterate over the child nodes in direction $d$, making $O(\segsize)$ recursive calls with argument $d-1$.
+By induction the recursive calls are done in time $O(\segsize^{d-1})$, so the time complexity of both \pdst and \recomp is $O(\segsize^d)$.
+
+Next we prove the running time of \cleardt by induction on argument $d$.
+If $d=1$ the calls to \pdst and \recomp perform $O(1)$ work, and the algorithm is equivalent to Algorithm~\ref{alg:segrm} for 1-dimensional segment tree removal.
+Thus the base case $d=1$ is proven by Lemma~\ref{lem:segrmtime}.
+
+In case $d\ge 2$ we iterate over the child nodes in direction $d$.
+We call \pdst and \recomp with argument $d-1$ for every node in \canonpari{R_d}{d}.
+We also make $O(\segsize)$ calls to \cleardt with argument $d-1$.
+The size of \canonpari{R_d}{d} is $O(\log\segsize)$, so by induction the total time complexity is $O((\log\segsize)\segsize^{d-1} + \segsize(\segsize^{d-2}\log\segsize))=O(\segsize^{d-1}\log\segsize)$.
+
+\end{proof}
 
 
 \section{Planar minimum link paths}\label{sec:minlink2d}
