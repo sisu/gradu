@@ -1,7 +1,6 @@
 \documentclass[english,gradu]{tktltiki2018}
 \usepackage{epsfig}
 %\usepackage[pdftex]{graphicx}
-\usepackage{subfigure}
 \usepackage{url}
 \usepackage{lmodern}
 \usepackage{microtype}
@@ -302,6 +301,14 @@ Conceptually the sweep line moves continuously in space, but in practice we only
 A rectilinear domain can be decomposed into rectangles by extending each horizontal obstacle edge in both directions until the sides hit a vertical obstacle edge.
 This defines the \emph{horizontal decomposition} of the domain, denoted \decomp{x}.
 The vertical decomposition \decomp{y} is defined correspondingly by extending all the vertical edges until they hit a horizontal obstacle.
+Figure~\ref{fig:decomp}
+
+\begin{figure}\centering
+	\includegraphics[scale=0.6,page=2]{fig/decomp}
+	\hfil
+	\includegraphics[scale=0.6,page=3]{fig/decomp}
+	\caption{Horizontal and vertical decomposition of the same domain. Each cell touches at least one obstacle corner and each obstacle corner touches at most two cells, so both decompositions have size $O(n)$.}\label{fig:decomp}
+\end{figure}
 
 It is easy to see that each cell of \decomp{x} touches at least one obstacle vertex.
 Since each vertex can be touched by at most two rectangles, the size of the decomposition is $O(n)$.
@@ -719,6 +726,12 @@ Each branch node $s$ has two child nodes \leftc{s} and \rightc{s}.
 The intervals of the children divide the parent interval into two parts:
 $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
 The root node corresponds the largest supported interval \range{\epts[1]}{\epts[\segsize]}, and the leaf nodes correspond to the smallest possible intervals \range{\epts[i]}{\epts[i+1]}.
+Figure~\ref{fig:segtree} displays a segment where $\segsize=9$.
+
+\begin{figure}\centering
+	\includegraphics[scale=0.7,page=1]{fig/segtree}
+	\caption{Structure of a segment tree. The numbers display how the nodes are indexed when the tree is stored in an array.}\label{fig:segtree}
+\end{figure}
 
 The structure of a semi-dynamic segment tree is independent of the intervals added to the tree.
 The nodes are commonly arranged into an almost complete binary tree, which allows storing the tree nodes in an array similarly to binary heap:
