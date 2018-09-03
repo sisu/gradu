@@ -52,6 +52,7 @@
 \newcommand\canonpar[1]{\ensuremath{\textsc{p}_{\textsc{c}}(#1)}\xspace}
 \newcommand\canonpari[2]{\ensuremath{\textsc{p}_{\textsc{c},#2}(#1)}\xspace}
 \newcommand\epar[1]{\ensuremath{\textsc{p}(#1)}\xspace}
+\newcommand\findol{\ensuremath{\textsc{FindOverlapping}}\xspace}
 \newcommand\visitp{\ensuremath{\textsc{VisitParent}}\xspace}
 \newcommand\visitc{\ensuremath{\textsc{VisitCanonical}}\xspace}
 \newcommand\adddt{\ensuremath{\textsc{InsertToTree}}\xspace}
@@ -631,29 +632,31 @@ Each sweep finds the direction $D$ links by using the following recursive algori
 \begin{alg}\label{alg:overlapdd}
 Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ and $B$.
 \begin{algorithmic}
-\If{$D=2$}
-	\State Compute the overlapping pairs using Algorithm~\ref{alg:overlap2d} and return.
-\EndIf
-\State $E\gets$ List of all faces of hyperrectangles in $A$ and $B$ perpendicular to $D$-axis.
-\State Sort $E$ by $D$-coordinate.
-\State $G\gets$ Groups of consequtive elements of $E$ with equal $D$-coordinate.
-\State $P_A\gets$ Empty set of integers.
-\State $P_B\gets$ Empty set of integers.
-\State $R\gets$ Empty list of pairs.
-\ForAll{$g\in G$}
-	\State $S_A\gets$ Starting elements of $A$ in $g$.
-	\State $S_B\gets$ Starting elements of $B$ in $g$.
-	\State $T_A\gets$ Ending elements of $A$ in $g$.
-	\State $T_B\gets$ Ending elements of $B$ in $g$.
-	\State $P_A\gets P_A\setminus T_A$.
-	\State $P_B\gets P_B\setminus T_B$.
-	\State Recursively compute overlap between $P_A$ and $S_B$ into $R$.
-	\State Recursively compute overlap between $S_A$ and $P_A$ into $R$.
-	\State Recursively compute overlap between $S_A$ and $S_A$ into $R$.
-	\State $P_A\gets P_A\cup S_A$.
-	\State $P_B\gets P_B\cup S_B$.
-\EndFor
-\State Return list $R$.
+\Procedure{FindOverlapping}{$D,A,B$}
+	\If{$D=2$}
+		\State Return overlapping pairs computed with Algorithm~\ref{alg:overlap2d}.
+	\EndIf
+	\State $E\gets$ List of all faces of hyperrectangles in $A$ and $B$ perpendicular to $D$-axis.
+	\State Sort $E$ by $D$-coordinate.
+	\State $G\gets$ Groups of consequtive elements of $E$ with equal $D$-coordinate.
+	\State $P_A\gets$ Empty set of references to $A$.
+	\State $P_B\gets$ Empty set of references to $B$.
+	\State $R\gets$ Empty list of pairs.
+	\ForAll{$g\in G$}
+		\State $S_A\gets$ Starting elements of $A$ in $g$.
+		\State $S_B\gets$ Starting elements of $B$ in $g$.
+		\State $T_A\gets$ Ending elements of $A$ in $g$.
+		\State $T_B\gets$ Ending elements of $B$ in $g$.
+		\State $P_A\gets P_A\setminus T_A$.
+		\State $P_B\gets P_B\setminus T_B$.
+		\State $R\gets R + \findol(D-1,P_A,B_B)$.
+		\State $R\gets R + \findol(D-1,S_A,P_B)$.
+		\State $R\gets R + \findol(D-1,S_A,S_B)$.
+		\State $P_A\gets P_A\cup S_A$.
+		\State $P_B\gets P_B\cup S_B$.
+	\EndFor
+	\State Return list $R$.
+\EndProcedure
 \end{algorithmic}
 \end{alg}
 
@@ -664,7 +667,23 @@ We maintain the set of hyperrectangles currently intersecting the sweep hyperpla
 \begin{lem}\label{lem:overlapddok}
 Algorithm~\ref{alg:overlapdd} finds each intersecting pair between the input sets $A$ and $B$ exactly once.
 \end{lem}
-\begin{proof}Left as an exercise.\end{proof}
+\begin{proof}
+Proof by induction on $D$.
+If $D=2$, we use Algorithm~\ref{alg:overlap2d}, which was shown to work correctly in Section~\ref{sec:split3d}.
+
+Suppose $D\ge 3$.
+The algorithm iterates over the $D$-coordinates where at least one of $A$ or $B$ changes.
+By induction we know that the 3 recursive calls inside the iteration each report the intersections of the provded inputs exactly once.
+On each iteration we create sets $S_A$ and $S_B$, which are the newly introduced hyperrectangles at this coordinate.
+Since $S_A$ and $S_B$ contain only new rectangles, none of the 3 recursive calls may find any pairs that were previously added.
+Thus the algorithm finds each intersecting pair at most once.
+
+At the point of making the recursive calls, the sets $P_A$ and $P_B$ contain all the rectangles whose $D$-ranges strictly contain the current $D$-coordinate.
+Two ranges can only itersect is they either share the starting point or the starting point of one of the ranges is inside the other range.
+The recursive call $\findol(D-1,S_A,S_B)$ handles the ranges with the common starting point, and the other two recursive calls handle the case of the starting point being inside the other range.
+Thus the algorithm finds all the intersectin pairs at least once.
+Since we have proven that each pair is found at most once, this completes the proof.
+\end{proof}
 
 The algorithm for the $D$-dimensional overlap computation is simpler than the special case for $D=2$.
 However Lemma~\ref{lem:overlap2dtime} cannot be directly extended to higher dimensions, because there is no guarantee that the subproblems are significantly smaller than the original problem.
