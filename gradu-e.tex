@@ -173,7 +173,7 @@ We present new algorithms to several variations of the minimum link path problem
 \setcounter{section}{-1}
 \section{Preface}
 
-"If it was hard to write, it should be hard to read." -- anonymous
+"If it was hard to write, it should be hard to read." -- Anonymous
 
 \section{Introduction}
 
@@ -1564,7 +1564,7 @@ If we discover a cell $c$ on step $k$ then all the points visible from $c$ are i
 We only count the \addEs in direction $+z$.
 The other directions are identical.
 Each \addE lies on the same plane with some obstacle face whose normal points to direction $-z$.
-For the purpose of deriving an upper bound, we assume that the obstacle faces are slightly perturbed such that each obstacle face has unique $z$-coordinate.
+For the purpose of deriving an upper bound, we assume that each obstacle face has unique $z$-coordinate.
 We may overcount the number of \addEs this way by counting the same events multiple times, but not undercount.
 
 Consider the events on the plane $P$ of obstacle $o$ at $z$-coordinate $\hat{z}$.
@@ -1583,7 +1583,7 @@ Because we generate the events on both sides of $P$, we will merge them so that 
 Because of the filtering, we can only have events on plane $P$ after the sweep has reached obstacle $o$.
 There are three cases for how an event might be generated on plane $P$ that is not removed by the filtering.
 \begin{enumerate}
-\item During a sweep in direction $+z$ we hit obstacle $o$.
+\item During a sweep in direction $+z$ we hit the obstacle $o$.
 	We generate \addEs in directions $\pm x$ and $\pm y$ that are bounded by $\hat{z}$.
 	From these \addEs we create events on plane $P$ on the following illumination step.
 \item During a sweep in direction $\pm x$ or $\pm y$ the obstacle face $o$ cuts a rectangle in the tree such that the remaining part has boundary on $P$.
@@ -1603,7 +1603,7 @@ After the illumination has reached obstacle $o$, the illumination on $P$ proceed
 The 2D illumination illuminates maximal rectangles of \decomp{x} and \decomp{y}, producing a total of $O(n)$ illuminated rectangles.
 There is some overhead because of reilluminating the same parts multiple times, but by Lemma~\ref{lem:celle3} each part of the domain can be illuminated only $O(1)$ times.
 
-The number of events on the plane of a single obstacle $o$ is $O(n)$, and the total number of events is thus $O(n^2)$.
+The number of events on the plane of a single obstacle $o$ is $O(n)$, so the total number of events is $O(n^2)$.
 \end{proof}
 
 We are ready to prove the main result of this section.
@@ -1708,13 +1708,6 @@ The events are aligned in direction $a$ if the bounds of their hyperrectangles a
 
 The filtering step allows us to again bound the numberor of \addEs processed during the illumination.
 
-\begin{lem}\label{lem:added}The number of \addEs generated during the illumation after after filtering is $O(n^{D-1})$.\end{lem}
-\begin{proof}
-Left as an exerice to the reader.
-\end{proof}
-
-We also need to bound the number of \obsEs and \cellEs.
-
 \begin{lem}\label{lem:obsed}For each obstacle we generate \obsE on at most $2D+3$ steps of the illumination.\end{lem}
 \begin{proof}
 The proof is similar to Lemma~\ref{lem:obse3} for the 3D case.
@@ -1729,6 +1722,36 @@ We won't generate any \addEs for such obstacle $h$ after step $k+2D+1$, so the l
 \begin{proof}
 The proof is very similar to Lemma~\ref{lem:obsed}.
 If we discover a cell $c$ on step $k$ then all the points visible from $c$ are illuminated after step $k+D$, so no more sweeps can reach $c$ after step $k+2D+2$.
+\end{proof}
+
+\begin{lem}\label{lem:added}The number of \addEs generated during the illumation after after filtering is $O(n^{D-1})$.\end{lem}
+\begin{proof}
+The proof is similar to Lemma~\ref{lem:adde3}.
+We only count the \addEs in direction $+D$ occurring on a hyperplane $P$ defined by a $(D-1)$-dimensional obstacle face $o$ that has $D$-coordinate $\hat{d}$.
+To simplify the counting we assume that the obstacle $D$-coordinates are unique so $o$ is the only obstacle face on $P$.
+
+We classify the events remaining after filtering similarly to the 3D case:
+\begin{enumerate}
+\item During a sweep in direction $+D$ we hit the obstacle $o$.
+	We generate \addEs in directions other than $\pm D$ that are bounded by $\hat{d}$.
+	From these \addEs we create events on plane $P$ on the following illumination step.
+\item During a sweep in direction other than $\pm D$ the obstacle face $o$ cuts a hyperrectangle in the tree such that the remaining part has boundary on $P$.
+\item If on the previous step we created $\addE$ on plane $P$, then we also created events in directions other than $\pm D$ that have plane $P$ as one of the sides.
+	From those events we create more $+D$ events on plane $P$ on the following step.
+\end{enumerate}
+
+Similar to the 3D case, a single sweep can only produce as many events on $P$ as the number of canonical hyperrectangles bounded by $P$, which in the $(D-1)$-dimensional unified tree is $O(n^{D-2})$.
+By Lemma~\ref{lem:obsed} and Lemma~\ref{lem:celled} the illumination can only touch $o$ on $O(1)$ steps, so the number of type 1 and 2 events on $P$ is $O(n^{D-2})$.
+
+We use induction on $D$ to prove the number of type 3 events.
+The base case $D=2$ is proven by Lemma~\ref{lem:adde3}.
+
+For $D\ge 3$ notice that again the illumination on the boundary of $P$ advances exactly like the $(D-1)$-dimensional illumination in the cross section of $P$.
+By induction the $(D-1)$-dimensional illumination creates $O(n^{D-2})$ events.
+Multiplying this by the number of times any cell can be visited gives an upper bound for the $D$-dimensional illumination on $P$.
+Since there is only constant factor overhead compared to the $(D-1)$-dimensional illumination, the number of type~3 events is $O(n^{D-2})$.
+
+The number of events on the hyperplane of a single obstacle $o$ is $O(n^{D-2})$, so the total number of events is $O(n^{D-1})$.
 \end{proof}
 
 These lemmas allow us to prove the final result.
