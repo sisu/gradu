@@ -1223,7 +1223,7 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 \end{algorithmic}
 \end{alg}
 
-\begin{lem}Algorithm~\ref{alg:segurm} has running time $O(\segsize^{D-1}\log\segsize + k)$, where $k$ is the number of cleared canonical nodes.\end{lem}
+\begin{lem}\label{lem:segurmtime}Algorithm~\ref{alg:segurm} has running time $O(\segsize^{D-1}\log\segsize + k)$, where $k$ is the number of cleared canonical nodes.\end{lem}
 \begin{proof}
 We start by proving that \pdst and \recomp have running time $O(\segsize^d)$ by induction on the argument $d$.
 Clearly the functions perform $O(1)$ work in case $d=0$, which proves the base case.
@@ -1615,7 +1615,8 @@ On each \cellE we perform a single lookup to the unified tree in time $O(\log^2 
 Since the decomposition has $O(n^2)$ cells and $O(n^2)$ links between cells, the total time taken in processing \cellEs is $O(n^2\log^2 n)$.
 
 On each \addE we insert a new rectangle to the unified tree in time $O(\log^2 n)$.
-The number of \addEs is $O(n^2)$ by Lemma~\ref{lem:adde3}, so the event filtering can be done in time $O(n^2\log n)$, and the total time used in processing them is $O(n^2\log^2 n)$.
+The filtering of \addEs can be done in linear time, and the total number of unfiltered events is at most the number of \addEs multiplied by the $O(\log^2 n)$ canonical nodes used to store a rectangle in the unified tree.
+Thus the time complexity of the filtering is $O(n^2\log^2 n)$.
 
 On each \obsE we clear a rectangle from the tree.
 The clearing takes $O(n\log n + k)$, where $k$ is the number of cleared canonical rectangles.
@@ -1758,7 +1759,19 @@ These lemmas allow us to prove the final result.
 
 \begin{theo}Algorithm~\ref{alg:minlinkdd} computes $D$-dimensional minimum link path in time $O(n^{D-1}\log^{D-1}n)$.\end{theo}
 \begin{proof}
-Left as an exerice to the reader.
+By Lemma~\ref{lem:celled} each cell is visited $O(1)$ times during the illumination.
+On each \cellE we perform a single lookup to the unified tree in time $O(\log^{D-1} n)$, and iterate over the neighbors of the cell.
+Since the decomposition has $O(n^{D-1})$ cells and $O(n^{D-1})$ links between cells, the total time taken in processing \cellEs is $O(n^{D-1}\log^{D-1} n)$.
+
+On each \addE we insert a new rectangle to the unified tree in time $O(\log^{D-1} n)$.
+The filtering of \addEs can be done in linear time, and the total number of unfiltered events is at most the number of \addEs multiplied by the $O(\log^{D-1} n)$ canonical nodes used to store a hyperrectangle in the unified tree.
+
+On each \obsE we clear a hyperrectangle from the tree.
+By Lemma~\ref{lem:segurmtime}, each clear operation takes time $O(n^{D-2}\log n + k)$ where $k$ is the nubmer of cleared canonical nodes.
+Each \addE adds $O(\log^{D-1} n)$ canonical rectangles to the tree, so the total number of rectangles to be cleared is $O(n^{D-1}\log^{D-1} n)$.
+There are $O(n)$ \obsEs by Lemma~\ref{lem:obsed}, so the total time taken in \obsEs is $O(n^{D-1}\log^{D-1} n)$.
+
+As all parts of the algorithm are done in time $O(n^{D-1}\log^{D-1} n)$, the total complexity is $O(n^{D-1}\log^{D-1} n)$.
 \end{proof}
 
 
