@@ -1544,13 +1544,6 @@ Thus we don't create any \addEs for an obstacle $o$ that was first found more th
 
 We now prove the complexity of the minimum link computation algorithm.
 
-\begin{lem}\label{lem:adde3}The number of \addEs generated during the illumation after after filtering is $O(n^2)$.\end{lem}
-\begin{proof}
-Left as an exerice to the reader.
-\end{proof}
-
-We also need to bound the number of \obsEs and \cellEs.
-
 \begin{lem}\label{lem:obse3}For each obstacle we generate \obsE on at most 9 steps of the illumination.\end{lem}
 \begin{proof}
 Recall that we stop generating \addEs from obstacles after 3 steps have passed since that obstacle was discovered.
@@ -1564,6 +1557,53 @@ We won't generate any \addEs for such obstacle $h$ after step $k+7$, so the last
 \begin{proof}
 The proof is very similar to Lemma~\ref{lem:obse3}.
 If we discover a cell $c$ on step $k$ then all the points visible from $c$ are illuminated after step $k+3$, so no more sweeps can reach $c$ after step $k+8$.
+\end{proof}
+
+\begin{lem}\label{lem:adde3}The number of \addEs generated during the illumation after after filtering is $O(n^2)$.\end{lem}
+\begin{proof}
+We only count the \addEs in direction $+z$.
+The other directions are identical.
+Each \addE lies on the same plane with some obstacle face whose normal points to direction $-z$.
+For the purpose of deriving an upper bound, we assume that the obstacle faces are slightly perturbed such that each obstacle face has unique $z$-coordinate.
+We may overcount the number of \addEs this way by counting the same events multiple times, but not undercount.
+
+Consider the events on the plane $P$ of obstacle $o$ at $z$-coordinate $\hat{z}$.
+Events in direction $+z$ can be generated during the sweeps to direction $\pm x$ and $\pm y$.
+We only consider the sweep in direction $+y$.
+We generate an event on plane $P$ if an \obsE removes a rectangle $R$ from the unified tree such that the upper $z$-coordinate of $R$ is $\hat{z}$.
+
+Some \addEs might be generated on $P$ because of how the rectangles are stored in the unified segment tree.
+When we add a rectangle to the tree it is split to canonical nodes, and some of them might have boundary on $P$.
+In such cases we generate \addEs both from canonical nodes on both sides of $P$, so the events are removed during the filtering, where we remove pairs of events at identical positions that have opposite directions.
+
+Because of the canonical nodes aligned with sides on $P$, we may also generate \addEs in direction $\pm x$ whose $z$-range is bounded by $\hat{z}$.
+In the second part of the filtering we merge aligned events into larger events.
+Because we generate the events on both sides of $P$, we will merge them so that the $z$-range of the combined event contains $\hat{z}$ but does not have endpoint on it.
+
+Because of the filtering, we can only have events on plane $P$ after the sweep has reached obstacle $o$.
+There are three cases for how an event might be generated on plane $P$ that is not removed by the filtering.
+\begin{enumerate}
+\item During a sweep in direction $+z$ we hit obstacle $o$.
+	We generate \addEs in directions $\pm x$ and $\pm y$ that are bounded by $\hat{z}$.
+	From these \addEs we create events on plane $P$ on the following illumination step.
+\item During a sweep in direction $\pm x$ or $\pm y$ the obstacle face $o$ cuts a rectangle in the tree such that the remaining part has boundary on $P$.
+\item If on the previous step we created $\addE$ on plane $P$, then we also created events in directions $\pm x$ or $\pm y$ that have plane $P$ as one of the sides.
+	From those events we create more $+z$ events on plane $P$ on the following step.
+\end{enumerate}
+
+First let us consider the first two types of events.
+They only occur through sweeps touching the surface of obstacle $o$.
+By Lemma~\ref{lem:obse3} and Lemma~\ref{lem:celle3} such sweeps occur only on $O(1)$ steps.
+On a single sweep, the number of events created on $P$ is bounded by the number of canonical rectangles whose $z$-range is bounded by $\hat{z}$.
+There are $O(n)$ such rectangles, so the number of events is $O(n)$.
+
+Now consider the third type of events.
+A crucial observation is the following:
+After the illumination has reached obstacle $o$, the illumination on $P$ proceeds exactly like the 2D staged illumination in the cross section of $P$.
+The 2D illumination illuminates maximal rectangles of \decomp{x} and \decomp{y}, producing a total of $O(n)$ illuminated rectangles.
+There is some overhead because of reilluminating the same parts multiple times, but by Lemma~\ref{lem:celle3} each part of the domain can be illuminated only $O(1)$ times.
+
+The number of events on the plane of a single obstacle $o$ is $O(n)$, and the total number of events is thus $O(n^2)$.
 \end{proof}
 
 We are ready to prove the main result of this section.
