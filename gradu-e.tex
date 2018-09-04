@@ -1508,15 +1508,6 @@ Run staged illumination in 3D domain \fspace starting from point \spt.
 \end{algorithmic}
 \end{alg}
 
-To make the minimum link path computation efficient, we want to avoid reilluminating the same cells multiple times.
-For the 2D minimum link paths this was done by turning cells into obstacles once enough steps have passed since the cell was first discovered.
-This approach works also for 3D, but since there are $O(n^2)$ cells and clearing a rectangle from the unified tree requires $O(n\log n)$ steps, having to do clear operations for all the cells would increase the time complexity significantly.
-
-To overcome this problem, instead of limiting the reachable cells, we instead limit the creation of \addEs.
-We create \addEs for the next step when a plane sweep hits an obstacle.
-If the illumination first reaches an obstacle face $o$ on step $k$, then after step $k+2$ all the points touching $o$ are illuminated, so after step $k+3$ all the points visible from $o$ are illuminated.
-Thus there is no longer need to add \addEs for \obsEs on $o$, as any point illuminated through such events has been illuminated already.
-
 \subsection{Event generation}\label{sec:evtgen}
 
 We now discuss how the \addEs for the next round are generated when the sweep processes an \obsE.
@@ -1540,6 +1531,15 @@ The definition is similar in all the other directions.
 The aligned \addEs are searched for the events in all directions separately.
 Performing these operations allow us to bound the number of \addEs generated during the illumination.
 
+To make the minimum link path computation efficient, we want to avoid reilluminating the same cells multiple times.
+For the 2D minimum link paths this was done by turning cells into obstacles once enough steps have passed since the cell was first discovered.
+This approach works also for 3D, but since there are $O(n^2)$ cells and clearing a rectangle from the unified tree requires $O(n\log n)$ steps, having to do clear operations for all the cells would increase the time complexity significantly.
+
+To overcome this problem, instead of limiting the reachable cells, we instead limit the creation of \addEs.
+We create \addEs for the next step when a plane sweep hits an obstacle.
+If the illumination first reaches an obstacle face $o$ on step $k$, then after step $k+2$ all the points touching $o$ are illuminated, so after step $k+3$ all the points visible from $o$ are illuminated.
+Thus we don't create any \addEs for an obstacle $o$ that was first found more than 3 steps ago, as any point illuminated through such events has been illuminated already.
+
 \subsection{Complexity}
 
 We now prove the complexity of the minimum link computation algorithm.
@@ -1553,12 +1553,17 @@ We also need to bound the number of \obsEs and \cellEs.
 
 \begin{lem}\label{lem:obse3}For each obstacle we generate \obsE on at most 9 steps of the illumination.\end{lem}
 \begin{proof}
-Left as an exerice to the reader.
+Recall that we stop generating \addEs from obstacles after 3 steps have passed since that obstacle was discovered.
+Suppose we first generate \obsE for obstacle $o$ on step $k$.
+After step $k+3$ all the points visible from $o$ are illuminated.
+After step $k+4$ we have discovered each obstacle $h$ such that the illumination reaching $h$ could generate an \addE that illuminates $o$.
+We won't generate any \addEs for such obstacle $h$ after step $k+7$, so the last time a sweep can reach $o$ is on step $k+8$.
 \end{proof}
 
 \begin{lem}\label{lem:celle3}For each cell we generate \cellE on at most 9 steps of the illumination.\end{lem}
 \begin{proof}
-Left as an exerice to the reader.
+The proof is very similar to Lemma~\ref{lem:obse3}.
+If we discover a cell $c$ on step $k$ then all the points visible from $c$ are illuminated after step $k+3$, so no more sweeps can reach $c$ after step $k+8$.
 \end{proof}
 
 We are ready to prove the main result of this section.
@@ -1670,14 +1675,20 @@ Left as an exerice to the reader.
 
 We also need to bound the number of \obsEs and \cellEs.
 
-\begin{lem}\label{lem:obsed}For each obstacle we generate \obsE on at most 9 steps of the illumination.\end{lem}
+\begin{lem}\label{lem:obsed}For each obstacle we generate \obsE on at most $2D+3$ steps of the illumination.\end{lem}
 \begin{proof}
-Left as an exerice to the reader.
+The proof is similar to Lemma~\ref{lem:obse3} for the 3D case.
+We stop generating \addEs from obstacles after $D$ steps have passed since that obstacle was discovered.
+Suppose we first generate \obsE for obstacle $o$ on step $k$.
+After step $k+D$ all the points visible from $o$ are illuminated.
+After step $k+D+1$ we have discovered each obstacle $h$ such that the illumination reaching $h$ could generate an \addE that illuminates $o$.
+We won't generate any \addEs for such obstacle $h$ after step $k+2D+1$, so the last time a sweep can reach $o$ is on step $k+2D+2$.
 \end{proof}
 
-\begin{lem}\label{lem:celled}For each cell we generate \cellE on at most 9 steps of the illumination.\end{lem}
+\begin{lem}\label{lem:celled}For each cell we generate \cellE on at most $2D+3$ steps of the illumination.\end{lem}
 \begin{proof}
-Left as an exerice to the reader.
+The proof is very similar to Lemma~\ref{lem:obsed}.
+If we discover a cell $c$ on step $k$ then all the points visible from $c$ are illuminated after step $k+D$, so no more sweeps can reach $c$ after step $k+2D+2$.
 \end{proof}
 
 These lemmas allow us to prove the final result.
