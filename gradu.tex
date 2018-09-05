@@ -115,11 +115,6 @@
 \date{\today}
 \level{Master's thesis}
 
-% For new study programmes (2017->) to appear on title page
-%\department{Master's Programme in Computer Science}
-%\department{Master's Programme in Data Science}
-%\department{Bachelor's Programme in Computer Science}
-
 \maketitle
 
 \numberofpagesinformation{\numberofpages\ pages + \numberofappendixpages\ appendices}
@@ -133,38 +128,18 @@ F.2.2 [Nonnumerical Algorithms and Problems]}}
 
 \supervisors{Antti Laaksonen and Jyrki Kivinen}
 
-%default (40 cr thesis)
-%\program{Computer Science}
-
-%Computer Science Master's Programme thesis, 30 cr
-%\program{Study Programme in Computer Science} 
-
-%Data Science thesis, 30 cr
-%\program{Master's Programme in Data Science}
-
-%Bachelor's thesis 
-%\level{Bachelor's thesis}
-%Computer Science Bachelor's Programme (2017->) thesis
-%\program{Bachelor's Programme in Computer Science}
-
-% For CS Master's Programme thesis 2017->
-%\additionalinformation{Thesis for the Algorithms study track }
-%\additionalinformation{Thesis for the Networking and Services study track}
-%\additionalinformation{Thesis for the Software Systems study track}
-
-% For CS Master's thesis if you follow CS degree requirements prior 2017
-%\additionalinformation{Thesis for the Algorithmic Bioinformatics subprogramme}
 \additionalinformation{Thesis for the Algorithms, Data Analytics and Machine Learning subprogramme}
-%\additionalinformation{Thesis for the Networking and Services subprogramme}
-%\additionalinformation{Thesis for the Software Systems subprogramme}
-
-%\level{Seminar essay}
-%\additionalinformation{Essay for Seminar on ...}
 
 \begin{abstract}
-The thesis subject are algorithms for minimum link path computation.
-Minimum link path is a geometric path that consists of straight line segments and does a minimal number of turns.
-We present new algorithms to several variations of the minimum link path problem.
+The thesis subject are algorithms for the minimum link path problem.
+The minimum link path problem is a well known geometric path finding problem.
+The goal is to find a path amidst obstacles in a plane that does a minimal number of turns.
+We focus on the rectilinear variant of the problem, where the path and the obstacles can only use the directions of the coordinate axes.
+
+We study the rectilinear minimum link path problem in plane and in 3D dimensional space, as well as in higher dimensional domains.
+We develop new algorithms for the 3D and the high-dimensional case that achieve better asymptotic running time than the previous known methods.
+For the 3D rectilinear path problem we present an algorithm with running time $O(n^2\log^2 n)$ and space complexity $O(n^2)$ in a domain with $n$ obstacle edges.
+We show that the algorithm can be generalized to higher dimensions, leading to an algorithm that finds the minimum link path in $D$-dimensional domain in time $O(n^{D-1}\log^{D-1} n)$ and space $O(n^{D-1})$.
 \end{abstract}
 
 \mytableofcontents
