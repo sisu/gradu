@@ -199,29 +199,40 @@ The basic idea employed by most known algorithms is a simple extension of bredth
 First find points that have link distance~1 to the starting point, then points with link distance~2, and similarly iterate until the desired endpoint is encountered.
 Since the search happens in continuous space, the hard part of the algorithms is defining the appropriate data structures to store and update the discovered area.
 
-In this thesis we focus on variants of the problem where the possible directions of the edges of the path are limited.
-In $C$-oriented problem we are given a set $C$ of possible directions that the edges can take.
-For the $C$-oriented problem, we present a new algorithm that works in time $O(C^2n\log n)$~\cite{revisited}.
-We also study 3D version of the problem for a case where the only allowed directions are the coordinate axes.
-For this problem we present a new algorithm that works in time $O(n^2\log^2n)$, which is a significant improvement over the earlier best known result $O(n^{2.5}\log n)$.\cite{restricted}
-Finally, we extend the 3D solution to work in $D$-dimensional domains in time $O(n^D\log^Dn)$.
+In this thesis we focus on the \emph{rectilinear} variant of the problem.
+In the rectilinear minimum link path problem we require the obstacles as well as the paths to be constructed to follow the coordinate axes.
+We also study 3D version of the rectilinear minimum link path problem.
+For this version we present a new algorithm that works in time $O(n^2\log^2n)$, which is a significant improvement over the earlier best known result $O(n^{2.5}\log n)$.\cite{restricted}
+Finally, we extend the solution to the 3D rectilinear problem to work in $D$-dimensional domains, giving an algorithm with running time $O(n^D\log^Dn)$.
 
-\subsection{Problem description}
+\subsection{Background and new results}
 
-The definition of the minimum link path problem is the following.
-\begin{prob}\label{prob:path}
-We are given a description of free space \fspace and two points $\spt\in\fspace$ and $\ept\in\fspace$.
-The task is to find a path from \spt to \ept in \fspace with minimum link distance.
-\end{prob}
+Computing rectilinear minimum link paths is and old and well studied problem.
+For 2D domains an algorithm with running time $O(n\log n)$ and linear space complexity was developed independently by Das and Narasimhan~\cite{dasnar} and by Sato, Sakanaka and Ohtsuki~\cite{sato}.
+This result is asymptotically optimal, as the problem can be shown to be as hard as sorting~\cite{dasnar}, and thus having lower bound $O(n\log n)$.
 
-Typically the algorithms for pathfinding start from one of the points, and search the area until the other point is found.
-Often this approach allows us to create a data structure that can be used to efficiently find a path between \spt and any other point.
-Thus the same algorithms can be applied to solve a problem where \ept is given only afterwards.
+Several algorithms have been developed to compute higher dimensional rectilinear minimum link paths.
+De Berg et al.~\cite{de1992} gave an $O(n^D\log n)$ algorithm for the $D$-dimensional minimum link path problem.
+For the 3D case, a $O(n^3)$ algorithm was developed by Mikami and Tabuchi~\cite{mikami}.
+Fitch, Butler and Rus~\cite{fitch} gave an algorithm with improved performance in many cases, but still $O(n^3)$ worst case running time.
+This was further improved by Wagner, Drysdale and Stein~\cite{wagner}, who gave an algorithm with worst case time complexity $O(n^{2.5}\log n)$.
 
-\begin{prob}\label{prob:map}
-We are given a description of free space \fspace and a point $\spt\in\fspace$.
-Construct a data structure that allows finding the minimum link path between \spt and any given point.
-\end{prob}
+In this thesis we focus on new results to the rectilinear minimum link path problem, which are original research of the author.
+The following results have been published in peer-reviewed journals and conferences, and were made in collaboration with the respective co-authors.
+\begin{itemize}
+\item A simplified $O(n\log n)$ algorithm for the 2-dimensional case.
+\item A new algorithm for the 3D minimum link path problem, improving the running time from the previous best result of $O(n^{2.5}\log n)$ to $O(n^2\log^2 n)$.
+\end{itemize}
+
+The following items are new original contributions in this thesis.
+
+\begin{itemize}
+\item An algorithm for minimum link paths in higher dimensions. We show that the rectilinear minimum link path problem in $D$ dimensions can be solved in time $O(n^{D-1}\log^{D-1} n)$ by a generalization of the 3D algorithm.
+\item Detailed description of the algorithm for 3D minimum link path computation and the data structures used in the algorithm.
+\item Extension of the decomposition used in the 3D algorithm to higher dimensions.
+\item Simplification of the 3D minimum link algorithm by using the unified segment tree by Wagner~\cite{unified}.
+\item Extending the unified tree to higher than 2 dimensions and showing how clearing a hyperrectangle can be implemented. The original paper by Wagner~\cite{unified} mentions the possibility of extending the structure to higher dimensions, but does not provide any details.
+\end{itemize}
 
 \subsection{Overview of algorithms}\label{sec:overview}
 
@@ -1248,6 +1259,7 @@ We also make $O(\segsize)$ calls to \cleardt with argument $d-1$.
 The size of \canonpari{R_d}{d} is $O(\log\segsize)$, so by induction the total time complexity is $O((\log\segsize)\segsize^{d-1} + \segsize(\segsize^{d-2}\log\segsize))=O(\segsize^{d-1}\log\segsize)$.
 
 \end{proof}
+
 
 
 \section{Planar minimum link paths}\label{sec:minlink2d}
