@@ -1387,7 +1387,7 @@ Run staged illumination starting from \spt within \fspace such that the first li
 \end{algorithmic}
 \end{alg}
 
-\begin{theo}Algorithm~\ref{alg:minlink2d} has time complexity $O(n\log n)$.\end{theo}
+\begin{theo}Algorithm~\ref{alg:minlink2d} has time complexity $O(n\log n)$ and space complexity $O(n)$.\end{theo}
 \begin{proof}
 \decomp{x} is formed in time $O(n\log n)$ by Lemma~\ref{lem:split2dtime}.
 \decomp{x} has $O(n)$ cells and links between cells.
@@ -1395,6 +1395,8 @@ Each cell is marked as an obstacle 2 steps after it has been found.
 On each iteration of the main loop we perform two sweeps, so each cell can be visited at most 4 times by the sweeps.
 The complexity of a single sweep is $O(m\log m)$ by Lemma~\ref{lem:light2dtime}, where $m$ is the number of visited rectangles.
 Since each rectangle can be visited O(1) times, the total complexity of all the sweeps is $O(n\log n)$.
+
+The decomposition is created in linear space, and the sweeps only use simple binary search tree and binary heap structures taking linear space, so the whole algorithm runs in $O(n)$ space.
 \end{proof}
 
 The link distance between \spt and a target point \ept can be found by stopping the illumination process as soon as \ept becomes illuminated.
@@ -1615,7 +1617,7 @@ The number of events on the plane of a single obstacle $o$ is $O(n)$, so the tot
 
 We are ready to prove the main result of this section.
 
-\begin{theo}Algorithm~\ref{alg:minlink3d} computes 3D minimum link path in time $O(n^2\log^2n)$.\end{theo}
+\begin{theo}Algorithm~\ref{alg:minlink3d} computes 3D minimum link path in time $O(n^2\log^2n)$ and space $O(n^2)$.\end{theo}
 \begin{proof}
 By Lemma~\ref{lem:celle3} each cell is visited $O(1)$ times during the illumination.
 On each \cellE we perform a single lookup to the unified tree in time $O(\log^2 n)$, and iterate over the neighbors of the cell.
@@ -1630,7 +1632,9 @@ The clearing takes $O(n\log n + k)$, where $k$ is the number of cleared canonica
 Each \addE adds $O(\log^2 n)$ canonical rectangles to the tree, so the total number of rectangles to be cleared is $O(n^2\log^2 n)$.
 There are $O(n)$ \obsEs by Lemma~\ref{lem:obse3}, so the total time taken in \obsEs is $O(n^2\log^2 n)$.
 
-As all parts of the algorithm are done in time $O(n^2\log^2 n)$, the total complexity is $O(n^2\log^2 n)$.
+As all parts of the algorithm are done in time $O(n^2\log^2 n)$, the total time complexity is $O(n^2\log^2 n)$.
+
+The size of the decomposition as well as the segment tree used during the sweeps is $O(n^2)$, so the space complexity is $O(n^2)$.
 \end{proof}
 
 \subsection{Higher dimensional paths}
@@ -1764,7 +1768,7 @@ The number of events on the hyperplane of a single obstacle $o$ is $O(n^{D-2})$,
 
 These lemmas allow us to prove the final result.
 
-\begin{theo}Algorithm~\ref{alg:minlinkdd} computes $D$-dimensional minimum link path in time $O(n^{D-1}\log^{D-1}n)$.\end{theo}
+\begin{theo}Algorithm~\ref{alg:minlinkdd} computes $D$-dimensional minimum link path in time $O(n^{D-1}\log^{D-1}n)$ and space $O(n^{D-1})$.\end{theo}
 \begin{proof}
 By Lemma~\ref{lem:celled} each cell is visited $O(1)$ times during the illumination.
 On each \cellE we perform a single lookup to the unified tree in time $O(\log^{D-1} n)$, and iterate over the neighbors of the cell.
@@ -1779,6 +1783,8 @@ Each \addE adds $O(\log^{D-1} n)$ canonical rectangles to the tree, so the total
 There are $O(n)$ \obsEs by Lemma~\ref{lem:obsed}, so the total time taken in \obsEs is $O(n^{D-1}\log^{D-1} n)$.
 
 As all parts of the algorithm are done in time $O(n^{D-1}\log^{D-1} n)$, the total complexity is $O(n^{D-1}\log^{D-1} n)$.
+
+The size of the decomposition as well as the unified segment tree used during the sweeps is $O(n^{D-1})$, so the space complexity is $O(n^{D-1})$.
 \end{proof}
 
 
