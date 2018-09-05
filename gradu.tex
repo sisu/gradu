@@ -170,7 +170,7 @@ Figure~\ref{fig:paths} displays an example of two kinds of minimum link paths as
 \end{figure}
 
 Finding minimum link paths is a well studied algorithmic problem\cite{restricted,wagner,dasnar,de1991,de1992,fitch,handbook}.
-The basic idea employed by most known algorithms is a simple extension of bredth-first search:
+The basic idea employed by most known algorithms is a simple extension of breadth-first search:
 First find points that have link distance~1 to the starting point, then points with link distance~2, and similarly iterate until the desired endpoint is encountered.
 As the search happens in continuous space, the tricky part of the algorithms is defining the appropriate data structures to store and update the discovered area.
 
@@ -230,7 +230,7 @@ Figure~\ref{fig:staged} displays an example of the staged illumination process.
 	\caption{Four steps of staged illumination from a single starting point. The new areas are illuminated through the red windows on each step.}\label{fig:staged}
 \end{figure}
 
-This process closely resembles the bredth-first search, but a key difference is that the search is done in continuous space rather than in a graph.
+This process closely resembles the breadth-first search, but a key difference is that the search is done in continuous space rather than in a graph.
 A nontrivial part in any minimum link path algorithm is maintaining the illuminated area in a data structure that allows efficient computation of \reach{k+1} from \reach{k}.
 
 Representing the illuminated area can be simplified by first splitting the free space into simple primitives.
@@ -361,7 +361,7 @@ Thus the total complexity of the algorithm is $O(n\log n)$, and we only need $O(
 
 Similarly as a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids.
 Decomposition into cuboids is used in the algorithm for 3D minimum link paths in Section~\ref{sec:minlink3d}.
-The running time of the path finding algorithm is heavily depent on the size of the decomposition, so it is desirable to find as small decomposition as possible.
+The running time of the path finding algorithm depends on the size of the decomposition, so it is desirable to find as small decomposition as possible.
 
 The input is given as a list of 2-dimensional obstacle faces in 3-dimensional space.
 Each obstacle face is a polygon defined by a list of vertices.
@@ -556,7 +556,7 @@ The combination of the $n$ sub-problem results has thus size $O(n^{D-2}n)=O(n^{D
 
 \begin{lem}\label{lem:splitddtime}The running time of Algorithm~\ref{alg:splitdd} is $O(n^{D-1}\log n)$.\end{lem}
 \begin{proof}
-Proof by indunction on $D$.
+Proof by induction on $D$.
 Since we use Algorithm~\ref{alg:split2d} for case $D=2$, Lemma~\ref{lem:split2dtime} proves the base case $D=2$.
 
 For $D>2$, we solve $O(n)$ sub-problems, each of which can be done in time $O(n^{D-2}\log n)$ by induction.
@@ -617,7 +617,7 @@ Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ an
 	\EndIf
 	\State $E\gets$ List of all faces of hyperrectangles in $A$ and $B$ perpendicular to $D$-axis.
 	\State Sort $E$ by $D$-coordinate.
-	\State $G\gets$ Groups of consequtive elements of $E$ with equal $D$-coordinate.
+	\State $G\gets$ Groups of consecutive elements of $E$ with equal $D$-coordinate.
 	\State $P_A\gets$ Empty set of references to $A$.
 	\State $P_B\gets$ Empty set of references to $B$.
 	\State $R\gets$ Empty list of pairs.
@@ -652,15 +652,15 @@ If $D=2$, we use Algorithm~\ref{alg:overlap2d}, which was shown to work correctl
 
 Suppose $D\ge 3$.
 The algorithm iterates over the $D$-coordinates where at least one of $A$ or $B$ changes.
-By induction we know that the 3 recursive calls inside the iteration each report the intersections of the provded inputs exactly once.
+By induction we know that the 3 recursive calls inside the iteration each report the intersections of the provided inputs exactly once.
 On each iteration we create sets $S_A$ and $S_B$, which are the newly introduced hyperrectangles at this coordinate.
 Since $S_A$ and $S_B$ contain only new rectangles, none of the 3 recursive calls may find any pairs that were previously added.
 Thus the algorithm finds each intersecting pair at most once.
 
 At the point of making the recursive calls, the sets $P_A$ and $P_B$ contain all the rectangles whose $D$-ranges strictly contain the current $D$-coordinate.
-Two ranges can only itersect is they either share the starting point or the starting point of one of the ranges is inside the other range.
+Two ranges can only intersect if they either share the starting point or the starting point of one of the ranges is inside the other range.
 The recursive call $\findol(D-1,S_A,S_B)$ handles the ranges with the common starting point, and the other two recursive calls handle the case of the starting point being inside the other range.
-Thus the algorithm finds all the intersectin pairs at least once.
+Thus the algorithm finds all the intersecting pairs at least once.
 Since we have proven that each pair is found at most once, this completes the proof.
 \end{proof}
 
@@ -704,7 +704,7 @@ The structure allows performing many operations such as looking up overlapping i
 
 The segment tree is a simple and flexible structure that can be adapted to solve various problems.
 It is straightforward to augment a segment tree to contain additional information about the intervals and use that in queries.
-For example we can associate a number with each interval, and efficiently query for the sum or maximmum of intervals overlapping a given query interval.
+For example we can associate a number with each interval, and efficiently query for the sum or maximum of intervals overlapping a given query interval.
 We first present the general idea of the tree, and then show how it can be applied to the minimum link path problem.
 
 Segment trees are typically implemented as semi-dynamic structures.
@@ -753,7 +753,7 @@ If a set $S$ contains 3 nodes on the same depth, we can replace the middle one w
 Thus $S$ is not a minimal cover of $I$, and can not be \canon{I}.
 \end{proof}
 
-\begin{lem}\label{lem:canonplog}$\size{\canonpar{I}})=O(\log\segsize)$ for any inverval $I$.\end{lem}
+\begin{lem}\label{lem:canonplog}$\size{\canonpar{I}})=O(\log\segsize)$ for any interval $I$.\end{lem}
 \begin{proof}
 Similarly to the previous proof we show that \canonpar{I} cannot contain more than 2 nodes on the same depth.
 
@@ -1046,7 +1046,7 @@ Thus each node has between 0 and $2D$ links to child nodes.
 The children splitting the node $s$ along axis $i$ are denoted by \leftu{s}{i} and \rightu{s}{i}.
 
 Note that in the unified tree there is no distinction between outer and inner tree.
-In the regular multidimensional segment tree the nodes of nested tree represent ranges in one of the coordinate axes, and the innermost nodes represent their cartesian product.
+In the regular multidimensional segment tree the nodes of nested tree represent ranges in one of the coordinate axes, and the innermost nodes represent their Cartesian product.
 In the unified tree, there are no outer and inner nodes, and each node represents a $D$-dimensional hyperrectangle.
 
 The operations \adddt and \checkdt for unified tree are largely similar to the algorithms for the regular multidimensional tree.
@@ -1398,7 +1398,7 @@ To construct the minimum link path between \spt and \ept, augment the algorithm 
 In this section we study the rectilinear minimum link path problem in 3D domain.
 We present an algorithm that has time complexity $O(n^2\log^2n)$ and space complexity $O(n^2)$.
 We also extend the algorithm to work in higher dimensions.
-For any constant $D\ge 1$, the presented algorithm works in time $O(n^D\log^Dn)$.
+For any constant $D\ge 2$, the presented algorithm works in time $O(n^{D-1}\log^{D-1}n)$.
 
 Some of the basic ideas of the 2D minimum link path algorithm can also be applied to the 3D case.
 The path is computed using the staged illumination paradigm, and on each step we compute \reach{k+1} from \reach{k} by using sweep plane algorithms in all the coordinate axis directions.
@@ -1406,7 +1406,7 @@ However in 3D case the representation of the illuminated space becomes more comp
 
 We use the decomposition presented in Section~\ref{sec:split3d} to maintain the illuminated set and to guide the illumination during the sweeps.
 Unlike the 2D case, the algorithm does not use any specific properties of the decomposition, but can be used with any space decomposition.
-The running time of the algorithm is heavily dependend on the number of cells and links between them, and the decomposition we use has the advantage of having only a small number of links compared to other decompositions.
+The running time of the algorithm depends on the number of cells and links between them, and the decomposition we use has the advantage of having only a small number of links.
 
 The decomposition is used to implement plane sweep algorithm for computing \reach{k+1} from \reach{k}.
 On each step we run 6 sweeps, one in each of the directions $\pm x$, $\pm y$ and $\pm z$.
@@ -1556,7 +1556,7 @@ The proof is very similar to Lemma~\ref{lem:obse3}.
 If we discover a cell $c$ on step $k$ then all the points visible from $c$ are illuminated after step $k+3$, so no more sweeps can reach $c$ after step $k+8$.
 \end{proof}
 
-\begin{lem}\label{lem:adde3}The number of \addEs generated during the illumation after after filtering is $O(n^2)$.\end{lem}
+\begin{lem}\label{lem:adde3}The number of \addEs generated during the illumination after after filtering is $O(n^2)$.\end{lem}
 \begin{proof}
 We only count the \addEs in direction $+z$.
 The other directions are identical.
@@ -1706,7 +1706,7 @@ For two \addEs to be aligned, they need to in the event set for the same directi
 Let $a$ be any axis other than $D$.
 The events are aligned in direction $a$ if the bounds of their hyperrectangles are identical in all the directions except $a$, and the bounds in direction $a$ touch each other at endpoints.
 
-The filtering step allows us to again bound the numberor of \addEs processed during the illumination.
+The filtering step allows us to again bound the number of \addEs processed during the illumination.
 
 \begin{lem}\label{lem:obsed}For each obstacle we generate \obsE on at most $2D+3$ steps of the illumination.\end{lem}
 \begin{proof}
@@ -1724,7 +1724,7 @@ The proof is very similar to Lemma~\ref{lem:obsed}.
 If we discover a cell $c$ on step $k$ then all the points visible from $c$ are illuminated after step $k+D$, so no more sweeps can reach $c$ after step $k+2D+2$.
 \end{proof}
 
-\begin{lem}\label{lem:added}The number of \addEs generated during the illumation after after filtering is $O(n^{D-1})$.\end{lem}
+\begin{lem}\label{lem:added}The number of \addEs generated during the illumination after after filtering is $O(n^{D-1})$.\end{lem}
 \begin{proof}
 The proof is similar to Lemma~\ref{lem:adde3}.
 We only count the \addEs in direction $+D$ occurring on a hyperplane $P$ defined by a $(D-1)$-dimensional obstacle face $o$ that has $D$-coordinate $\hat{d}$.
@@ -1766,7 +1766,7 @@ On each \addE we insert a new rectangle to the unified tree in time $O(\log^{D-1
 The filtering of \addEs can be done in linear time, and the total number of unfiltered events is at most the number of \addEs multiplied by the $O(\log^{D-1} n)$ canonical nodes used to store a hyperrectangle in the unified tree.
 
 On each \obsE we clear a hyperrectangle from the tree.
-By Lemma~\ref{lem:segurmtime}, each clear operation takes time $O(n^{D-2}\log n + k)$ where $k$ is the nubmer of cleared canonical nodes.
+By Lemma~\ref{lem:segurmtime}, each clear operation takes time $O(n^{D-2}\log n + k)$ where $k$ is the number of cleared canonical nodes.
 Each \addE adds $O(\log^{D-1} n)$ canonical rectangles to the tree, so the total number of rectangles to be cleared is $O(n^{D-1}\log^{D-1} n)$.
 There are $O(n)$ \obsEs by Lemma~\ref{lem:obsed}, so the total time taken in \obsEs is $O(n^{D-1}\log^{D-1} n)$.
 
