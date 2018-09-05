@@ -689,10 +689,10 @@ Finally, we can generalize Theorem~\ref{theo:split3dtime} to $D$ dimensions.
 
 \begin{theo}\label{theo:splitddtime}$D$-dimensional rectilinear domain defined by obstacles with a total of $n$ vertices can be decomposed into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1})$ links between them in time $O(n^{D-1}\log n).$\end{theo}
 \begin{proof}
-The cuboids can be constructed in time $O(n^{D-1}\log n)$ according to Lemma~\ref{lem:splitddtime}.
+The hyperrectangles can be constructed in time $O(n^{D-1}\log n)$ according to Lemma~\ref{lem:splitddtime}.
 The total number of links between the nodes is $k=O(n^{D-1})$ according to Lemma~\ref{lem:splitddcount}.
 Computing the links between all the layers can then be done in time $O(n^{D-1}\log n+k)=O(n^{D-1}\log n)$ by Lemma~\ref{lem:overlapddtime}.
-Thus the total time complexity is $O(n^{D-1}\log n)$, and the total number of cuboids and links is $O(n^{D-1})$.
+Thus the total time complexity is $O(n^{D-1}\log n)$, and the total number of hyperrectangles and links is $O(n^{D-1})$.
 \end{proof}
 
 
