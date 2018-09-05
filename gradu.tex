@@ -942,7 +942,15 @@ $$\canon{R}=\set{c_1\times c_2\dots\times c_D \mid c_1\in\canoni{R_1}{1}, \dots,
 In other words, \canon{R} is the Cartesian product of one-dimensional canonical sets
 $$\canon{R}=\bigtimes_{i=1}^D \canoni{R_i}{i}.$$
 \end{lem}
-\begin{proof}Left as an exercise.\end{proof}
+\begin{proof}
+Proof by induction on $D$.
+The base case $D=1$ follows directly from the definition of \canon{R}.
+
+For $D\ge 2$ note that all of the inner $(D-1)$-dimensional segment trees are identical.
+Thus to cover a rectangular region minimally, we should select the same set of nodes in each inner tree.
+By induction we should select the nodes $bigtimes_{i=1}^{D-1} \canoni{R_i}{i}$ in the inner trees to cover axes $1\dots D-1$ optimally.
+To cover also axis $D$, it is optimal to select the nodes $\canoni{R_D}{D}$, and thus $\canon{R}=\bigtimes_{i=1}^D\canoni{R_i}{i}$.
+\end{proof}
 
 Combination of Lemma~\ref{lem:canond} and Lemma~\ref{lem:canonlog} gives bound for the size of the canonical set.
 
