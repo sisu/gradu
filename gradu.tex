@@ -706,18 +706,12 @@ Thus the total time complexity is $O(n^{D-1}\log n)$, and the total number of cu
 
 \section{Segment tree}\label{sec:segtree}
 
-Segment tree is a data structure that allows storing and querying of number intervals.
-The structure allows performing a wide range of operations in logarithmic time.
-Some example of operations that can be implemented include:
-\begin{itemize}
-	\item Insert and remove interval to the tree.
-	\item Find all the intervals intersecting a given query interval.
-	\item Cut of a given range from all the ranges in the tree.
-\end{itemize}
+Segment tree is a classical data structure that allows storing and querying intervals.~\cite{unified}
+The structure allows performing many operations such as looking up overlapping intervals in logarithmic time.
 
-Rather than as a single data structure that is used as a black box, the segment trees are better viewed as a framework that can be adapted to work in various situations.
-Segment trees are straightforward to augment to contain additional information about the intervals, and use the information in queries.
-For example we can associate a number with each interval, and efficiently query for the maximum number overlapping a given query interval.
+The segment tree is a simple and flexible structure that can be adapted to solve various problems.
+It is straightforward to augment a segment tree to contain additional information about the intervals and use that in queries.
+For example we can associate a number with each interval, and efficiently query for the sum or maximmum of intervals overlapping a given query interval.
 We first present the general idea of the tree, and then show how it can be applied to the minimum link path problem.
 
 Segment trees are typically implemented as semi-dynamic structures.
@@ -741,7 +735,7 @@ Figure~\ref{fig:segtree} displays an example of a segment tree.
 The structure of a semi-dynamic segment tree is independent of the intervals added to the tree.
 The nodes are commonly arranged into an almost complete binary tree, which allows storing the tree nodes in an array similarly to binary heap:
 the root node is stored in index~1, and the child nodes of node $i$ are $2i$ and $2i+1$.
-This representation allows implementing segment tree operations with very low overhead, making segment tree a powerful practical tool in addition to providing asymptotical bounds.
+This representation allows implementing segment tree operations with very low overhead, making segment tree a powerful practical tool in addition to providing asymptotical bounds.~\cite{kkkk}
 
 \subsection{Canonical nodes}
 
@@ -896,7 +890,7 @@ The segment tree can be generalized into two or higher dimensional structure.
 A two-dimensional segment tree stores rectangles, and allows efficient queries for rectangular regions.
 Correspondingly a $D$-dimensional segment tree provides efficient operations for $D$-dimensional hyperrectangles.
 
-A multidimensional segment tree is composed of of nested regular segment trees.
+A multidimensional segment tree is composed of of nested regular segment trees.~\cite{highseg}
 The shape of a $D$-dimensional segment tree is a 1-dimensional segment tree whose each node stores a $(D-1)$-dimensional segment tree.
 
 Each tree dimension represents one of the $D$ coordinate axes.
