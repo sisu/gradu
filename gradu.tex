@@ -1540,7 +1540,7 @@ Thus operations clears some of the tree nodes.
 As a first step in even generation, we create an \addEs on each side of every cleared canonical rectangle.
 This can create an unnecessarily large amount of events, because rectangles added to the tree are split to up to $(\log^2 n)$ canonical rectangles.
 
-To reduce the number of generated events, we perform the following two steps after generating the events:
+To reduce the number of generated events we perform \emph{filtering}, which consists of the following two steps:
 \begin{enumerate}
 \item Remove all the pairs of \addEs with the same position but opposite direction.
 \item Merge all sets of aligned \addEs with the same $z$-range into a single larger \addE.
@@ -1550,6 +1550,18 @@ The aligned \addEs in direction $+x$ are the ones that occur on the same $x$ coo
 The definition is similar in all the other directions.
 The aligned \addEs are searched for the events in all directions separately.
 Performing these operations allow us to bound the number of \addEs generated during the illumination.
+Figure~\ref{fig:filter} displays the generated \addEs on an obstacle before and after filtering.
+
+\begin{figure}\centering
+	\includegraphics[scale=0.5,page=1]{fig/filter}
+	\hfil
+	\includegraphics[scale=0.5,page=2]{fig/filter}
+	\caption{Initially we can create a large number of \addEs because of the segment tree structured, but after filtering the overhead is reduced.}\label{fig:filter}
+\end{figure}
+
+Filtering can be done in linear time with respect to the number of unfiltered rectangles.
+To see why, notice that there are only $O(n^2)$ possible coordinates that a corner of a rectangle can have.
+We can group the rectangles by their corners into an array of size $O(n^2)$ and use the array to find matching pairs of rectangles to remove or merge.
 
 To make the minimum link path computation efficient, we want to avoid reilluminating the same cells multiple times.
 For the 2D minimum link paths this was done by turning cells into obstacles once enough steps have passed since the cell was first discovered.
