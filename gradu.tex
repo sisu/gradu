@@ -211,7 +211,7 @@ The following items are new original contributions in this thesis.
 
 \subsection{Overview of algorithms}\label{sec:overview}
 
-All the known algorithms for the minimum link path problem use the same basic idea:
+Majority of the known algorithms for the minimum link path problem use the same basic idea~\cite[Sections 26.4, 27.3]{handbook}:
 The tasks is to find a minimum link path from point \spt to point \ept.
 Let \reach{k} be the set of points reachable by at most $k$ links from \spt.
 Start by defining $\reach{0}=\set{\spt}$, and iteratively compute \reach{k+1} from \reach{k}.
@@ -377,9 +377,10 @@ Denote the total number of vertices by $n$.
 
 We present a simple algorithm that uses the Algorithm~\ref{alg:split2d} as a subroutine.
 This algorithm produces a decomposition with $O(n^2)$ cells and $O(n^2)$ links.
-There also exists algorithms for finding decompositions with even small number of cells, but the worst case for number of links is superquadratic for all the known solutions.
+Earlier work on minimum link path has used binary space partitioning to reduce the number of cells to $O(n^{1.5})$~\cite{wagner,bsp}.
+However the number of links in a BSP-based decomposition can be as high as $O(n^{2.5})$, so we choose to pay for the lower number of links by having a higher number of cells.
 
-The solution is a sweep plane algorithm, whichi sweeps through the domain with a plane perpendicular to $z$-axis.
+The decomposition is created by a sweep plane algorithm, which sweeps through the domain with a plane perpendicular to $z$-axis.
 During the sweep we maintain the intersection of the sweep plane and the domain~\fspace.
 The intersection of the domain and a plane is called a \emph{cross section} of the domain.
 
