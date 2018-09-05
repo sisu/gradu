@@ -158,8 +158,8 @@ Geometric version of the problem asks for the shortest path in a continuous spac
 The typical task is to minimize the Euclidean length of the path, but there are other relevant metrics as well.
 For example a robot might move forward fast, but be slow at corners, so a long simple route is sometimes preferable to a shorter but more complex route.
 
-The topic of this thesis is finding geometric path the do minimum amount of turns.
-Consider a path consisting of a finite number of straight line segments.
+The topic of this thesis is finding geometric path that minimize the amount of turns taken.
+Consider a path consisting of a finite number of straight line segments, also called \emph{links}.
 The \emph{link distance} of the path is the number of segments.
 A \emph{minimum link path} between two points is a path that minimizes the link distance.
 Figure~\ref{fig:paths} displays an example of two kinds of minimum link paths as well as the regular shortest path.
@@ -169,16 +169,16 @@ Figure~\ref{fig:paths} displays an example of two kinds of minimum link paths as
 	\caption{There are many variants of the path finding problem in the plane, resulting in different kinds of paths.}\label{fig:paths}
 \end{figure}
 
-Finding minimum link paths is a well studied algorithmic problem.
+Finding minimum link paths is a well studied algorithmic problem\cite{restricted,wagner,dasnar,de1991,de1992,fitch,handbook}.
 The basic idea employed by most known algorithms is a simple extension of bredth-first search:
 First find points that have link distance~1 to the starting point, then points with link distance~2, and similarly iterate until the desired endpoint is encountered.
-Since the search happens in continuous space, the hard part of the algorithms is defining the appropriate data structures to store and update the discovered area.
+As the search happens in continuous space, the tricky part of the algorithms is defining the appropriate data structures to store and update the discovered area.
 
 In this thesis we focus on the \emph{rectilinear} variant of the problem.
 In the rectilinear minimum link path problem we require the obstacles as well as the paths to be constructed to follow the coordinate axes.
 We also study 3D version of the rectilinear minimum link path problem.
-For this version we present a new algorithm that works in time $O(n^2\log^2n)$, which is a significant improvement over the earlier best known result $O(n^{2.5}\log n)$.\cite{restricted}
-Finally, we extend the solution to the 3D rectilinear problem to work in $D$-dimensional domains, giving an algorithm with running time $O(n^D\log^Dn)$.
+For this version we present a new algorithm that works in time $O(n^2\log^2n)$, which is a significant improvement over the earlier best known result $O(n^{2.5}\log n)$.~\cite{restricted}
+Finally, we extend the solution to the 3D rectilinear problem to work in $D$-dimensional domains, giving an algorithm with running time $O(n^{D-1}\log^{D-1}n)$.
 
 \subsection{Background and new results}
 
