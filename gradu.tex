@@ -195,8 +195,8 @@ This was further improved by Wagner, Drysdale and Stein~\cite{wagner}, who gave 
 In this thesis we focus on new results to the rectilinear minimum link path problem, which are original research of the author.
 The following results have been published in peer-reviewed journals and conferences, and were made in collaboration with the respective co-authors.
 \begin{itemize}
-\item A simplified $O(n\log n)$ algorithm for the 2-dimensional case.
-\item A new algorithm for the 3D minimum link path problem, improving the running time from the previous best result of $O(n^{2.5}\log n)$ to $O(n^2\log^2 n)$.
+\item A simplified $O(n\log n)$ algorithm for the 2-dimensional case.~\cite{revisited}
+\item A new algorithm for the 3D minimum link path problem, improving the running time from the previous best result of $O(n^{2.5}\log n)$ to $O(n^2\log^2 n)$.~\cite{restricted}
 \end{itemize}
 
 The following items are new original contributions in this thesis.
@@ -1050,7 +1050,7 @@ The structure of a multidimensional segment tree depends on how we order the coo
 For example a two-dimensional segment tree can have either the outer tree represent $y$-coordinates and each inner tree represent $x$-coordinates, or the other way round.
 The structure and parent-child relationships are different in the two cases, but the sets of rectangles represented by the nodes of the inner trees are exactly the same.
 
-The \emph{unified segment tree} combines the parent-child links of the different multidimensional segment trees into a single structure.
+The \emph{unified segment tree}, developed by Wagner~\cite{unified}, combines the parent-child links of the different multidimensional segment trees into a single structure.
 The unified segment tree is not a tree, but a directed graph.
 Each node $n$ of the graph represents a $D$-dimensional hyperrectangle.
 For each axis $i$ where \rect{n} is not minimal, $n$ has links to two child nodes that divide \rect{n} into two parts along hyperplane perpendicular to $i$-axis.
