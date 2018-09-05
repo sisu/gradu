@@ -239,9 +239,10 @@ In case of minimum link paths with restricted orientations, rectangles or trapez
 In Section~\ref{sec:decomposition} we present algorithms for construction decompositions suitable for minimum link path computation.
 
 With restricted orientations that the paths can take, we can use \emph{sweep line algorithms} to efficiently compute \reach{k+1} from \reach{k}.
-The idea is to "sweep" over the search space by a line, and use the sweep to calculate how the path can advance into the direction of the sweep line.
+Sweep line algorithms are a generic technique used for a wide range of computational geometry problems.~\cite[Section 33.2]{clrs}
+The idea is to image a line that crosses over the domain and stops at some discrete \emph{events}.
+As the sweep line progresses, we gradually update the solution to take into account the parts of the domain that the line has crossed.
 This generic technique allows us to transform the 2-dimensional illumination problem into a series of easier 1-dimensional problems on the sweep line.
-The sweep line technique is discussed in Section~\ref{sec:sweep}.
 
 During the sweeps we need to maintain the relationship between the sweep line and the obstacles as well as the region \reach{k}.
 Maintaining this kind of information requires efficient handling of 1-dimensional intervals.
@@ -273,15 +274,6 @@ If the total number of edges in all the obstacles is $n$, we can decompose the s
 A similar structure can also be used for computing minimum link paths in 3-dimensional domains.
 In 3D rectilinear case each obstacle face is a polygon with axis-aligned edges in 3D space.
 In this case the free space can be decomposed into a graph with $O(n^2)$ cuboid as vertices and $O(n^2)$ edges.
-
-
-\subsection{Sweep line algorithms}\label{sec:sweep}
-
-Sweep line algorithms are a generic technique used for a wide range of computational geometry problems.
-The idea is to image a line that crosses over the domain.
-As the sweep line progresses, we gradually update the solution to take into account the parts of the domain that the line has crossed.
-Conceptually the sweep line moves continuously in space, but in practice we only process a discrete set of \emph{events} where some structural change to the solution happens.
-
 
 \subsection{Planar decomposition}\label{sec:decomp2d}
 
