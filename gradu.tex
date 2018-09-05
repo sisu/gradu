@@ -720,7 +720,7 @@ This allows implementing most operations in time $O(\log\segsize)$, and the size
 
 \subsection{Structure of a segment tree}
 
-A segment tree is a binary tree where each node $n$ corresponds to a fixed half-open interval $\inter{n}$.
+A segment tree is a binary tree where each node $s$ corresponds to a fixed half-open interval $\inter{s}$.
 Each branch node $s$ has two child nodes \leftc{s} and \rightc{s}.
 The intervals of the children divide the parent interval into two parts:
 $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
@@ -756,8 +756,8 @@ The following two lemmas are useful for proving the running times of segment tre
 As the segment tree is a balanced binary tree, it has depth $\Theta(\log\segsize)$.
 We show that $\canon{I}$ contains at most 2 nodes on each depth, which proves the claim.
 
-If a set $N$ contains 3 nodes on the same depth, we can replace the middle one with its parent node without affecting the interval covered by $N$.
-Thus $N$ is not a minimal cover of $I$, and can not be \canon{I}.
+If a set $S$ contains 3 nodes on the same depth, we can replace the middle one with its parent node without affecting the interval covered by $S$.
+Thus $S$ is not a minimal cover of $I$, and can not be \canon{I}.
 \end{proof}
 
 \begin{lem}\label{lem:canonplog}$\size{\canonpar{I}})=O(\log\segsize)$ for any inverval $I$.\end{lem}
@@ -774,12 +774,12 @@ We can iterate over the canonical nodes and their ancestors by using the followi
 \begin{alg}\label{alg:segiter}
 Visit all the elements of \canon{I} and \canonpar{I}.
 \begin{algorithmic}
-\Procedure{IterCanonical}{$n$}
-\Comment{Visit the canonical nodes in the subtree rooted at node $n$}
+\Procedure{IterCanonical}{$s$}
+\Comment{Visit the canonical nodes in the subtree rooted at node $s$}
 	\If{$\inter{n}\subseteq I$}
-		\State \visitc($n$)
+		\State \visitc($s$)
 	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
-		\State \visitp($n$)
+		\State \visitp($s$)
 		\State \textsc{IterCanonical}($\leftc{n}$)
 		\State \textsc{IterCanonical}($\rightc{n}$)
 	\EndIf
@@ -813,20 +813,20 @@ Either $i$ and $j$ are the same node, or one of them is an ancestor of the other
 
 For the "only if" part, we look at the three cases separately.
 \begin{enumerate}
-\item If there exists a node $n\in\canon{I}\cap\canon{J}$, then $\inter{n}\subseteq I\cap J$, so $I\cap J\neq\emptyset$.
-\item If there is a node $n\in\canonpar{I}\cap\canon{J}$, then there exists $m\in\canon{I}$ that is a grandchild of $n$. $\inter{m}\subseteq I$ and $\inter{m}\subsetneq\inter{n}\subseteq J$, so $I\cap J\neq\emptyset$.
+\item If there exists a node $s\in\canon{I}\cap\canon{J}$, then $\inter{s}\subseteq I\cap J$, so $I\cap J\neq\emptyset$.
+\item If there is a node $s\in\canonpar{I}\cap\canon{J}$, then there exists $m\in\canon{I}$ that is a grandchild of $s$. $\inter{m}\subseteq I$ and $\inter{m}\subsetneq\inter{s}\subseteq J$, so $I\cap J\neq\emptyset$.
 \item Identical to the second case.
 \end{enumerate}
 \end{proof}
 
 Lemma~\ref{lem:segintersect} can be used to find intersecting pairs of intervals in a segment tree.
-In each node $n$ of the segment tree, maintain two lists of intervals:
+In each node $s$ of the segment tree, maintain two lists of intervals:
 \begin{itemize}
-\item \nodecs{n}: Intervals $I$ for which $n\in\canon{I}$,
-\item \nodeps{n}: Intervals $I$ for which $n\in\canonpar{I}$.
+\item \nodecs{s}: Intervals $I$ for which $s\in\canon{I}$,
+\item \nodeps{s}: Intervals $I$ for which $s\in\canonpar{I}$.
 \end{itemize}
-When interval $I$ is added to the segment tree, it is added to \nodecs{n} for all $n\in\canon{I}$ and to \nodeps{n} for all $n\in\canonpar{I}$.
-When we look for intervals intersecting a given interval $J$, we report all the intervals in \nodecs{n} for all $n\in\canonpar{J}$ and in \nodeps{n} for all $n\in\canon{J}$.
+When interval $I$ is added to the segment tree, it is added to \nodecs{s} for all $s\in\canon{I}$ and to \nodeps{s} for all $s\in\canonpar{I}$.
+When we look for intervals intersecting a given interval $J$, we report all the intervals in \nodecs{s} for all $s\in\canonpar{J}$ and in \nodeps{s} for all $s\in\canon{J}$.
 By Lemma~\ref{lem:segintersect} this finds exactly the intervals intersecting $J$ and nothing else.
 Note, though, that some intervals might be counted multiple times.
 The structure can be further extended to avoid reporting the duplicates, but for the minimum link paths use case we only need to be able to check whether the query interval overlaps any of the intervals in the tree, so this solution is sufficient.
@@ -836,36 +836,36 @@ Clearing interval $I$ means that all the intervals $J$ in the tree are cut into 
 The clear operation is performed in the following three steps:
 \begin{enumerate}
 \item Split rectangles that touch $I$ but are not contained by $I$ into smaller parts.
-\item Completely clear each each subtree rooted in any node $n\in\canon{I}$.
-\item Recompute \nodeps{n} to match the remaining nodes for all nodes $n\in\canonpar{I}$.
+\item Completely clear each each subtree rooted in any node $s\in\canon{I}$.
+\item Recompute \nodeps{s} to match the remaining nodes for all nodes $s\in\canonpar{I}$.
 \end{enumerate}
 
 All the tree operations can be done in parallel during a single recursive traversal of the tree.
-For nodes $n\in\canonpar{I}$ we push down the intervals in \nodecs{n} to the child nodes before proceeding with the recursion.
-When we arrive in a node $n\in\canon{I}$, the entire subtree rooted at $n$ is cleared.
-After the child nodes are cleared, we also need to regenerate the \nodeps{n} list for the nodes $n\in\canonpar{I}$ to account for the intervals that are no longer present in the subtree.
-The regeneration is done by merging the lists in the child nodes of $n$.
+For nodes $s\in\canonpar{I}$ we push down the intervals in \nodecs{s} to the child nodes before proceeding with the recursion.
+When we arrive in a node $s\in\canon{I}$, the entire subtree rooted at $s$ is cleared.
+After the child nodes are cleared, we also need to regenerate the \nodeps{s} list for the nodes $s\in\canonpar{I}$ to account for the intervals that are no longer present in the subtree.
+The regeneration is done by merging the lists in the child nodes of $s$.
 The exact algorithm for clearing is shown below.
 
 \begin{alg}\label{alg:segrm}
 Clear interval $I$ from a segment tree.
 \begin{algorithmic}
-\Procedure{ClearInterval}{$n$}
-	\Comment Clears interval $I$ from subtree rooted at $n$.
-	\If{$\inter{n}\cap I=\emptyset$ or $\nodeps{n}$ is empty}
+\Procedure{ClearInterval}{$s$}
+	\Comment Clears interval $I$ from subtree rooted at $s$.
+	\If{$\inter{s}\cap I=\emptyset$ or $\nodeps{s}$ is empty}
 		Return.
 	\EndIf
-	\If{$\inter{n}\nsubseteq I$}
-		\State Copy \nodecs{n} to \nodecs{\leftc{n}} and to \nodecs{\rightc{n}}.
+	\If{$\inter{s}\nsubseteq I$}
+		\State Copy \nodecs{s} to \nodecs{\leftc{s}} and to \nodecs{\rightc{s}}.
 	\EndIf
-	\State Clear \nodecs{n}.
-	\State Clear \nodeps{n}.
-	\If{\leftc{n} and \rightc{n} defined}
-		\State $\cleariv(\leftc{n})$.
-		\State $\cleariv(\rightc{n})$.
+	\State Clear \nodecs{s}.
+	\State Clear \nodeps{s}.
+	\If{\leftc{s} and \rightc{s} defined}
+		\State $\cleariv(\leftc{s})$.
+		\State $\cleariv(\rightc{s})$.
 	\EndIf
-	\If{$\inter{n}\cap I\neq\emptyset$}
-		\State $\nodeps{n}\gets \nodeps{\leftc{n}} \cup \nodeps{\rightc{n}} \cup \nodecs{\leftc{n}} \cup \nodecs{\rightc{n}}$.
+	\If{$\inter{s}\cap I\neq\emptyset$}
+		\State $\nodeps{s}\gets \nodeps{\leftc{s}} \cup \nodeps{\rightc{s}} \cup \nodecs{\leftc{s}} \cup \nodecs{\rightc{s}}$.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
@@ -894,7 +894,7 @@ A multidimensional segment tree is composed of of nested regular segment trees.~
 The shape of a $D$-dimensional segment tree is a 1-dimensional segment tree whose each node stores a $(D-1)$-dimensional segment tree.
 
 Each tree dimension represents one of the $D$ coordinate axes.
-Each node $n$ of the innermost segment tree represents a $D$-dimensional hyperrectangle \rect{n}, whose bounds are defined by the position of the node on each of the $D$ tree levels.
+Each node $s$ of the innermost segment tree represents a $D$-dimensional hyperrectangle \rect{s}, whose bounds are defined by the position of the node on each of the $D$ tree levels.
 For example the outer tree of a 2-dimensional segment tree represents the $y$ coordinates, and each inner tree represents the $x$ coordinates.
 Each node of the inner tree represents a rectangle whose $x$-bounds are determined by the position of the node in the inner tree, and the $y$-bounds are determined by the node of the outer tree that contains the inner tree.
 
@@ -970,27 +970,27 @@ If $A\cap B=\emptyset$, then there exists some $d$ for which $A_d\cap B_d=\empty
 
 To apply Lemma~\ref{lem:rectintersect} to detect intersecting rectangles, we create \emph{two} $D-1$ dimensional inner trees to every outer node of a $D$-dimensional segment tree:
 \begin{description}
-\item[\subtree{n}] where we store rectangles $R$ for which $n\in\canoni{R_D}{D}$,
-\item[\subtreep{n}] where we store rectangles $R$ for which $n\in\canonpari{R_D}{D}$.
+\item[\subtree{s}] where we store rectangles $R$ for which $s\in\canoni{R_D}{D}$,
+\item[\subtreep{s}] where we store rectangles $R$ for which $s\in\canonpari{R_D}{D}$.
 \end{description}
 
 We can write rectangle insertion and query operations by using these fields.
 For simplicity we only support checking whether a query rectangle intersects any rectangle in the tree rather than returning the matching rectangles.
-The nodes $n$ of the innermost tree have dimension 0, and they contain only a single boolean \hasrect{n}, which indicates that at least one rectangle is inserted to this subtree.
+The nodes $s$ of the innermost tree have dimension 0, and they contain only a single boolean \hasrect{s}, which indicates that at least one rectangle is inserted to this subtree.
 
 \begin{alg}\label{alg:rectadd}
 Add rectangle $R$ to $D$-dimensional tree.
 \begin{algorithmic}
 \Procedure{InsertToTree}{$D,n$}
-\Comment{Insert to the subtree rooted at node $n$}
+\Comment{Insert to the subtree rooted at node $s$}
 	\If{$D=0$}
-		\State $\hasrect{n}\gets\texttt{true}$.
-	\ElsIf{$\inter{n}\subseteq R_D$}
-		\State $\adddt(D-1,\subtree{n})$.
-	\ElsIf{$\inter{n}\cap R_D\neq\emptyset$}
-		\State $\adddt(D-1,\subtreep{n})$.
-		\State $\adddt(D,\leftc{n})$.
-		\State $\adddt(D,\rightc{n})$.
+		\State $\hasrect{s}\gets\texttt{true}$.
+	\ElsIf{$\inter{s}\subseteq R_D$}
+		\State $\adddt(D-1,\subtree{s})$.
+	\ElsIf{$\inter{s}\cap R_D\neq\emptyset$}
+		\State $\adddt(D-1,\subtreep{s})$.
+		\State $\adddt(D,\leftc{s})$.
+		\State $\adddt(D,\rightc{s})$.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
@@ -1000,29 +1000,29 @@ Add rectangle $R$ to $D$-dimensional tree.
 Query whether rectangle $R$ intersects with any rectangle in the tree.
 \begin{algorithmic}
 \Procedure{QueryTree}{$D,n$}
-\Comment{Check subtree rooted at node $n$}
+\Comment{Check subtree rooted at node $s$}
 	\State $R\gets\texttt{false}$.
 	\If{$D=0$}
-		\State $R\gets\hasrect{n}$.
-	\ElsIf{$\inter{n}\subseteq R_D$}
-		\State $R\gets \checkdt(D-1,\subtree{n})$.
-		\State $R\gets R$ or $\checkdt(D-1,\subtreep{n})$.
-	\ElsIf{$\inter{n}\cap R_D\neq\emptyset$}
-		\State $R\gets \checkdt(D-1,\subtree{n})$.
-		\State $R\gets R$ or $\checkdt(D,\leftc{n})$.
-		\State $R\gets R$ or $\checkdt(D,\rightc{n})$.
+		\State $R\gets\hasrect{s}$.
+	\ElsIf{$\inter{s}\subseteq R_D$}
+		\State $R\gets \checkdt(D-1,\subtree{s})$.
+		\State $R\gets R$ or $\checkdt(D-1,\subtreep{s})$.
+	\ElsIf{$\inter{s}\cap R_D\neq\emptyset$}
+		\State $R\gets \checkdt(D-1,\subtree{s})$.
+		\State $R\gets R$ or $\checkdt(D,\leftc{s})$.
+		\State $R\gets R$ or $\checkdt(D,\rightc{s})$.
 	\EndIf
 	\State Return $R$.
 \EndProcedure
 \end{algorithmic}
 \end{alg}
 
-\begin{lem}\adddt and \checkdt both have time complexity $O(\log^D n)$.\end{lem}
+\begin{lem}\adddt and \checkdt both have time complexity $O(\log^D\segsize)$.\end{lem}
 \begin{proof}
 Proof by induction on $D$.
 For the base case $D=0$ both algorithm finishes in constant time.
-For $D\ge 1$, algorithms iterate over the canonical nodes and their ancestors in the outer tree, making $\log{n}$ calls to the inner trees.
-By induction the inner tree operations are done in time $O(\log^{D-1}n)$, so the total time complexity is $O(\log^D n)$.
+For $D\ge 1$, algorithms iterate over the canonical nodes and their ancestors in the outer tree, making $\log\segsize$ calls to the inner trees.
+By induction the inner tree operations are done in time $O(\log^{D-1}\segsize)$, so the total time complexity is $O(\log^D\segsize)$.
 \end{proof}
 
 Note that \subtree{} and \subtreep{} are used in opposite ways in the two operations.
@@ -1046,10 +1046,10 @@ The structure and parent-child relationships are different in the two cases, but
 
 The \emph{unified segment tree}, developed by Wagner~\cite{unified}, combines the parent-child links of the different multidimensional segment trees into a single structure.
 The unified segment tree is not a tree, but a directed graph.
-Each node $n$ of the graph represents a $D$-dimensional hyperrectangle.
-For each axis $i$ where \rect{n} is not minimal, $n$ has links to two child nodes that divide \rect{n} into two parts along hyperplane perpendicular to $i$-axis.
+Each node $s$ of the graph represents a $D$-dimensional hyperrectangle.
+For each axis $i$ where \rect{s} is not minimal, $s$ has links to two child nodes that divide \rect{s} into two parts along hyperplane perpendicular to $i$-axis.
 Thus each node has between 0 and $2D$ links to child nodes.
-The children splitting the node $n$ along axis $i$ are denoted by \leftu{n}{i} and \rightu{n}{i}.
+The children splitting the node $s$ along axis $i$ are denoted by \leftu{s}{i} and \rightu{s}{i}.
 
 Note that in the unified tree there is no distinction between outer and inner tree.
 In the regular multidimensional segment tree the nodes of nested tree represent ranges in one of the coordinate axes, and the innermost nodes represent their cartesian product.
@@ -1058,17 +1058,17 @@ In the unified tree, there are no outer and inner nodes, and each node represent
 The operations \adddt and \checkdt for unified tree are largely similar to the algorithms for the regular multidimensional tree.
 We consider again checking whether the query rectangle intersects with any of the hyperrectangles in the tree rather than reporting all the intersecting hyperrectangles.
 Each tree node stores $2^D$ bits of information about the hyperrectangles stored in the subtree.
-When a hyperrectangle $R$ is added to node $n$, the bits are used to define whether $n$ represents a canonical node or an ancestor of a canonical node along each coordinate axis.
+When a hyperrectangle $R$ is added to node $s$, the bits are used to define whether $s$ represents a canonical node or an ancestor of a canonical node along each coordinate axis.
 The $2^D$ bits allow us to detect when the conditions of Lemma~\ref{lem:rectintersect} become fulfilled for the query rectangle and a rectangle in the tree.
 The following function computes the mask for a rectangle and a tree node.
 
 \begin{alg}\label{alg:maskof}
-Compute bitmask representing how hyperrectangle $R$ is stored in unified tree node $n$.
+Compute bitmask representing how hyperrectangle $R$ is stored in unified tree node $s$.
 \begin{algorithmic}
 \Procedure{NodeMask}{$R,n$}
 	\State $m\gets 0$
 	\ForAll{$d \in 1\dots D$}
-		\If{$\rect{n}_d\subseteq R_D$}
+		\If{$\rect{s}_d\subseteq R_D$}
 			\State $m\gets m + 2^d$
 		\EndIf
 	\EndFor
@@ -1083,21 +1083,21 @@ We can write procedures \adddt and \checkdt by using this function.
 Add rectangle $R$ to $D$-dimensional unified tree.
 \begin{algorithmic}
 \Procedure{InsertToTree}{$d,n$}
-\Comment{Insert to the subtree rooted at node $n$ by moving along axes $1\dots d$}
+\Comment{Insert to the subtree rooted at node $s$ by moving along axes $1\dots d$}
 	\If{$d=0$}
 		\State $m\gets\maskof{R,n}$.
 		\ForAll{$b \in 0\dots 2^D-1$}
 			\If{All bits of $b$ are set in $m$}
-				\State $\hasbits{n}{b}\gets\texttt{true}.$
+				\State $\hasbits{s}{b}\gets\texttt{true}.$
 			\EndIf
 		\EndFor
-		\State $\hasrect{n}\gets\texttt{true}$.
-	\ElsIf{$\rect{n}_d\subseteq R_d$}
+		\State $\hasrect{s}\gets\texttt{true}$.
+	\ElsIf{$\rect{s}_d\subseteq R_d$}
 		\State $\adddt(d-1,n)$.
-	\ElsIf{$\rect{n}_d\cap R_d\neq\emptyset$}
+	\ElsIf{$\rect{s}_d\cap R_d\neq\emptyset$}
 		\State $\adddt(d-1,n)$.
-		\State $\adddt(d,\leftu{n}{d})$.
-		\State $\adddt(d,\rightu{n}{d})$.
+		\State $\adddt(d,\leftu{s}{d})$.
+		\State $\adddt(d,\rightu{s}{d})$.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
@@ -1110,26 +1110,26 @@ For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
 Query whether rectangle $R$ intersects with any rectangle in the unified tree.
 \begin{algorithmic}
 \Procedure{QueryTree}{$d,n$}
-\Comment{Check subtree rooted at node $n$}
+\Comment{Check subtree rooted at node $s$}
 	\State $R\gets\texttt{false}$.
 	\If{$d=0$}
-		\State $R\gets\hasbits{n}{\texttt{reverseBits}(\maskof{R,n})}$.
-	\ElsIf{$\inter{n}\subseteq R_d$}
+		\State $R\gets\hasbits{s}{\texttt{reverseBits}(\maskof{R,n})}$.
+	\ElsIf{$\rect{s}_d\subseteq R_d$}
 		\State $R\gets\checkdt(d-1,n)$.
-	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
+	\ElsIf{$\rect{s}_d\cap R_d\neq\emptyset$}
 		\State $R\gets\checkdt(d-1,n)$.
-		\State $R\gets R$ or $\checkdt(d,\leftu{n}{d})$.
-		\State $R\gets R$ or $\checkdt(d,\rightu{n}{d})$.
+		\State $R\gets R$ or $\checkdt(d,\leftu{s}{d})$.
+		\State $R\gets R$ or $\checkdt(d,\rightu{s}{d})$.
 	\EndIf
 	\State Return $R$.
 \EndProcedure
 \end{algorithmic}
 \end{alg}
 
-The interesting part of the query algorithm is checking if the tree node contains a rectangle by expression $\hasbits{n}{\texttt{reverseBits}(\maskof{R,n})}$ when querying for hyperrectangle $R$.
-When adding a hyperrectangle $A$, we set $\hasbits{n}{b}$ for each bitmask $b$ whose bits are contained in $\maskof{A,n}$.
+The interesting part of the query algorithm is checking if the tree node contains a rectangle by expression $\hasbits{s}{\texttt{reverseBits}(\maskof{R,n})}$ when querying for hyperrectangle $R$.
+When adding a hyperrectangle $A$, we set $\hasbits{s}{b}$ for each bitmask $b$ whose bits are contained in $\maskof{A,n}$.
 Thus the expression in \checkdt detects $A$ if $\maskof{A,n}|\maskof{R,n}=2^D-1$, where $x|y$ represents the bitwise OR operation of $x$ and $y$.
-This is equivalent to condition that $\rect{n}_d$ is the range of a canonical node of either $R_d$ or $A_d$ in each dimension $d$.
+This is equivalent to condition that $\rect{s}_d$ is the range of a canonical node of either $R_d$ or $A_d$ in each dimension $d$.
 This matches the conditions of Lemma~\ref{lem:rectintersect} for rectangle intersection, so the intersection is returned if and only if $R$ and $A$ truly intersect.
 
 Next we consider clearing a rectangle from the unified tree.
@@ -1138,74 +1138,74 @@ The clear operation is implemented using the same three operations as we used fo
 split touching intervals, clear subtrees of the canonical nodes, and finally recompute the information about hyperrectangles stored in the descendants.
 
 The three operations are performed by a recursive function \cleardt that traverses through the tree.
-The function guides the tree traversal with two arguments: the current subtree root $n$, and the axis where we are moving $d$.
-In each canonical parent $n\in\canonpari{R_d}{d}$ we split the contents of the subtree along axis $d$ before proceeding, and recompute the descendant information after finishing clearing the subtree.
+The function guides the tree traversal with two arguments: the current subtree root $s$, and the axis where we are moving $d$.
+In each canonical parent $s\in\canonpari{R_d}{d}$ we split the contents of the subtree along axis $d$ before proceeding, and recompute the descendant information after finishing clearing the subtree.
 The full algorithm is described below.
 
 \begin{alg}\label{alg:segurm}
 Clear rectangle $R$ from $D$-dimensional unified segment tree.
 \begin{algorithmic}
 \Procedure{ClearFromTree}{$d,n$}
-	\If{$\inter{n}\cap R_d=\emptyset$ or $\neg\hasbits{n}{0}$}
+	\If{$\rect{s}_d\cap R_d=\emptyset$ or $\neg\hasbits{s}{0}$}
 		\State Return.
 	\EndIf
 	\If{$d=0$}
-		\State $\hasbita{n}\gets\texttt{false}$.
+		\State $\hasbita{s}\gets\texttt{false}$.
 		\State Return.
 	\EndIf
-	\If{$\rect{n}_d\nsubseteq R_d$}
+	\If{$\rect{s}_d\nsubseteq R_d$}
 		\State $\pdst(d-1,n,d)$.
 	\EndIf
 	\State $\cleardt(d-1,n)$.
-	\If{\leftu{n}{d} and \rightu{n}{d} defined}
-		\State $\cleardt(d,\leftu{n}{d})$.
-		\State $\cleardt(d,\rightu{n}{d})$.
+	\If{\leftu{s}{d} and \rightu{s}{d} defined}
+		\State $\cleardt(d,\leftu{s}{d})$.
+		\State $\cleardt(d,\rightu{s}{d})$.
 	\EndIf
-	\If{$\rect{n}_d\nsubseteq R_d$}
+	\If{$\rect{s}_d\nsubseteq R_d$}
 		\State $\recomp(d,n)$.
 	\EndIf
 \EndProcedure
 
 \Procedure{PushDownSubtree}{$d,n,a$}
-	\Comment Pushes down values in subtree $n$ along axis $a$.
+	\Comment Pushes down values in subtree $s$ along axis $a$.
 	\If{$d=0$}
-		\State $\hasbita{\leftu{n}{a}}\gets \hasbita{\leftu{n}{a}} | \hasbita{n}$.
-		\State $\hasbita{\rightu{n}{a}}\gets \hasbita{\rightu{n}{a}} | \hasbita{n}$.
+		\State $\hasbita{\leftu{s}{a}}\gets \hasbita{\leftu{s}{a}} | \hasbita{s}$.
+		\State $\hasbita{\rightu{s}{a}}\gets \hasbita{\rightu{s}{a}} | \hasbita{s}$.
 		\State Return.
-	\ElsIf{$\rect{n}_d\cap R_d=\emptyset$}
+	\ElsIf{$\rect{s}_d\cap R_d=\emptyset$}
 		\State Return.
 	\EndIf
 	\State $\pdst(d-1,n,a)$.
-	\If{\leftu{n}{d} and \rightu{n}{d} defined}
-		\State $\pdst(d,\leftu{n}{d},a)$.
-		\State $\pdst(d,\rightu{n}{d},a)$.
+	\If{\leftu{s}{d} and \rightu{s}{d} defined}
+		\State $\pdst(d,\leftu{s}{d},a)$.
+		\State $\pdst(d,\rightu{s}{d},a)$.
 	\EndIf
 \EndProcedure
 
 \Procedure{RecomputeSubtreeData}{$d,n$}
 	\If{$d=0$}
-		\State $\hasbita{n}\gets\texttt{false}$.
+		\State $\hasbita{s}\gets\texttt{false}$.
 		\State $m\gets\maskof{R,n}$.
 		\ForAll{$a \in 1\dots D$}
-			\If{$\rect{n}_a \subseteq R_a$}
+			\If{$\rect{s}_a \subseteq R_a$}
 				Continue.
 			\EndIf
-			\State $c_1\gets\leftu{n}{a}$.
-			\State $c_1\gets\rightu{n}{a}$.
+			\State $c_1\gets\leftu{s}{a}$.
+			\State $c_1\gets\rightu{s}{a}$.
 			\ForAll{$b \in 0 \dots 2^D-1$}
 				\If{$b$ does not have bit $a$ set}
-					\State $\hasbits{n}{b}\gets \hasbits{n}{b}$ or $\hasbits{c_1}{b}$ or $\hasbits{c_2}{b}$.
+					\State $\hasbits{s}{b}\gets \hasbits{s}{b}$ or $\hasbits{c_1}{b}$ or $\hasbits{c_2}{b}$.
 				\EndIf
 			\EndFor
 		\EndFor
 		\State Return.
-	\ElsIf{$\inter{n}\cap R_d=\emptyset$}
+	\ElsIf{$\rect{s}_d\cap R_d=\emptyset$}
 		\State Return.
 	\EndIf
 	\State $\recomp(d-1,n)$.
-	\If{\leftu{n}{d} and \rightu{n}{d} defined}
-		\State $\recomp(d,\leftu{n}{d})$.
-		\State $\recomp(d,\rightu{n}{d})$.
+	\If{\leftu{s}{d} and \rightu{s}{d} defined}
+		\State $\recomp(d,\leftu{s}{d})$.
+		\State $\recomp(d,\rightu{s}{d})$.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
@@ -1337,9 +1337,9 @@ Compute illuminated rectangles from group $R$ into direction $+y$.
 			\State Replace $t$ by $t\setminus\xrange{o}$, possibly removing it or splitting it into two parts.
 		\EndFor
 	\EndFor
-	\ForAll{$n\in\nbsd{r}{+y}$}
-		\If{$\xrange{n}$ touches any range in $T$ and $n\notin Q$}
-			\State Insert $n$ into $Q$.
+	\ForAll{$b\in\nbsd{r}{+y}$}
+		\If{$\xrange{b}$ touches any range in $T$ and $b\notin Q$}
+			\State Insert $b$ into $Q$.
 		\EndIf
 	\EndFor
 \EndWhile
@@ -1463,8 +1463,8 @@ Illuminate by plane sweep in direction $+z$ starting from a provided event set $
 			\ForAll{$o\in\obsd{c}{z+}$}
 				\State Insert \obsE for $o$ to $Q$.
 			\EndFor
-			\ForAll{$n\in\nbsd{c}{z+}$}
-				\State Insert \cellE for $n$ to $Q$.
+			\ForAll{$b\in\nbsd{c}{z+}$}
+				\State Insert \cellE for $b$ to $Q$.
 			\EndFor
 		\EndIf
 	\ElsIf{$e$ is \obsE}
@@ -1658,8 +1658,8 @@ Illuminate by plane sweep in direction $+D$ starting from a provided event set $
 			\ForAll{$o\in\obsd{c}{D+}$}
 				\State Insert \obsE for $o$ to $Q$.
 			\EndFor
-			\ForAll{$n\in\nbsd{c}{D+}$}
-				\State Insert \cellE for $n$ to $Q$.
+			\ForAll{$b\in\nbsd{c}{D+}$}
+				\State Insert \cellE for $b$ to $Q$.
 			\EndFor
 		\EndIf
 	\ElsIf{$e$ is \obsE}
