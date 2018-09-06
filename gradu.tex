@@ -302,7 +302,6 @@ Each element added to the binary tree is a partially constructed rectangle $a$ w
 \begin{itemize}
 \item Interval $\xrange{a}=\range{\xranget{a}{1}}{\xranget{a}{2}}$.
 \item Interval $\yrange{a}=\range{\yranget{a}{1}}{\yranget{a}{2}}$.
-\item List of neighbor links $\nbs{a}$.
 \end{itemize}
 
 The sweep stops at each horizontal obstacle edge.
@@ -326,7 +325,6 @@ Decomposition of \fspace into a group of rectangular cells \decomp{x}.
 		\State $\yranget{v}{2}\gets\y{e}$.
 		\ForAll{$u\gets v\setminus s$}
 			\State $\yranget{u}{1}\gets\y{e}$.
-			\State Insert $v$ to list $\nbs{u}$.
 			\State $a\gets\text{New rectangle}$.
 			\State $\xrange{a}\gets u$.
 			\State $\yranget{a}{1}\gets\y{e}$.
@@ -338,7 +336,6 @@ Decomposition of \fspace into a group of rectangular cells \decomp{x}.
 		\State $\yranget{a}{1}\gets\y{e}$.
 		\ForAll{$v\in$ lookup $T$ for intervals touching \xrange{e}}
 			\State Remove $v$ from $T$.
-			\State Insert $v$ to list \nbs{a}.
 			\State $\xrange{a}\gets\xrange{a}\cup\xrange{v}$.
 		\EndFor
 		\State Insert $a$ to $T$.
@@ -347,7 +344,9 @@ Decomposition of \fspace into a group of rectangular cells \decomp{x}.
 \end{algorithmic}
 \end{alg}
 
-The complexity of the algorithm can be easily bounded.
+Algorithm~\ref{alg:split2d} only computes the cells, but not the links between them.
+It is straightforward to extend the algorithm to compute the links as well by inserting links between the cells that are removed and inserted in the binary search tree during each event.
+The following lemma gives a bound on the complexity of the algorithm.
 
 \begin{lem}\label{lem:split2dtime}Algorithm~\ref{alg:split2d} works in time $O(n\log n)$ and space $O(n)$.\end{lem}
 \begin{proof}
