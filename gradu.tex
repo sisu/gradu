@@ -152,7 +152,7 @@ We show that the algorithm can be generalized to higher dimensions, leading to a
 
 \section{Introduction}
 
-Path finding problems are a widely studied subject in algorithmics.~\cite{survey}
+Path finding problems are a widely studied subject in algorithmics~\cite{survey}.
 A typical task is finding the shortest path between two nodes in a graph.
 Geometric version of the problem asks for the shortest path in a continuous space, such as plane with polygonal obstacles.
 The typical task is to minimize the Euclidean length of the path, but there are other relevant metrics as well.
@@ -177,7 +177,7 @@ As the search happens in continuous space, the tricky part of the algorithms is 
 In this thesis we focus on the \emph{rectilinear} variant of the problem.
 In the rectilinear minimum link path problem we require the obstacles as well as the paths to be constructed to follow the coordinate axes.
 We also study 3D version of the rectilinear minimum link path problem.
-For this version we present a new algorithm that works in time $O(n^2\log^2n)$, which is a significant improvement over the earlier best known result $O(n^{2.5}\log n)$.~\cite{restricted}
+For this version we present a new algorithm that works in time $O(n^2\log^2n)$, which is a significant improvement over the earlier best known result $O(n^{2.5}\log n)$~\cite{restricted}.
 Finally, we extend the solution to the 3D rectilinear problem to work in $D$-dimensional domains, giving an algorithm with running time $O(n^{D-1}\log^{D-1}n)$.
 
 \subsection{Background and new results}
@@ -195,8 +195,8 @@ This was further improved by Wagner, Drysdale and Stein~\cite{wagner}, who gave 
 In this thesis we focus on new results to the rectilinear minimum link path problem, which are original research of the author.
 The following results have been published in peer-reviewed journals and conferences, and were made in collaboration with the respective co-authors.
 \begin{itemize}
-\item A simplified $O(n\log n)$ algorithm for the 2-dimensional case.~\cite{revisited}
-\item A new algorithm for the 3D minimum link path problem, improving the running time from the previous best result of $O(n^{2.5}\log n)$ to $O(n^2\log^2 n)$.~\cite{restricted}
+\item A simplified $O(n\log n)$ algorithm for the 2-dimensional case~\cite{revisited}.
+\item A new algorithm for the 3D minimum link path problem, improving the running time from the previous best result of $O(n^{2.5}\log n)$ to $O(n^2\log^2 n)$~\cite{restricted}.
 \end{itemize}
 
 The following items are new original contributions in this thesis.
@@ -239,7 +239,7 @@ In case of minimum link paths with restricted orientations, rectangles or trapez
 In Section~\ref{sec:decomposition} we present algorithms for construction decompositions suitable for minimum link path computation.
 
 With restricted orientations that the paths can take, we can use \emph{sweep line algorithms} to efficiently compute \reach{k+1} from \reach{k}.
-Sweep line algorithms are a generic technique used for a wide range of computational geometry problems.~\cite[Section 33.2]{clrs}
+Sweep line algorithms are a generic technique used for a wide range of computational geometry problems~\cite[Section 33.2]{clrs}.
 The idea is to image a line that crosses over the domain and stops at some discrete \emph{events}.
 As the sweep line progresses, we gradually update the solution to take into account the parts of the domain that the line has crossed.
 This generic technique allows us to transform the 2-dimensional illumination problem into a series of easier 1-dimensional problems on the sweep line.
@@ -277,7 +277,7 @@ In this case the free space can be decomposed into a graph with $O(n^2)$ cuboid 
 
 \subsection{Planar decomposition}\label{sec:decomp2d}
 
-A rectilinear domain can be decomposed into rectangles by extending each horizontal obstacle edge in both directions until the sides hit a vertical obstacle edge.
+A rectilinear domain can be decomposed into rectangles by extending each horizontal obstacle edge in both directions until the sides hit a vertical obstacle edge~\cite{dasnar}.
 This defines the \emph{horizontal decomposition} of the domain, denoted \decomp{x}.
 The vertical decomposition \decomp{y} is defined correspondingly by extending all the vertical edges until they hit a horizontal obstacle.
 Figure~\ref{fig:decomp}
@@ -359,7 +359,7 @@ Thus the total complexity of the algorithm is $O(n\log n)$, and we only need $O(
 
 \subsection{3D cuboid decomposition}\label{sec:split3d}
 
-Similarly as a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids.
+As a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids.
 Decomposition into cuboids is used in the algorithm for 3D minimum link paths in Section~\ref{sec:minlink3d}.
 The running time of the path finding algorithm depends on the size of the decomposition, so it is desirable to find as small decomposition as possible.
 
@@ -367,10 +367,10 @@ The input is given as a list of 2-dimensional obstacle faces in 3-dimensional sp
 Each obstacle face is a polygon defined by a list of vertices.
 Denote the total number of vertices by $n$.
 
-We present a simple algorithm that uses the Algorithm~\ref{alg:split2d} as a subroutine.
+We present a simple algorithm that uses the Algorithm~\ref{alg:split2d} as a subroutine~\cite{revisited}.
 This algorithm produces a decomposition with $O(n^2)$ cells and $O(n^2)$ links.
 Earlier work on minimum link path has used binary space partitioning to reduce the number of cells to $O(n^{1.5})$~\cite{wagner,bsp}.
-However the number of links in a BSP-based decomposition can be as high as $O(n^{2.5})$, so we choose to pay for the lower number of links by having a higher number of cells.
+However the number of links in a BSP-based decomposition can be as high as $O(n^{2.5})$, so we opt for a higher number of cells to reduce the number of links.
 
 The decomposition is created by a sweep plane algorithm, which sweeps through the domain with a plane perpendicular to $z$-axis.
 During the sweep we maintain the intersection of the sweep plane and the domain~\fspace.
@@ -699,7 +699,7 @@ Thus the total time complexity is $O(n^{D-1}\log n)$, and the total number of hy
 
 \section{Segment tree}\label{sec:segtree}
 
-Segment tree is a classical data structure that allows storing and querying intervals.~\cite{unified}
+Segment tree is a classical data structure that allows storing and querying intervals~\cite{wagner}.
 The structure allows performing many operations such as looking up overlapping intervals in logarithmic time.
 
 The segment tree is a simple and flexible structure that can be adapted to solve various problems.
@@ -728,7 +728,7 @@ Figure~\ref{fig:segtree} displays an example of a segment tree.
 The structure of a semi-dynamic segment tree is independent of the intervals added to the tree.
 The nodes are commonly arranged into an almost complete binary tree, which allows storing the tree nodes in an array similarly to binary heap:
 the root node is stored in index~1, and the child nodes of node $i$ are $2i$ and $2i+1$.
-This representation allows implementing segment tree operations with very low overhead, making segment tree a powerful practical tool in addition to providing asymptotical bounds.~\cite{kkkk}
+This representation allows implementing segment tree operations with very low overhead, making segment tree a powerful practical tool in addition to providing asymptotical bounds~\cite{kkkk}.
 
 \subsection{Canonical nodes}
 
@@ -786,7 +786,7 @@ Thus the running time is proportional to the sizes of \canon{I} and \canonpar{I}
 
 \subsection{Tree operations}\label{sec:treeops}
 
-We now show how the segment trees can be used for finding intersecting intervals.
+We now show how the segment trees can be used for finding intersecting intervals~\cite[Chapter 10]{berg2008}.
 
 \begin{lem}\label{lem:segintersect}Consider any two intervals $I$ and $J$.
 At least one of the following is true if and only if $I\cap J\neq\emptyset$.
@@ -883,7 +883,7 @@ The segment tree can be generalized into two or higher dimensional structure.
 A two-dimensional segment tree stores rectangles, and allows efficient queries for rectangular regions.
 Correspondingly a $D$-dimensional segment tree provides efficient operations for $D$-dimensional hyperrectangles.
 
-A multidimensional segment tree is composed of of nested regular segment trees.~\cite{highseg}
+A multidimensional segment tree is composed of of nested regular segment trees~\cite{highseg}.
 The shape of a $D$-dimensional segment tree is a 1-dimensional segment tree whose each node stores a $(D-1)$-dimensional segment tree.
 
 Each tree dimension represents one of the $D$ coordinate axes.
@@ -1229,7 +1229,7 @@ The size of \canonpari{R_d}{d} is $O(\log\segsize)$, so by induction the total t
 
 In this section we study the rectilinear minimum link path in a plane.
 In the rectilinear problem both the obstacle segments as well as the links of the path to be produced must be aligned to coordinate axes.
-We present a simple algorithm with time complexity $O(n\log n)$ and space complexity $O(n)$.
+We present a simple algorithm with time complexity $O(n\log n)$ and space complexity $O(n)$~\cite{revisited}.
 The ideas developed for the the simple algorithm are later generalized to solve the more difficult 3D minimum link path problem in Section~\ref{sec:minlink3d}.
 
 \subsection{Intersection graph}
@@ -1270,12 +1270,12 @@ For odd $k$ we form \reach{k+1} by illuminating in vertical direction from \reac
 \end{figure}
 
 For a set of geometric objects (such as rectangles) $G$, the \emph{intersection graph} of $G$ is a graph whose nodes are the elements of $G$, and there is an edge between each each pair of intersecting objects.
-Figure~\ref{fig:inter} displays an example of a intersection graph.
+Figure~\ref{fig:inter} displays an example of an intersection graph.
 Consider the intersection graph of $\decomp{x}\cup\decomp{y}$.
 This graph has rectangles as nodes, and intersection rectangles between \decomp{x} and \decomp{y} are combined by an edge.
 Let $k$ be an even number and $r\in\decomp{x}$ contained in \reach{k}.
 Then for each neighbor $n$ of $r$ in the intersection graph applies $n\subseteq\reach{k+1}$ by Lemma~\ref{lem:illum2d}.
-In other words, the staged illumination finds the rectangles in the same order as breadth-first search in the intersection graph.
+In other words, the staged illumination finds the rectangles in the same order as breadth-first search in the intersection graph~\cite{dasnar}.
 
 The rectilinear minimum link path problem can thus be solved by forming the intersection graph and searching for the shortest path using breadth-first search.
 The intersection graph has quadratic size, so we don't want to form the graph explicitly.
@@ -1288,7 +1288,7 @@ We start by constructing the horizontal decomposition with Algorithm~\ref{alg:sp
 The vertical decomposition is used implicitly in the analysis, but there is no need to construct it explicitly.
 
 \reach{0} contains the start point~\spt, and \reach{1} is the horizontal line segment passing through \spt.
-The path finding algorithm works by alternating between two phases:
+The path finding algorithm works by alternating between two phases~\cite{revisited}:
 
 \begin{enumerate}
 \item For odd $k$, \reach{k} consists of a set of rectangles $R_k\subseteq\decomp{x}$.
@@ -1396,7 +1396,7 @@ To construct the minimum link path between \spt and \ept, augment the algorithm 
 \section{Paths in 3 and higher dimensions}\label{sec:minlink3d}
 
 In this section we study the rectilinear minimum link path problem in 3D domain.
-We present an algorithm that has time complexity $O(n^2\log^2n)$ and space complexity $O(n^2)$.
+We present an algorithm that has time complexity $O(n^2\log^2n)$ and space complexity $O(n^2)$~\cite{restricted}.
 We also extend the algorithm to work in higher dimensions.
 For any constant $D\ge 2$, the presented algorithm works in time $O(n^{D-1}\log^{D-1}n)$.
 
@@ -1415,8 +1415,8 @@ Next we discuss how the sweep plane algorithm is implemented, and then show how 
 
 \subsection{Illumination by plane sweep}
 
-We use a sweep plane algorithm to compute \reach{k+1} from \reach{k}.
-The sweep algorithm performs two functions: it discovers which cells can be illuminated from \reach{k}, and it constructs the boundary of the illuminated region.
+We use a sweep plane algorithm to compute \reach{k+1} from \reach{k}~\cite{restricted}.
+The sweep performs two functions: it discovers which cells can be illuminated from \reach{k}, and it constructs the boundary of the illuminated region.
 The boundary is used on the next step to compute \reach{k+2} from \reach{k+1}.
 
 During the sweep we maintain the intersection of the sweep plane with the newly illuminated region, and a priority queue of events.
@@ -1780,9 +1780,9 @@ The size of the decomposition as well as the unified segment tree used during th
 \section{Conclusions}\label{sec:conclusions}
 
 We have discussed algorithms for the rectilinear minimum link path problem in two, three and higher dimensions.
-We gave a simple algorithm for the problem on a plane with running time $O(n\log n)$.
+We gave a simple algorithm for the problem on a plane with running time $O(n\log n)$~\cite{revisited}.
 The algorithm has the same asymptotic complexity as older results~\cite{dasnar,sato}, but it uses much simpler data structures.
-We provided a new algorithm for the 3-dimensional variant of the problem with running time $O(n^2\log^2 n)$
+We provided a new algorithm for the 3-dimensional variant of the problem with running time $O(n^2\log^2 n)~\cite{restricted}$
 We also showed that this result can be generalized to work for any dimension $D$ with running time $O(n^{D-1}\log^{D-1}n)$.
 These algorithms provide significant improvements over the previous best known results $O(n^{2.5}\log n)$~\cite{wagner} and $O(n^D\log n)$~\cite{de1992}.
 
