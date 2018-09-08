@@ -5,7 +5,8 @@
 \usepackage{lmodern}
 \usepackage{microtype}
 \usepackage{amsfonts,amsmath,amssymb,amsthm,booktabs,color,enumitem,graphicx,mathabx}
-\usepackage{subfigure,xspace}
+\usepackage{subcaption,xspace}
+\usepackage{cleveref}
 \usepackage{algpseudocode}
 \begin{document}
 \onehalfspacing
@@ -1296,7 +1297,39 @@ The path finding algorithm works by alternating between two phases~\cite{revisit
 	Then $\reach{k+1}=\bigcup_{r\in R_{k+1}}r$ by Lemma~\ref{lem:illum2d}.
 \end{enumerate}
 
+\begin{figure}\centering
+	\begin{subfigure}{0.15\textwidth}\centering
+		\includegraphics[width=\textwidth,page=2]{fig/light2d}
+		\caption{Initial state}\label{fig:light2d:start}
+	\end{subfigure}
+	\begin{subfigure}{0.15\textwidth}\centering
+		\includegraphics[width=\textwidth,page=3]{fig/light2d}
+		\caption{Sweep up}\label{fig:light2d:up}
+	\end{subfigure}
+	\begin{subfigure}{0.15\textwidth}\centering
+		\includegraphics[width=\textwidth,page=4]{fig/light2d}
+		\caption{Sweep down}\label{fig:light2d:down}
+	\end{subfigure}
+	\begin{subfigure}{0.15\textwidth}\centering
+		\includegraphics[width=\textwidth,page=5]{fig/light2d}
+		\caption{Select rectangles found by the sweeps}\label{fig:light2d:sel1}
+	\end{subfigure}
+	\begin{subfigure}{0.15\textwidth}\centering
+		\includegraphics[width=\textwidth,page=6]{fig/light2d}
+		\caption{Sweep up and down}\label{fig:light2d:updown}
+	\end{subfigure}
+	\begin{subfigure}{0.15\textwidth}\centering
+		\includegraphics[width=\textwidth,page=7]{fig/light2d}
+		\caption{Select rectangles found by the sweeps}\label{fig:light2d:sel2}
+	\end{subfigure}
+	\caption{The staged illumination proceeds from starting state (Fig.~\ref{fig:light2d:start}) by iterating two phases:
+	1. Illuminate up and down (Fig.~\ref{fig:light2d:up},~\ref{fig:light2d:down},~\ref{fig:light2d:updown}).
+	2. Select illuminated rectangles (Fig.~\ref{fig:light2d:sel1},~\ref{fig:light2d:sel2}).
+	}\label{fig:light2d}
+\end{figure}
+
 We keep iterating these phases until the endpoint~\ept is reached in either phase.
+Figure~\ref{fig:light2d} displays the illumination process.
 
 For performance, it is important to ensure that we don't reilluminate the same parts of the domain many times.
 We avoid the reillumination by marking cells of \decomp{x} as obstacles some time after they have been found.
