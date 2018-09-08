@@ -379,6 +379,25 @@ The intersection of the domain and a plane is called a \emph{cross section} of t
 In each cross section we form a 2D decomposition of the domain with Algorithm~\ref{alg:split2d}, and extend the $xy$-rectangles in $z$-direction so that they fill the whole free space.
 Any common rectangles shared by consecutive cross sections are merged into a single larger cuboid.
 The merging is done by by maintaining a binary search tree of the cells of the previous decomposition.
+Figure~\ref{fig:split3d} displays how the 3D decomposition is created using a series of 2D decompositions.
+
+\begin{figure}\centering
+	\begin{subfigure}{0.3\textwidth}\centering
+		\includegraphics[width=0.5\textwidth,page=1]{fig/split3d}
+		\caption{3D domain}
+	\end{subfigure}
+	\hfil
+	\begin{subfigure}{0.3\textwidth}\centering
+		\includegraphics[width=0.5\textwidth,page=3]{fig/split3d}
+		\caption{Cross section of the lower level}
+	\end{subfigure}
+	\hfil
+	\begin{subfigure}{0.3\textwidth}\centering
+		\includegraphics[width=0.5\textwidth,page=4]{fig/split3d}
+		\caption{Cross section of the upper level}
+	\end{subfigure}
+	\caption{3D domain is decomposed into cuboids by taking the horizontal decomposition of each cross-section. The light-blue cell is shared between the two cross-sections, so the cuboids on the two levels are merged.}\label{fig:split3d}
+\end{figure}
 
 The description below only calculates the cells, but not the links between them.
 We discuss the computation of links below.
