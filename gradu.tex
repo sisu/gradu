@@ -49,8 +49,8 @@
 %\newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
 %\newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
 \newcommand\canoni[2]{\ensuremath{\textsc{c}_{#2}(#1)}\xspace}
-\newcommand\canonpar[1]{\ensuremath{\textsc{p}_{\textsc{c}}(#1)}\xspace}
-\newcommand\canonpari[2]{\ensuremath{\textsc{p}_{\textsc{c},#2}(#1)}\xspace}
+\newcommand\canonpar[1]{\ensuremath{\textsc{a}_{\textsc{c}}(#1)}\xspace}
+\newcommand\canonpari[2]{\ensuremath{\textsc{a}_{\textsc{c},#2}(#1)}\xspace}
 \newcommand\epar[1]{\ensuremath{\textsc{p}(#1)}\xspace}
 \newcommand\findol{\ensuremath{\textsc{FindOverlapping}}\xspace}
 \newcommand\visitp{\ensuremath{\textsc{VisitParent}}\xspace}
@@ -157,7 +157,7 @@ The topic of this thesis is finding geometric path that minimize the amount of t
 Consider a path consisting of a finite number of straight line segments, also called \emph{links}.
 The \emph{link distance} of the path is the number of segments.
 A \emph{minimum link path} between two points is a path that minimizes the link distance.
-Figure~\ref{fig:paths} displays an example of two kinds of minimum link paths as well as the regular shortest path.
+Figure~\ref{fig:paths} shows an example of two kinds of minimum link paths as well as the regular shortest path.
 
 \begin{figure}\centering
 	\includegraphics{fig/paths}
@@ -219,7 +219,7 @@ Let \reach{k} be the set of points reachable by at most $k$ links from \spt.
 Start by defining $\reach{0}=\set{\spt}$, and iteratively compute \reach{k+1} from \reach{k}.
 The iteration continues until we find $k$ such that $\ept\in\reach{k}$.
 This iteration is often called \emph{staged illumination}, because the computation of \reach{k+1} can be illustrated by setting a light source in all points of \reach{k}, and selecting all the lit points.
-Figure~\ref{fig:staged} displays an example of the staged illumination process.
+Figure~\ref{fig:staged} shows an example of the staged illumination process.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.5,page=1]{fig/staged}
@@ -235,10 +235,11 @@ Figure~\ref{fig:staged} displays an example of the staged illumination process.
 This process closely resembles the breadth-first search, but a key difference is that the search is done in continuous space rather than in a graph.
 A nontrivial part in any minimum link path algorithm is maintaining the illuminated area in a data structure that allows efficient computation of \reach{k+1} from \reach{k}.
 
+The area not blocked by any obstacles is called the \emph{free space}, denoted by~\fspace.
 Representing the illuminated area can be simplified by first splitting the free space into simple primitives.
 A common approach in computational geometry is to start by triangulating the input, which allows working with simple forms.
 In case of minimum link paths with restricted orientations, rectangles or trapezoids are the most comfortable representations.
-In Section~\ref{sec:decomposition} we present algorithms for construction decompositions suitable for minimum link path computation.
+In Section~\ref{sec:decomposition} we present algorithms for construction decompositions suitable for the minimum link path computation.
 
 With restricted orientations that the paths can take, we can use \emph{sweep line algorithms} to efficiently compute \reach{k+1} from \reach{k}.
 Sweep line algorithms are a generic technique used for a wide range of computational geometry problems~\cite[Section 33.2]{clrs}.
@@ -268,7 +269,7 @@ The input is given as a list of polygons, and each polygon is described by a lis
 This form is inconvenient for path planning algorithms, as many simple operations, such as checking whether we can move from a given point to given direction, require scanning through all the polygons.
 
 In the rectilinear minimum link path problem the obstacle edges are oriented according to the coordinate axis.
-This allows us to decomposition the free space into rectangles, which is a convenient form for rectilinear path computation.
+This allows us to decompose the free space into rectangles, which is a convenient form for rectilinear path computation.
 For each cell of the decomposition we also construct links to neighboring cells and obstacles.
 In other words, the decomposition is a graph with rectangles as vertices and an edge between each pair of adjacent rectangles.
 If the total number of edges in all the obstacles is $n$, we can decompose the space into $O(n)$ cells such the total number of links between cells is also $O(n)$.
@@ -371,7 +372,7 @@ Denote the total number of vertices by $n$.
 We present a simple algorithm that uses the Algorithm~\ref{alg:split2d} as a subroutine~\cite{revisited}.
 This algorithm produces a decomposition with $O(n^2)$ cells and $O(n^2)$ links.
 Earlier work on minimum link path has used binary space partitioning to reduce the number of cells to $O(n^{1.5})$~\cite{wagner,bsp}.
-However the number of links in a BSP-based decomposition can be as high as $O(n^{2.5})$, so we opt for a higher number of cells to reduce the number of links.
+However the number of links in a binary space partitioning based decomposition can be as high as $O(n^{2.5})$, so we opt for a higher number of cells to reduce the number of links.
 
 The decomposition is created by a sweep plane algorithm, which sweeps through the domain with a plane perpendicular to $z$-axis.
 During the sweep we maintain the intersection of the sweep plane and the domain~\fspace.
@@ -380,7 +381,7 @@ The intersection of the domain and a plane is called a \emph{cross section} of t
 In each cross section we form a 2D decomposition of the domain with Algorithm~\ref{alg:split2d}, and extend the $xy$-rectangles in $z$-direction so that they fill the whole free space.
 Any common rectangles shared by consecutive cross sections are merged into a single larger cuboid.
 The merging is done by by maintaining a binary search tree of the cells of the previous decomposition.
-Figure~\ref{fig:split3d} displays how the 3D decomposition is created using a series of 2D decompositions.
+Figure~\ref{fig:split3d} shows how the 3D decomposition is created using a series of 2D decompositions.
 
 \begin{figure}\centering
 	\begin{subfigure}{0.3\textwidth}\centering
@@ -737,11 +738,11 @@ Each branch node $s$ has two child nodes \leftc{s} and \rightc{s}.
 The intervals of the children divide the parent interval into two parts:
 $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
 The root node corresponds the largest supported interval \range{\epts[1]}{\epts[\segsize]}, and the leaf nodes correspond to the smallest possible intervals \range{\epts[i]}{\epts[i+1]}.
-Figure~\ref{fig:segtree} displays an example of a segment tree.
+Figure~\ref{fig:segtree} shows an example of a segment tree.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.7,page=1]{fig/segtree}
-	\caption{Structure of a segment tree. The numbers display how the nodes are indexed when the tree is stored in an array.}\label{fig:segtree}
+	\caption{Structure of a segment tree. The numbers show how the nodes are indexed when the tree is stored in an array.}\label{fig:segtree}
 \end{figure}
 
 The structure of a semi-dynamic segment tree is independent of the intervals added to the tree.
@@ -753,7 +754,7 @@ This representation allows implementing segment tree operations with very low ov
 
 When an interval $I$ is added to a segment tree, it is added to several tree nodes called the \emph{canonical nodes} of $I$, denoted by \canon{I}.
 The canonical nodes of $I$ are the smallest set of nodes whose intervals cover $I$ but nothing else: $\cup_{c\in\canon{I}} \inter{c}=I$.
-Figure~\ref{fig:canon} displays examples of canonical nodes.
+Figure~\ref{fig:canon} shows examples of canonical nodes.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.7,page=1]{fig/canon}
@@ -912,7 +913,7 @@ Each node of the inner tree represents a rectangle whose $x$-bounds are determin
 
 The concept of canonical nodes can also be extended to higher dimensions.
 The canonical nodes \canon{R} of a $D$-dimensional hyperrectangle $R$ are the smallest set of nodes that fully cover $R$ but nothing else.
-Figure~\ref{fig:canon2d} displays an example of canonical nodes of a 2-dimensional segment tree.
+Figure~\ref{fig:canon2d} shows an example of the canonical nodes of a 2-dimensional segment tree.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.7,page=1]{fig/canon2d}
@@ -1289,7 +1290,7 @@ For odd $k$ we form \reach{k+1} by illuminating in vertical direction from \reac
 \end{figure}
 
 For a set of geometric objects (such as rectangles) $G$, the \emph{intersection graph} of $G$ is a graph whose nodes are the elements of $G$, and there is an edge between each each pair of intersecting objects.
-Figure~\ref{fig:inter} displays an example of an intersection graph.
+Figure~\ref{fig:inter} shows an example of an intersection graph.
 Consider the intersection graph of $\decomp{x}\cup\decomp{y}$.
 This graph has rectangles as nodes, and intersection rectangles between \decomp{x} and \decomp{y} are combined by an edge.
 Let $k$ be an even number and $r\in\decomp{x}$ contained in \reach{k}.
@@ -1353,7 +1354,7 @@ The path finding algorithm works by alternating between two phases~\cite{revisit
 \end{figure}
 
 We keep iterating these phases until the endpoint~\ept is reached in either phase.
-Figure~\ref{fig:light2d} displays the illumination process.
+Figure~\ref{fig:light2d} shows the illumination process.
 
 For performance, it is important to ensure that we don't reilluminate the same parts of the domain many times.
 We avoid the reillumination by marking cells of \decomp{x} as obstacles some time after they have been found.
@@ -1369,7 +1370,7 @@ During the sweep we maintain the intersection between the sweep line and the new
 The intersection consists of non-overlapping intervals stored in a binary search tree.
 
 Let \nbsd{r}{d} and \obsd{r}{d} be the neighbor cell and the adjacent obstacles of rectangle $r$ in direction $d$ in \decomp{x}.
-The algorithm below displays the illumination in direction $+y$.
+The algorithm below describes the illumination in direction $+y$.
 The sweep in direction $-y$ is identical.
 
 \begin{alg}\label{alg:light2d}
@@ -1571,7 +1572,7 @@ The aligned \addEs in direction $+x$ are the ones that occur on the same $x$ coo
 The definition is similar in all the other directions.
 The aligned \addEs are searched for the events in all directions separately.
 Performing these operations allow us to bound the number of \addEs generated during the illumination.
-Figure~\ref{fig:filter} displays the generated \addEs on an obstacle before and after filtering.
+Figure~\ref{fig:filter} shows the generated \addEs on an obstacle before and after filtering.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.5,page=1]{fig/filter}
