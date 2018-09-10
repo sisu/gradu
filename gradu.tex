@@ -53,7 +53,7 @@
 \newcommand\canonpari[2]{\ensuremath{\textsc{a}_{\textsc{c},#2}(#1)}\xspace}
 \newcommand\epar[1]{\ensuremath{\textsc{p}(#1)}\xspace}
 \newcommand\findol{\ensuremath{\textsc{FindOverlapping}}\xspace}
-\newcommand\visitp{\ensuremath{\textsc{VisitParent}}\xspace}
+\newcommand\visitp{\ensuremath{\textsc{VisitAncestor}}\xspace}
 \newcommand\visitc{\ensuremath{\textsc{VisitCanonical}}\xspace}
 \newcommand\adddt{\ensuremath{\textsc{InsertToTree}}\xspace}
 \newcommand\checkdt{\ensuremath{\textsc{QueryTree}}\xspace}
@@ -848,7 +848,7 @@ We also want to support clearing an interval from the tree.
 Clearing interval $I$ means that all the intervals $J$ in the tree are cut into $J\setminus I$, potentially removing $J$ completely or cutting it into two parts.
 The clear operation is performed in the following three steps:
 \begin{enumerate}
-\item Split rectangles that touch $I$ but are not contained by $I$ into smaller parts.
+\item Split intervals that touch $I$ but are not contained by $I$ into smaller parts.
 \item Completely clear each each subtree rooted in any node $s\in\canon{I}$.
 \item Recompute \nodeps{s} to match the remaining nodes for all nodes $s\in\canonpar{I}$.
 \end{enumerate}
@@ -1153,7 +1153,7 @@ split touching intervals, clear subtrees of the canonical nodes, and finally rec
 
 The three operations are performed by a recursive function \cleardt that traverses through the tree.
 The function guides the tree traversal with two arguments: the current subtree root $s$, and the axis where we are moving $d$.
-In each canonical parent $s\in\canonpari{R_d}{d}$ we split the contents of the subtree along axis $d$ before proceeding, and recompute the descendant information after finishing clearing the subtree.
+In each canonical ancestor $s\in\canonpari{R_d}{d}$ we split the contents of the subtree along axis $d$ before proceeding, and recompute the descendant information after finishing clearing the subtree.
 The full algorithm is described below.
 
 \begin{alg}\label{alg:segurm}
