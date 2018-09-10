@@ -283,7 +283,7 @@ In this case the free space can be decomposed into a graph with $O(n^2)$ cuboid 
 A rectilinear domain can be decomposed into rectangles by extending each horizontal obstacle edge in both directions until the sides hit a vertical obstacle edge~\cite{dasnar}.
 This defines the \emph{horizontal decomposition} of the domain, denoted \decomp{x}.
 The vertical decomposition \decomp{y} is defined correspondingly by extending all the vertical edges until they hit a horizontal obstacle.
-Figure~\ref{fig:decomp}
+Figure~\ref{fig:decomp} shows an example of the two two decompositions.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.6,page=2]{fig/decomp}
@@ -789,12 +789,12 @@ Visit all the elements of \canon{I} and \canonpar{I}.
 \begin{algorithmic}
 \Procedure{IterCanonical}{$s$}
 \Comment{Visit the canonical nodes in the subtree rooted at node $s$}
-	\If{$\inter{n}\subseteq I$}
+	\If{$\inter{s}\subseteq I$}
 		\State \visitc($s$)
-	\ElsIf{$\inter{n}\cap I\neq\emptyset$}
+	\ElsIf{$\inter{s}\cap I\neq\emptyset$}
 		\State \visitp($s$)
-		\State \textsc{IterCanonical}($\leftc{n}$)
-		\State \textsc{IterCanonical}($\rightc{n}$)
+		\State \textsc{IterCanonical}($\leftc{s}$)
+		\State \textsc{IterCanonical}($\rightc{s}$)
 	\EndIf
 \EndProcedure
 \end{algorithmic}
