@@ -849,7 +849,7 @@ Clearing interval $I$ means that all the intervals $J$ in the tree are cut into 
 The clear operation is performed in the following three steps:
 \begin{enumerate}
 \item Split intervals that touch $I$ but are not contained by $I$ into smaller parts.
-\item Completely clear each each subtree rooted in any node $s\in\canon{I}$.
+\item Clear each subtree rooted in any node $s\in\canon{I}$.
 \item Recompute \nodeps{s} to match the remaining nodes for all nodes $s\in\canonpar{I}$.
 \end{enumerate}
 
