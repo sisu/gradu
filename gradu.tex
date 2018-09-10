@@ -140,22 +140,17 @@ We focus on the rectilinear variant of the problem, where the path and the obsta
 We study the rectilinear minimum link path problem in plane and in 3D dimensional space, as well as in higher dimensional domains.
 We develop new algorithms for the 3D and the high-dimensional case that achieve better asymptotic running time than the previous known methods.
 For the 3D rectilinear path problem we present an algorithm with running time $O(n^2\log^2 n)$ and space complexity $O(n^2)$ in a domain with $n$ obstacle edges.
-We show that the algorithm can be generalized to higher dimensions, leading to an algorithm that finds the minimum link path in $D$-dimensional domain in time $O(n^{D-1}\log^{D-1} n)$ and space $O(n^{D-1})$.
+We show that the algorithm can be generalized to higher dimensions, leading to an algorithm that finds the minimum link path in $D$-dimensional domain in $O(n^{D-1}\log^{D-1} n)$ time and $O(n^{D-1})$ space.
 \end{abstract}
 
 \mytableofcontents
 
 
-\setcounter{section}{-1}
-\section{Preface}
-
-"If it was hard to write, it should be hard to read." -- Anonymous
-
 \section{Introduction}
 
 Path finding problems are a widely studied subject in algorithmics~\cite{survey}.
 A typical task is finding the shortest path between two nodes in a graph.
-Geometric version of the problem asks for the shortest path in a continuous space, such as plane with polygonal obstacles.
+The geometric version of the problem asks for the shortest path in a continuous space, such as plane with polygonal obstacles.
 The typical task is to minimize the Euclidean length of the path, but there are other relevant metrics as well.
 For example a robot might move forward fast, but be slow at corners, so a long simple route is sometimes preferable to a shorter but more complex route.
 
@@ -178,19 +173,19 @@ As the search happens in continuous space, the tricky part of the algorithms is 
 In this thesis we focus on the \emph{rectilinear} variant of the problem.
 In the rectilinear minimum link path problem we require the obstacles as well as the paths to be constructed to follow the coordinate axes.
 We also study 3D version of the rectilinear minimum link path problem.
-For this version we present a new algorithm that works in time $O(n^2\log^2n)$, which is a significant improvement over the earlier best known result $O(n^{2.5}\log n)$~\cite{restricted}.
-Finally, we extend the solution to the 3D rectilinear problem to work in $D$-dimensional domains, giving an algorithm with running time $O(n^{D-1}\log^{D-1}n)$.
+For this version we present a new algorithm that works in $O(n^2\log^2n)$ time, which is a significant improvement over the earlier best known result $O(n^{2.5}\log n)$~\cite{restricted}.
+Finally, we extend the solution to the 3D rectilinear problem to work in $D$-dimensional domains, giving an algorithm with time complexity $O(n^{D-1}\log^{D-1}n)$.
 
 \subsection{Background and new results}
 
 Computing rectilinear minimum link paths is and old and well studied problem.
-For 2D domains an algorithm with running time $O(n\log n)$ and linear space complexity was developed independently by Das and Narasimhan~\cite{dasnar} and by Sato, Sakanaka and Ohtsuki~\cite{sato}.
-This result is asymptotically optimal, as the problem can be shown to be as hard as sorting~\cite{dasnar}, and thus having lower bound $O(n\log n)$.
+For 2D domains an algorithm with time complexity $O(n\log n)$ and linear space complexity was developed independently by Das and Narasimhan~\cite{dasnar} and by Sato, Sakanaka and Ohtsuki~\cite{sato}.
+This result is asymptotically optimal, as the problem can be shown to be as hard as sorting~\cite{dasnar} and thus having lower bound $O(n\log n)$.
 
 Several algorithms have been developed to compute higher dimensional rectilinear minimum link paths.
 De Berg et al.~\cite{de1992} gave an $O(n^D\log n)$ algorithm for the $D$-dimensional minimum link path problem.
-For the 3D case, a $O(n^3)$ algorithm was developed by Mikami and Tabuchi~\cite{mikami}.
-Fitch, Butler and Rus~\cite{fitch} gave an algorithm with improved performance in many cases, but still $O(n^3)$ worst case running time.
+For the 3D case, an $O(n^3)$ algorithm was developed by Mikami and Tabuchi~\cite{mikami}.
+Fitch, Butler and Rus~\cite{fitch} gave an algorithm with improves the performance in many cases, but has still $O(n^3)$ worst case running time.
 This was further improved by Wagner, Drysdale and Stein~\cite{wagner}, who gave an algorithm with worst case time complexity $O(n^{2.5}\log n)$.
 
 In this thesis we focus on new results to the rectilinear minimum link path problem, which are original research of the author.
@@ -203,11 +198,13 @@ The following results have been published in peer-reviewed journals and conferen
 The following items are new original contributions in this thesis.
 
 \begin{itemize}
-\item An algorithm for minimum link paths in higher dimensions. We show that the rectilinear minimum link path problem in $D$ dimensions can be solved in time $O(n^{D-1}\log^{D-1} n)$ by a generalization of the 3D algorithm.
+\item An algorithm for minimum link paths in higher dimensions.
+	We show that the rectilinear minimum link path problem in $D$ dimensions can be solved in $O(n^{D-1}\log^{D-1} n)$ time by a generalization of the 3D algorithm.
 \item Detailed description of the algorithm for 3D minimum link path computation and the data structures used in the algorithm.
 \item Extension of the decomposition used in the 3D algorithm to higher dimensions.
 \item Simplification of the 3D minimum link algorithm by using the unified segment tree by Wagner~\cite{unified}.
-\item Extending the unified segment tree to higher than 2 dimensions and showing how clearing a hyperrectangle can be implemented. The original paper by Wagner~\cite{unified} mentions the possibility of extending the structure to higher dimensions, but does not provide any details.
+\item Extending the unified segment tree to higher than 2 dimensions and showing how clearing a hyperrectangle can be implemented.
+	The original paper by Wagner~\cite{unified} mentions the possibility of extending the structure to higher dimensions, but does not provide any details.
 \end{itemize}
 
 \subsection{Overview of algorithms}\label{sec:overview}
@@ -349,12 +346,12 @@ Algorithm~\ref{alg:split2d} only computes the cells, but not the links between t
 It is straightforward to extend the algorithm to compute the links as well by inserting links between the cells that are removed and inserted in the binary search tree during each event.
 The following lemma gives a bound on the complexity of the algorithm.
 
-\begin{lem}\label{lem:split2dtime}Algorithm~\ref{alg:split2d} works in time $O(n\log n)$ and space $O(n)$.\end{lem}
+\begin{lem}\label{lem:split2dtime}Algorithm~\ref{alg:split2d} works in $O(n\log n)$ time and $O(n)$ space.\end{lem}
 \begin{proof}
-The algorithm sorts all the horizontal edges in time $O(n\log n)$, and iterates over them in $O(n)$ steps.
+The algorithm sorts all the horizontal edges in $O(n\log n)$ time and iterates over them in $O(n)$ steps.
 On each step we emit $O(1)$ cells and neighbor links, and perform $O(1)$ operations to the binary search tree.
-The search tree is a balanced binary tree, so each operation to it is carried out in time $O(\log n)$.
-Thus the total complexity of the algorithm is $O(n\log n)$, and we only need $O(n)$ storage for the edge list and the binary search tree.
+The search tree is a balanced binary tree, so each operation to it is carried out in $O(\log n)$ time.
+Thus the total complexity of the algorithm is $O(n\log n)$ and we only need $O(n)$ storage for the edge list and the binary search tree.
 \end{proof}
 
 \subsection{3D cuboid decomposition}\label{sec:split3d}
@@ -432,14 +429,13 @@ The running time of the algorithm is easy to determine using Lemma~\ref{lem:spli
 \begin{lem}\label{lem:split3dtime}Algorithm~\ref{alg:split3d} has running time $O(n^2\log n)$.\end{lem}
 \begin{proof}
 We loop through $O(n)$ unique $z$-coordinates.
-For each $z$ we construct a set of obstacles in time $O(n)$ and a 2D decomposition in time $O(n\log n)$.
-The map $M$ is implemented as a binary search tree, so each update and lookup can be performed in time $O(\log n)$.
-For each $z$ we perform $O(n)$ such updates, so the total time bound is $O(n^2\log n)$.
+For each $z$ we construct a set of obstacles in $O(n)$ time and a 2D decomposition in $O(n\log n)$ time.
+The map $M$ is implemented as a binary search tree, so each update and lookup can be performed in $O(\log n)$ time.
+For each $z$ we perform $O(n)$ map updates, so the total time complexity is $O(n^2\log n)$.
 \end{proof}
 
-Algorithm~\ref{alg:split3d} divides the space into cuboids, but does not generate any links between them.
-First we bound the number of links.
-The following lemma helps in the analysis.
+Next we show how to compute the links between the cuboids generated by Algorithm~\ref{alg:split3d}.
+The following lemma helps us bound the number of links.
 
 \begin{lem}\label{lem:decomp2dch}
 Consider two obstacle sets $A$ and $B$ on 2D plane.
@@ -504,9 +500,9 @@ Find all overlapping pairs of two sets of rectangles $A$ and $B$.
 \end{algorithmic}
 \end{alg}
 
-\begin{lem}\label{lem:overlap2dtime}Algorithm~\ref{alg:overlap2d} runs in time $O(n\log n + k)$, where $n$ is the total size of $A$ and $B$, and $k$ is the number of overlapping pairs.\end{lem}
+\begin{lem}\label{lem:overlap2dtime}Algorithm~\ref{alg:overlap2d} runs in $O(n\log n + k)$ time, where $n$ is the total size of $A$ and $B$, and $k$ is the number of overlapping pairs.\end{lem}
 \begin{proof}
-First we sort all the top and bottom edges in the input in time $O(n\log n)$.
+First we sort all the top and bottom edges in the input in $O(n\log n)$ time.
 We then iterate over all the edges, performing 3 kinds of tree operations: add, remove and lookup.
 
 Each add and lookup operation takes $O(\log n)$ time in a balanced binary search tree.
@@ -518,11 +514,11 @@ Combining the time for sorting, tree additions, deletions and lookups, the total
 
 We are now ready to prove the main result of this section.
 
-\begin{theo}\label{theo:split3dtime}3D rectilinear domain defined by obstacles with a total of $n$ vertices can be decomposed into $O(n^2)$ cuboids with $O(n^2)$ links between them in time $O(n^2\log n).$\end{theo}
+\begin{theo}\label{theo:split3dtime}A 3D rectilinear domain defined by obstacles with a total of $n$ vertices can be decomposed into $O(n^2)$ cuboids with $O(n^2)$ links between them in $O(n^2\log n)$ time.\end{theo}
 \begin{proof}
-The cuboids can be constructed in time $O(n^2\log n)$ according to Lemma~\ref{lem:split3dtime}.
+The cuboids can be constructed in $O(n^2\log n)$ time according to Lemma~\ref{lem:split3dtime}.
 The total number of links between the nodes is $k=O(n^2)$ according to Lemma~\ref{lem:split3dcount}.
-Computing the links between all the layers can then be done in time $O(n^2\log n+k)=O(n^2\log n)$ by Lemma~\ref{lem:overlap2dtime}.
+Computing the links between all the layers can then be done in $O(n^2\log n+k)=O(n^2\log n)$ time by Lemma~\ref{lem:overlap2dtime}.
 Thus the total time complexity is $O(n^2\log n)$, and the total number of cuboids and links is $O(n^2)$.
 \end{proof}
 
@@ -531,8 +527,8 @@ Thus the total time complexity is $O(n^2\log n)$, and the total number of cuboid
 \subsection{Higher dimensional decomposition}
 
 The ideas of the 3D decomposition can be generalized to allow decomposing 4D and higher dimensional rectilinear domains into hyperrectangles.
-The construction is done recursively, so that $D$-dimensional decomposition is created by solving a sequence of $(D-1)$-dimensional sub-problems.
-The idea is identical to how the 3D decomposition is constructed based on a sequence of 2D decompositions in Algorithm~\ref{alg:split3d}.
+The construction is done recursively so that the $D$-dimensional decomposition is created by solving a sequence of $(D-1)$-dimensional sub-problems.
+The method is similar to how Algorthm~\ref{alg:split3d} forms the 3D decomposition from a series of 2D decompositions.
 
 \begin{alg}\label{alg:splitdd}
 Decompose the free space defined by a set $E$ of $(D-1)$-dimensional obstacle faces into $D$-dimensional hyperrectangles.
@@ -578,16 +574,16 @@ The combination of the $n$ sub-problem results has thus size $O(n^{D-2}n)=O(n^{D
 Proof by induction on $D$.
 Since we use Algorithm~\ref{alg:split2d} for case $D=2$, Lemma~\ref{lem:split2dtime} proves the base case $D=2$.
 
-For $D>2$, we solve $O(n)$ sub-problems, each of which can be done in time $O(n^{D-2}\log n)$ by induction.
+For $D>2$, we solve $O(n)$ sub-problems, each of which can be done in $O(n^{D-2}\log n)$ time by induction.
 The total time of solving all the sub-problems is thus $O(n^{D-1}\log n)$.
 
 We also maintain a mapping from $(D-1)$-dimensional hyperrectangles to result indices.
 The size of the mapping is bounded by the size of the $(D-1)$-dimensional decompositions, which have size $O(n^{D-2})$ by Lemma~\ref{lem:splitddcells}.
-Thus each map operation can be done in time $O(\log{n^{D-2}})=O(\log n)$.
+Thus each map operation can be done in $O(\log{n^{D-2}})=O(\log n)$ time.
 The number of map operations for each cross-section is $O(n^{D-2})$, so the total time spent in the map operations is $O(nn^{D-2}\log n)=O(n^{D-1}\log n)$.
 \end{proof}
 
-We can similarly prove a bound for the number of links with induction that uses the proofs for 2D and 3D domains as the base case.
+Next we consider the generation of links in the $D$-dimensional decomposition.
 
 \begin{lem}\label{lem:decompddch}
 Consider two obstacle sets $A$ and $B$ that each define a $D$-dimensional domain.
@@ -689,7 +685,7 @@ Instead we prove a less generic lemma by using the properties of the decompositi
 
 \begin{lem}\label{lem:overlapddtime}
 Let $A$ and $B$ be two decompositions generated by Algorithm~\ref{alg:splitdd} for two different inputs that have a total of $n$ obstacles.
-Then Algorithm~\ref{alg:overlapdd} runs in time $O(n^{D-1}\log n + k)$ for inputs $A$ and $B$, where $k$ is the number of overlapping pairs.
+Then Algorithm~\ref{alg:overlapdd} runs in $O(n^{D-1}\log n + k)$ time for inputs $A$ and $B$, where $k$ is the number of overlapping pairs.
 \end{lem}
 \begin{proof}
 Proof by induction on $D$.
@@ -706,11 +702,11 @@ By Lemma~\ref{lem:overlapddok} each intersection is found exactly once, so the t
 
 Finally, we can generalize Theorem~\ref{theo:split3dtime} to $D$ dimensions.
 
-\begin{theo}\label{theo:splitddtime}$D$-dimensional rectilinear domain defined by obstacles with a total of $n$ vertices can be decomposed into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1})$ links between them in time $O(n^{D-1}\log n).$\end{theo}
+\begin{theo}\label{theo:splitddtime}$D$-dimensional rectilinear domain defined by obstacles with a total of $n$ vertices can be decomposed into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1})$ links between them in $O(n^{D-1}\log n)$ time.\end{theo}
 \begin{proof}
-The hyperrectangles can be constructed in time $O(n^{D-1}\log n)$ according to Lemma~\ref{lem:splitddtime}.
+The hyperrectangles can be constructed in $O(n^{D-1}\log n)$ time according to Lemma~\ref{lem:splitddtime}.
 The total number of links between the nodes is $k=O(n^{D-1})$ according to Lemma~\ref{lem:splitddcount}.
-Computing the links between all the layers can then be done in time $O(n^{D-1}\log n+k)=O(n^{D-1}\log n)$ by Lemma~\ref{lem:overlapddtime}.
+Computing the links between all the layers can then be done in $O(n^{D-1}\log n+k)=O(n^{D-1}\log n)$ time by Lemma~\ref{lem:overlapddtime}.
 Thus the total time complexity is $O(n^{D-1}\log n)$, and the total number of hyperrectangles and links is $O(n^{D-1})$.
 \end{proof}
 
@@ -728,7 +724,7 @@ We first present the general idea of the tree, and then show how it can be appli
 
 Segment trees are typically implemented as semi-dynamic structures.
 This means that the tree can be efficiently modified after it has been build, but we need to specify the set of possible endpoints \epts of intervals in advance.
-This allows implementing most operations in time $O(\log\segsize)$, and the size of the tree is $O(\segsize)$, where $\segsize=\size{\epts}$.
+This allows implementing most operations in $O(\log\segsize)$ time, and the size of the tree is $O(\segsize)$, where $\segsize=\size{\epts}$.
 
 \subsection{Structure of a segment tree}
 
@@ -1035,7 +1031,7 @@ Query whether rectangle $R$ intersects with any rectangle in the tree.
 Proof by induction on $D$.
 For the base case $D=0$ both algorithm finishes in constant time.
 For $D\ge 1$, algorithms iterate over the canonical nodes and their ancestors in the outer tree, making $\log\segsize$ calls to the inner trees.
-By induction the inner tree operations are done in time $O(\log^{D-1}\segsize)$, so the total time complexity is $O(\log^D\segsize)$.
+By induction the inner tree operations are done in $O(\log^{D-1}\segsize)$ time, so the total time complexity is $O(\log^D\segsize)$.
 \end{proof}
 
 Note that \subtree{} and \subtreep{} are used in opposite ways in the two operations.
@@ -1229,7 +1225,7 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 We start by proving that \pdst and \recomp have running time $O(\segsize^d)$ by induction on the argument $d$.
 Clearly the functions perform $O(1)$ work in case $d=0$, which proves the base case.
 If $d\ge 1$, then both functions recursively iterate over the child nodes in direction $d$, making $O(\segsize)$ recursive calls with argument $d-1$.
-By induction the recursive calls are done in time $O(\segsize^{d-1})$, so the time complexity of both \pdst and \recomp is $O(\segsize^d)$.
+By induction the recursive calls are done in $O(\segsize^{d-1})$ time, so the time complexity of both \pdst and \recomp is $O(\segsize^d)$.
 
 Next we prove the running time of \cleardt by induction on argument $d$.
 If $d=1$ the calls to \pdst and \recomp perform $O(1)$ work, and the algorithm is equivalent to Algorithm~\ref{alg:segrm} for 1-dimensional segment tree removal.
@@ -1402,7 +1398,7 @@ The outermost loop processes a different rectangle $r$ each time, so it is execu
 For each obstacle adjacent to $r$ we cut of all the intersections with the obstacle from the binary search tree.
 At most two of the intersected intervals remain in the tree, the others are removed, so the cost of the clearing operation can be accounted to the point when the nodes where added to the tree.
 Thus the cost of processing an obstacle if $O(\log m)$ when the removing time is accounted to the insertions.
-For each rectangle adjacent to $r$ we perform a single binary tree operation and possibly a single operation to the binary queue, which can both be done in time $O(\log m)$.
+For each rectangle adjacent to $r$ we perform a single binary tree operation and possibly a single operation to the binary queue, which can both be done in $O(\log m)$ time.
 Thus the total time complexity is $O(m\log m)$.
 \end{proof}
 
@@ -1433,12 +1429,12 @@ Run staged illumination starting from \spt within \fspace such that the first li
 
 \begin{theo}Algorithm~\ref{alg:minlink2d} has time complexity $O(n\log n)$ and space complexity $O(n)$.\end{theo}
 \begin{proof}
-\decomp{x} is formed in time $O(n\log n)$ by Lemma~\ref{lem:split2dtime}.
+\decomp{x} is formed in $O(n\log n)$ time by Lemma~\ref{lem:split2dtime}.
 \decomp{x} has $O(n)$ cells and links between cells.
 Each cell is marked as an obstacle 2 steps after it has been found.
 On each iteration of the main loop we perform two sweeps, so each cell can be visited at most 4 times by the sweeps.
-The complexity of a single sweep is $O(m\log m)$ by Lemma~\ref{lem:light2dtime}, where $m$ is the number of visited rectangles.
-Since each rectangle can be visited O(1) times, the total complexity of all the sweeps is $O(n\log n)$.
+The time complexity of a single sweep is $O(m\log m)$ by Lemma~\ref{lem:light2dtime}, where $m$ is the number of visited rectangles.
+Since each rectangle can be visited $O(1)$ times, the total time complexity of all the sweeps is $O(n\log n)$.
 
 The decomposition is created in linear space, and the sweeps only use simple binary search tree and binary heap structures taking linear space, so the whole algorithm runs in $O(n)$ space.
 \end{proof}
@@ -1454,7 +1450,7 @@ To construct the minimum link path between \spt and \ept, augment the algorithm 
 In this section we study the rectilinear minimum link path problem in 3D domain.
 We present an algorithm that has time complexity $O(n^2\log^2n)$ and space complexity $O(n^2)$~\cite{restricted}.
 We also extend the algorithm to work in higher dimensions.
-For any constant $D\ge 2$, the presented algorithm works in time $O(n^{D-1}\log^{D-1}n)$.
+For any constant $D\ge 2$, the presented algorithm works in $O(n^{D-1}\log^{D-1}n)$ time.
 
 Some of the basic ideas of the 2D minimum link path algorithm can also be applied to the 3D case.
 The path is computed using the staged illumination paradigm, and on each step we compute \reach{k+1} from \reach{k} by using sweep plane algorithms in all the coordinate axis directions.
@@ -1586,9 +1582,9 @@ We can group the rectangles by their corners into an array of size $O(n^2)$ and 
 
 To make the minimum link path computation efficient, we want to avoid reilluminating the same cells multiple times.
 For the 2D minimum link paths this was done by turning cells into obstacles once enough steps have passed since the cell was first discovered.
-This approach works also for 3D, but since there are $O(n^2)$ cells and clearing a rectangle from the unified tree requires $O(n\log n)$ steps, having to do clear operations for all the cells would increase the time complexity significantly.
+This approach works also for 3D, but since there are $O(n^2)$ cells and clearing a rectangle from the unified tree requires $O(n\log n)$ steps, having to do the clear operations for all the cells would increase the time complexity significantly.
 
-To overcome this problem, instead of limiting the reachable cells, we instead limit the creation of \addEs.
+To overcome this problem, instead of limiting the reachable cells we limit the creation of \addEs.
 We create \addEs for the next step when a plane sweep hits an obstacle.
 If the illumination first reaches an obstacle face $o$ on step $k$, then after step $k+2$ all the points touching $o$ are illuminated, so after step $k+3$ all the points visible from $o$ are illuminated.
 Thus we don't create any \addEs for an obstacle $o$ that was first found more than 3 steps ago, as any point illuminated through such events has been illuminated already.
@@ -1661,22 +1657,22 @@ The number of events on the plane of a single obstacle $o$ is $O(n)$, so the tot
 
 We are ready to prove the main result of this section.
 
-\begin{theo}Algorithm~\ref{alg:minlink3d} computes 3D minimum link path in time $O(n^2\log^2n)$ and space $O(n^2)$.\end{theo}
+\begin{theo}Algorithm~\ref{alg:minlink3d} computes 3D minimum link path in $O(n^2\log^2n)$ time and $O(n^2)$ space.\end{theo}
 \begin{proof}
 By Lemma~\ref{lem:celle3} each cell is visited $O(1)$ times during the illumination.
-On each \cellE we perform a single lookup to the unified tree in time $O(\log^2 n)$, and iterate over the neighbors of the cell.
+On each \cellE we perform a single lookup to the unified tree in $O(\log^2 n)$ time, and iterate over the neighbors of the cell.
 Since the decomposition has $O(n^2)$ cells and $O(n^2)$ links between cells, the total time taken in processing \cellEs is $O(n^2\log^2 n)$.
 
-On each \addE we insert a new rectangle to the unified tree in time $O(\log^2 n)$.
+On each \addE we insert a new rectangle to the unified tree in $O(\log^2 n)$ time.
 The filtering of \addEs can be done in linear time, and the total number of unfiltered events is at most the number of \addEs multiplied by the $O(\log^2 n)$ canonical nodes used to store a rectangle in the unified tree.
 Thus the time complexity of the filtering is $O(n^2\log^2 n)$.
 
 On each \obsE we clear a rectangle from the tree.
-The clearing takes $O(n\log n + k)$, where $k$ is the number of cleared canonical rectangles.
+The clearing takes $O(n\log n + k)$ time, where $k$ is the number of cleared canonical rectangles.
 Each \addE adds $O(\log^2 n)$ canonical rectangles to the tree, so the total number of rectangles to be cleared is $O(n^2\log^2 n)$.
 There are $O(n)$ \obsEs by Lemma~\ref{lem:obse3}, so the total time taken in \obsEs is $O(n^2\log^2 n)$.
 
-As all parts of the algorithm are done in time $O(n^2\log^2 n)$, the total time complexity is $O(n^2\log^2 n)$.
+As all parts of the algorithm are done in $O(n^2\log^2 n)$ time, the total time complexity is $O(n^2\log^2 n)$.
 
 The size of the decomposition as well as the segment tree used during the sweeps is $O(n^2)$, so the space complexity is $O(n^2)$.
 \end{proof}
@@ -1685,7 +1681,7 @@ The size of the decomposition as well as the segment tree used during the sweeps
 
 The algorithm for 3D minimum link paths can be generalized to higher dimensions.
 We now assume that \fspace is a $D$-dimensional rectilinear region for arbitrary fixed $D\ge 2$.
-We develop a generalization of Algorithm~\ref{alg:minlink3d} that computes the rectilinear minimum link path in $D$-dimensional space in time $O(n^{D-1}\log^{D-1}n)$.
+We develop a generalization of Algorithm~\ref{alg:minlink3d} that computes the rectilinear minimum link path in $D$-dimensional space in $O(n^{D-1}\log^{D-1}n)$ time.
 
 The algorithm uses the same set of events during the sweeps in the $D$-dimensional space as were used in 3D space.
 The 2D sweep plane is replaced by a $(D-1)$-dimensional hyperplane, so each event $e$ defines a $(D-1)$-dimensional hyperrectangle \hrectof{e} instead of \rectof{e}.
@@ -1805,30 +1801,30 @@ The base case $D=2$ is proven by Lemma~\ref{lem:adde3}.
 For $D\ge 3$ notice that again the illumination on the boundary of $P$ advances exactly like the $(D-1)$-dimensional illumination in the cross section of $P$.
 By induction the $(D-1)$-dimensional illumination creates $O(n^{D-2})$ events.
 Multiplying this by the number of times any cell can be visited gives an upper bound for the $D$-dimensional illumination on $P$.
-Since there is only constant factor overhead compared to the $(D-1)$-dimensional illumination, the number of type~3 events is $O(n^{D-2})$.
+Since there is only a constant factor overhead compared to the $(D-1)$-dimensional illumination, the number of type~3 events is $O(n^{D-2})$.
 
-The number of events on the hyperplane of a single obstacle $o$ is $O(n^{D-2})$, so the total number of events is $O(n^{D-1})$.
+The number of events on the hyperplane of each obstacle is $O(n^{D-2})$, so the total number of events is $O(n^{D-1})$.
 \end{proof}
 
-These lemmas allow us to prove the final result.
+We are now ready to state the final result.
 
-\begin{theo}Algorithm~\ref{alg:minlinkdd} computes $D$-dimensional minimum link path in time $O(n^{D-1}\log^{D-1}n)$ and space $O(n^{D-1})$.\end{theo}
+\begin{theo}Algorithm~\ref{alg:minlinkdd} computes $D$-dimensional minimum link path in $O(n^{D-1}\log^{D-1}n)$ time and $O(n^{D-1})$ space.\end{theo}
 \begin{proof}
 By Lemma~\ref{lem:celled} each cell is visited $O(1)$ times during the illumination.
-On each \cellE we perform a single lookup to the unified tree in time $O(\log^{D-1} n)$, and iterate over the neighbors of the cell.
+On each \cellE we perform a single lookup to the unified tree in $O(\log^{D-1} n)$ time, and iterate over the neighbors of the cell.
 Since the decomposition has $O(n^{D-1})$ cells and $O(n^{D-1})$ links between cells, the total time taken in processing \cellEs is $O(n^{D-1}\log^{D-1} n)$.
 
-On each \addE we insert a new rectangle to the unified tree in time $O(\log^{D-1} n)$.
+On each \addE we insert a new rectangle to the unified tree in $O(\log^{D-1} n)$ time.
 The filtering of \addEs can be done in linear time, and the total number of unfiltered events is at most the number of \addEs multiplied by the $O(\log^{D-1} n)$ canonical nodes used to store a hyperrectangle in the unified tree.
 
 On each \obsE we clear a hyperrectangle from the tree.
-By Lemma~\ref{lem:segurmtime}, each clear operation takes time $O(n^{D-2}\log n + k)$ where $k$ is the number of cleared canonical nodes.
+By Lemma~\ref{lem:segurmtime} each clear operation takes $O(n^{D-2}\log n + k)$ time, where $k$ is the number of cleared canonical nodes.
 Each \addE adds $O(\log^{D-1} n)$ canonical rectangles to the tree, so the total number of rectangles to be cleared is $O(n^{D-1}\log^{D-1} n)$.
 There are $O(n)$ \obsEs by Lemma~\ref{lem:obsed}, so the total time taken in \obsEs is $O(n^{D-1}\log^{D-1} n)$.
 
-As all parts of the algorithm are done in time $O(n^{D-1}\log^{D-1} n)$, the total complexity is $O(n^{D-1}\log^{D-1} n)$.
+All parts of the algorithm are done in $O(n^{D-1}\log^{D-1} n)$ time, so the total time complexity is $O(n^{D-1}\log^{D-1} n)$.
 
-The size of the decomposition as well as the unified segment tree used during the sweeps is $O(n^{D-1})$, so the space complexity is $O(n^{D-1})$.
+The decomposition and the unified segment tree both require $O(n^{D-1})$ memory, so the space complexity is $O(n^{D-1})$.
 \end{proof}
 
 
@@ -1848,7 +1844,7 @@ For the higher dimensional results no other upper bound is known than the same $
 
 One of the main bottlenecks in the higher dimensional algorithms are operations on segment tree.
 Segment trees and their applications are a broad research topic.
-For example we can create a segment tree that supports adding intervals, and finding the maximal number of overlapping any point in a query interval in time $O(\log n)$.
+For example we can create a segment tree that supports adding intervals, and finding the maximal number of overlapping any point in a query interval in $O(\log n)$ time.
 It is an open question whether this can be generalized to two or more dimensions: can we create a structure that supports adding and querying for maximally overlapping rectangles in polylogarithmic time?
 
 
