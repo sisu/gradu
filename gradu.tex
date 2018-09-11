@@ -1876,6 +1876,10 @@ The planar problem was shown to be as difficult as sorting the input~\cite{dasna
 For the higher dimensional versions no other lower bound is known besides the $O(n\log n)$ bound.
 The planar minimum link path problem without orientation restriction was shown to be 3SUM hard-hard by Mitchell, Polishchuk and Sysikaski~\cite{revisited}, but there is no known way to extend the result to the rectilinear case.
 
+The bottleneck of the algorithm for $D$-dimensional minimum link path computation are the operations on the unified segment tree.
+Thus the running time of the algorithm could be improved by developing a faster data structure for hyperrectangle intersection testing.
+Wagner~\cite{unified} suggest that it might be possible to speed up the operations on the unified tree by a logarithmic factor through the use of fractional cascading.
+However the idea is not discussed in detail, so developing a faster multidimensional segment tree varient remains as a future challenge.
 
 
 
