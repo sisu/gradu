@@ -794,7 +794,7 @@ Visit all the elements of \canon{I} and \canonpar{I}.
 	\If{$\inter{s}\subseteq I$}
 		\State $\visitc(s)$.
 	\ElsIf{$\inter{s}\cap I\neq\emptyset$}
-		\State \visitp($s$)
+		\State $\visitp(s)$.
 		\State $\textsc{IterCanonical}(\leftc{s})$.
 		\State $\textsc{IterCanonical}(\rightc{s})$.
 	\EndIf
