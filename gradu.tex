@@ -792,11 +792,11 @@ Visit all the elements of \canon{I} and \canonpar{I}.
 \Procedure{IterCanonical}{$s$}
 \Comment{Visit the canonical nodes in the subtree rooted at node $s$}
 	\If{$\inter{s}\subseteq I$}
-		\State \visitc($s$)
+		\State $\visitc(s)$.
 	\ElsIf{$\inter{s}\cap I\neq\emptyset$}
 		\State \visitp($s$)
-		\State \textsc{IterCanonical}($\leftc{s}$)
-		\State \textsc{IterCanonical}($\rightc{s}$)
+		\State $\textsc{IterCanonical}(\leftc{s})$.
+		\State $\textsc{IterCanonical}(\rightc{s})$.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
