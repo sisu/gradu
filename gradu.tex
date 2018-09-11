@@ -529,7 +529,7 @@ Thus the total time complexity is $O(n^2\log n)$, and the total number of cuboid
 
 
 
-\subsection{Higher dimensional decomposition}
+\subsection{Higher dimensional decomposition}\label{sec:splitdd}
 
 The ideas of the 3D decomposition can be generalized to allow decomposing 4D and higher dimensional rectilinear domains into hyperrectangles.
 The construction is done recursively so that the $D$-dimensional decomposition is created by solving a sequence of $(D-1)$-dimensional sub-problems.
@@ -807,6 +807,28 @@ Thus the running time is proportional to the sizes of \canon{I} and \canonpar{I}
 \subsection{Tree operations}\label{sec:treeops}
 
 We now show how the segment trees can be used for finding intersecting intervals~\cite[Chapter 10]{berg2008}.
+The following lemma helps us find intersecting pairs of elements.
+Figure~\ref{fig:iproof} illustrates the different cases of the lemma.
+
+\begin{figure}\centering
+	\begin{subfigure}[t]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth,page=3]{fig/iproof}
+		\caption{A}\label{fig:iproof:common}
+	\end{subfigure}
+	\hfil
+	\begin{subfigure}[t]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth,page=4]{fig/iproof}
+		\caption{B}\label{fig:iproof:anc}
+	\end{subfigure}
+	\hfil
+	\begin{subfigure}[t]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth,page=2]{fig/iproof}
+		\caption{C}\label{fig:iproof:no}
+	\end{subfigure}
+	\caption{Different cases of Lemma~\ref{lem:segintersect}.
+	If a pair of intervals intersect, they either have a common canonical node (Fig.~\ref{fig:iproof:common}) or the ancestors or a canonical node of either interval is a canonical ancestor of the other (Fig.~\ref{fig:iproof:anc}).
+	If the intervals don't intersect, the canonical sets are also separate (Fig.~\ref{fig:iproof:no}).}\label{fig:iproof}
+\end{figure}
 
 \begin{lem}\label{lem:segintersect}Consider any two intervals $I$ and $J$.
 At least one of the following is true if and only if $I\cap J\neq\emptyset$.
@@ -1255,8 +1277,8 @@ The ideas developed for the the simple algorithm are later generalized to solve 
 \subsection{Intersection graph}
 
 We solve the minimum link path problem by applying the staged illumination paradigm outlined in Section~\ref{sec:overview}.
-Initialize \reach{0} to contain the starting point, and iteratively expand the illuminated area by computing \reach{k+1} based on \reach{k}.
-The iteration is continued until we find the desired endpoint.
+We initialize \reach{0} to contain the starting point, and iteratively expand the illuminated area by computing \reach{k+1} based on \reach{k}.
+The iteration continues until we find the desired endpoint.
 
 It is easy to see that in any minimum link path consists of alternation between horizontal and vertical links.
 We split the problem into two subproblems, based on whether the first link is horizontal or vertical.
@@ -1274,7 +1296,7 @@ For odd $k$ the same applies for \decomp{y}.
 \begin{proof}
 Let $k>0$ be even.
 The region \reach{k} is formed by illuminating in vertical direction from \reach{k-1}.
-Let $h$ be any rectangle in $decomp{x}$ that is at least partially illuminated in \reach{k}, and $p$ any point in $h\cap\reach{k}$.
+Let $h$ be any rectangle in $\decomp{x}$ that is at least partially illuminated in \reach{k}, and $p$ any point in $h\cap\reach{k}$.
 Since \reach{k} is formed by illuminating vertically from \reach{k-1}, the vertical line segment passing between top and bottom edges of $h$ through $p$ must entirely belong to \reach{k}.
 Illuminating horizontally from the vertical line passing through $h$ illuminated the entire rectangle, so $h\subseteq\reach{k+1}$.
 Thus each rectangle of \decomp{x} intersected by \reach{k} is entirely contained in \reach{k+1}.
@@ -1837,20 +1859,24 @@ The decomposition and the unified segment tree both require $O(n^{D-1})$ memory,
 \section{Conclusions}\label{sec:conclusions}
 
 We have discussed algorithms for the rectilinear minimum link path problem in two, three and higher dimensions.
-We gave a simple algorithm for the problem on a plane with running time $O(n\log n)$~\cite{revisited}.
-The algorithm has the same asymptotic complexity as older results~\cite{dasnar,sato}, but it uses much simpler data structures.
-We provided a new algorithm for the 3-dimensional variant of the problem with running time $O(n^2\log^2 n)~\cite{restricted}$
+We presented new algorithms for the problem with lower asymptotical running times than the previous known solutions.
+The results are exciting since computing rectilinear minimum link paths is an old and well studied problem~\cite{wagner,restricted}.
+
+We gave a simple algorithm for the planar rectilinear minimum link path problem with running time $O(n\log n)$~\cite{revisited}.
+The algorithm has the same asymptotic complexity as older results~\cite{dasnar,sato}, but it uses simpler data structures.
+We provided a new algorithm for the 3-dimensional variant of the problem with running time $O(n^2\log^2 n)~\cite{restricted}$.
 We also showed that this result can be generalized to work for any dimension $D$ with running time $O(n^{D-1}\log^{D-1}n)$.
 These algorithms provide significant improvements over the previous best known results $O(n^{2.5}\log n)$~\cite{wagner} and $O(n^D\log n)$~\cite{de1992}.
 
-A natural follow up question is, whether the result could be improved further.
-The planar problem was shown to be equivalently difficult as sorting the input~\cite{dasnar}, so the known result are asymptotically optimal.
-For the higher dimensional results no other upper bound is known than the same $O(n\log n)$ bound.
+The key techniques for achieving the new results were the recursive space decomposition (Sec.~\ref{sec:decomposition}) and the multidimensional segment tree (Sec.~\ref{sec:segtree}).
+The algorithms are relatively simple, which is demonstrated by the implementation linked in Appendix~1.
 
-One of the main bottlenecks in the higher dimensional algorithms are operations on segment tree.
-Segment trees and their applications are a broad research topic.
-For example we can create a segment tree that supports adding intervals, and finding the maximal number of overlapping any point in a query interval in $O(\log n)$ time.
-It is an open question whether this can be generalized to two or more dimensions: can we create a structure that supports adding and querying for maximally overlapping rectangles in polylogarithmic time?
+A natural follow up question is whether the result could be improved further.
+The planar problem was shown to be as difficult as sorting the input~\cite{dasnar}, so the known result are asymptotically optimal.
+For the higher dimensional versions no other lower bound is known besides the $O(n\log n)$ bound.
+The planar minimum link path problem without orientation restriction was shown to be 3SUM hard-hard by Mitchell, Polishchuk and Sysikaski~\cite{revisited}, but there is no known way to extend the result to the rectilinear case.
+
+
 
 
 \nocite{*}
@@ -1863,11 +1889,12 @@ It is an open question whether this can be generalized to two or more dimensions
 
 \pagestyle{empty}
 
-\internalappendix{1}{Source code location}
+\internalappendix{1}{Source code location}\label{apx:src}
 
 An implementation of the high-dimensional rectilinear minimum link path algorithm presented in the thesis is available in the following URL: \\
 \url{https://github.com/sisu/gradu/tree/master/code}
 
+The code implements the minimum link path computation in time $O(n^{D-1}\log^{D-1}n)$ for a any constant $D$ defined at compile time.
 The code is written in standard C++ using the C++14 standard.
 The implementation does not depend on any libraries besides the C++ standard library, but the associated unit tests are written using the Google Test framework.
 
