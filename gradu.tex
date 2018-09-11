@@ -760,7 +760,8 @@ Figure~\ref{fig:canon} shows examples of canonical nodes.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.75,page=1]{fig/canon}
-	\caption{Two intervals, red and blue, and their canonical nodes in the segment tree.}\label{fig:canon}
+	\caption{The canonical nodes of an interval $I$ are the smallest set of nodes covering exactly $I$.
+	The number of canonical nodes and their ancestors $\canonpar{I}$ is $O(\log\segsize)$.}\label{fig:canon}
 \end{figure}
 
 Let \canonpar{I} be the set of ancestors of \canon{I}.
