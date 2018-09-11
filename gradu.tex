@@ -731,7 +731,7 @@ Segment trees are typically implemented as semi-dynamic structures.
 This means that the tree can be efficiently modified after it has been build, but we need to specify the set of possible endpoints \epts of intervals in advance.
 This allows implementing most operations in $O(\log\segsize)$ time, and the size of the tree is $O(\segsize)$, where $\segsize=\size{\epts}$.
 
-\subsection{Structure of a segment tree}
+\subsection{Structure of the segment tree}
 
 A segment tree is a binary tree where each node $s$ corresponds to a fixed half-open interval $\inter{s}$.
 Each branch node $s$ has two child nodes \leftc{s} and \rightc{s}.
@@ -742,7 +742,9 @@ Figure~\ref{fig:segtree} shows an example of the segment tree.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.7,page=1]{fig/segtree}
-	\caption{Structure of a segment tree. The numbers show how the nodes are indexed when the tree is stored in an array.}\label{fig:segtree}
+	\caption{The segment tree is a complete or almost complete binary tree.
+	Each tree node is associated with an interval.
+	The root node represents the total range, and the children of each branch node $n$ divide the range of $n$ into two parts.}\label{fig:segtree}
 \end{figure}
 
 The structure of a semi-dynamic segment tree is independent of the intervals added to the tree.
