@@ -1099,6 +1099,13 @@ Each node $s$ of the graph represents a $D$-dimensional hyperrectangle.
 For each axis $i$ where \rect{s} is not minimal, $s$ has links to two child nodes that divide \rect{s} into two parts along hyperplane perpendicular to $i$-axis.
 Thus each node has between 0 and $2D$ links to child nodes.
 The children splitting the node $s$ along axis $i$ are denoted by \leftu{s}{i} and \rightu{s}{i}.
+Figure~\ref{fig:unified} illustrates the structure of the unified segment tree.
+
+\begin{figure}\centering
+	\includegraphics[width=0.5\textwidth]{fig/unified}
+	\caption{The nodes of the unified segment tree form a directed acyclic graph.
+	Each node can be split along any of the coordinate axes as long as the node is not already minimal in that direction.}\label{fig:unified}
+\end{figure}
 
 Note that in the unified tree there is no distinction between outer and inner tree.
 In the regular multidimensional segment tree the nodes of nested tree represent ranges in one of the coordinate axes, and the innermost nodes represent their Cartesian product.
