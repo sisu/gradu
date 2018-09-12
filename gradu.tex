@@ -938,11 +938,21 @@ Each node of the inner tree represents a rectangle whose $x$-bounds are determin
 
 The concept of canonical nodes can also be extended to higher dimensions.
 The canonical nodes \canon{R} of a $D$-dimensional hyperrectangle $R$ are the smallest set of nodes that fully cover $R$ but nothing else.
-Figure~\ref{fig:canon2d} shows an example of the canonical nodes of a 2-dimensional segment tree.
+Figure~\ref{fig:canon2d} shows the canonical nodes of a rectangle in a 2-dimensional segment tree.
 
 \begin{figure}\centering
-	\includegraphics[scale=0.7,page=1]{fig/canon2d}
-	\caption{Rectangle in a two-dimensional segment tree. The original rectangle is drawn with solid line, and its canonical nodes with dotted lines.}\label{fig:canon2d}
+	\begin{subfigure}[t]{0.15\textwidth}\centering
+		\includegraphics[width=\textwidth,page=2]{fig/segtree2d}
+		\caption{Rectangle $R$ relative to total area}\label{fig:canon2d:r}
+	\end{subfigure}
+	\hfil
+	\begin{subfigure}[t]{0.75\textwidth}\centering
+		\includegraphics[width=\textwidth,page=1]{fig/segtree2d}
+		\caption{The canonical nodes of $R$ in a 2D segment tree}\label{fig:canon2d:tree}
+	\end{subfigure}
+	\caption{Each node of the outer tree defines a range of $y$-coordinates and an inner segment tree built on $x$-coordinates.
+	Each node of the inner trees is a rectangle that combines the $y$ and the $x$ ranges.
+	The canonical nodes of rectangle $R$ (Fig.~\ref{fig:canon2d:r}) are the smallest set of nodes of the inner trees that cover exactly $R$ (Fig.~\ref{fig:canon2d:tree}).}\label{fig:canon2d}
 \end{figure}
 
 In order to compute the canonical nodes we look into each axis separately.
@@ -973,7 +983,7 @@ To cover also axis $D$, it is optimal to select the nodes $\canoni{R_D}{D}$, and
 
 Combination of Lemma~\ref{lem:canond} and Lemma~\ref{lem:canonlog} gives bound for the size of the canonical set.
 
-\begin{lem}$\size{\canon{R}}=O(\log^D\segsize)$ for any $D$-dimensional rectangle $R$.\end{lem}
+\begin{cor}$\size{\canon{R}}=O(\log^D\segsize)$ for any $D$-dimensional rectangle $R$.\end{cor}
 \begin{proof}
 $$
 \size{\canon{R}} = \size{\bigtimes_{i=1}^D \canoni{R_i}{i}}
