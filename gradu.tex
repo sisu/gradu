@@ -83,6 +83,8 @@
 \newcommand\zrange[1]{\ensuremath{z(#1)}\xspace}
 \newcommand\xranget[2]{\ensuremath{x(#1)_{#2}}\xspace}
 \newcommand\yranget[2]{\ensuremath{y(#1)_{#2}}\xspace}
+\newcommand\zranget[2]{\ensuremath{z(#1)_{#2}}\xspace}
+\newcommand\dranget[2]{\ensuremath{D(#1)_{#2}}\xspace}
 \newcommand\nbs[1]{\ensuremath{\textsc{nbs}{(#1)}}\xspace}
 \newcommand\nbsd[2]{\ensuremath{\textsc{nbs}_{#2}{(#1)}}\xspace}
 \newcommand\obsd[2]{\ensuremath{\textsc{obs}_{#2}{(#1)}}\xspace}
@@ -265,26 +267,33 @@ These elements are combined into an algorithm for finding minimum link paths in 
 
 \section{Space decomposition}\label{sec:decomposition}
 
-The domain of the minimum link path problem is a polygon with smaller polygons as obstacles.
-The input is given as a list of polygons, and each polygon is described by a list of vertices.
-This form is inconvenient for path planning algorithms, as many simple operations, such as checking whether we can move from a given point to given direction, require scanning through all the polygons.
+The first step of many minimum link path algorithms is decomposing the free space into simple primitives~\cite{imai86,dasnar,revisited}.
+The decomposition has two purposes during the staged illumination:
+to track the illuminated area and to guide the sweep line algorithms that illuminate new areas.
+
+%The domain of the minimum link path problem is a polygon with smaller polygons as obstacles.
+%The input is given as a list of polygons, and each polygon is described by a list of vertices.
+%This form is inconvenient for path planning algorithms, as many simple operations, such as checking whether we can move from a given point to a given direction, require scanning through all the polygons.
 
 In the rectilinear minimum link path problem the obstacle edges are oriented according to the coordinate axis.
-This allows us to decompose the free space into rectangles, which is a convenient form for rectilinear path computation.
+This allows us to decompose the free space into axis-aligned rectangles, which is a convenient form for rectilinear path computation.
 For each cell of the decomposition we also construct links to neighboring cells and obstacles.
-In other words, the decomposition is a graph with rectangles as vertices and an edge between each pair of adjacent rectangles.
-If the total number of edges in all the obstacles is $n$, we can decompose the space into $O(n)$ cells such the total number of links between cells is also $O(n)$.
+In other words, the decomposition can be seen as a graph with rectangles as vertices and an edge between each pair of adjacent rectangles.
+Let $n$ be the total number of vertices in all the obstacles.
+The space can decomposed into $O(n)$ cells such the total number of links between cells is $O(n)$.
 
 A similar structure can also be used for computing minimum link paths in 3-dimensional domains.
-In 3D rectilinear case each obstacle face is a polygon with axis-aligned edges in 3D space.
-In this case the free space can be decomposed into a graph with $O(n^2)$ cuboid as vertices and $O(n^2)$ edges.
+In the 3D rectilinear case each obstacle face is an axis-aligned rectangle in 3D space.
+The free space of a 3D domain can be decomposed into a graph with $O(n^2)$ cuboid as vertices and $O(n^2)$ edges.
+This decomposition algorithm can also be extended to higher dimensions: a $D$-dimensional domain can be split into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1}$ links between them.
 
 \subsection{Planar decomposition}\label{sec:decomp2d}
 
-A rectilinear domain can be decomposed into rectangles by extending each horizontal obstacle edge in both directions until the sides hit a vertical obstacle edge~\cite{dasnar}.
+A rectilinear domain can be decomposed into rectangles by extending each horizontal obstacle edge in both directions until the sides hit a vertical obstacle edge~\cite{imai86}.
 This defines the \emph{horizontal decomposition} of the domain, denoted \decomp{x}.
 The vertical decomposition \decomp{y} is defined correspondingly by extending all the vertical edges until they hit a horizontal obstacle.
 Figure~\ref{fig:decomp} shows an example of the two two decompositions.
+We focus on \decomp{x} below, as \decomp{y} has all the same properties with coordinate axes swapped.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.6,page=2]{fig/decomp}
@@ -297,81 +306,71 @@ It is easy to see that each cell of \decomp{x} touches at least one obstacle ver
 Since each vertex can be touched by at most two rectangles, the size of the decomposition is $O(n)$.
 Each pair of touching rectangles also shares a common obstacle corner, so the number of links is also $O(n)$.
 
-\decomp{x} can be constructed with a line sweep algorithm.
+\decomp{x} can be constructed by a line sweep algorithm~\cite{dasnar}.
 We sweep over the domain by a horizontal line moving from $y$ coordinate $-\infty$ (down) to $\infty$ (up).
 During the sweep we maintain the intersection of the free space \fspace and the sweep line.
 The intersection consists of non-overlapping intervals, which we store in a binary search tree.
-
-Each element added to the binary tree is a partially constructed rectangle $a$ with the following fields.
-\begin{itemize}
-\item Interval $\xrange{a}=\range{\xranget{a}{1}}{\xranget{a}{2}}$.
-\item Interval $\yrange{a}=\range{\yranget{a}{1}}{\yranget{a}{2}}$.
-\end{itemize}
+Each element added to the binary tree is a rectangle $a$ defined by intervals \xrange{a} and \yrange{a}.
+We refer to lower and upper bound of each range $r$ by $r_{start}$ and $r_{end}$.
+\yranget{a}{end} is initially undefined when a rectangle $a$ is added to the tree, because we don't know how tall the rectangle will be until $a$ is removed from the tree.
 
 The sweep stops at each horizontal obstacle edge.
 When moving from down to up, each edge starts either starts or ends an obstacle.
 If the edge starts an obstacle, the $x$-range of the edge is fully contained in one of the intervals in the search tree.
 If the edge ends an obstacle, the $x$-range does not intersect any intervals in the tree, but the left and right endpoints may touch some intervals.
-In both cases the intervals touching the encountered edge are removed from the search tree, and $O(1)$ new intervals are inserted to maintain the sweep line state.
+In both cases the rectangles touching the encountered edge are removed from the search tree, and $O(1)$ new rectangles are inserted to maintain the sweep line state.
 A more exact description of the algorithm follows below.
 
 \begin{alg}\label{alg:split2d}
-Decomposition of \fspace into a group of rectangular cells \decomp{x}.
+Decompose the free space defined by a set $E$ of obstacle edges into \decomp{x}.
 \begin{algorithmic}
 \State $T\gets \text{Empty binary search tree}$.
-\State $E\gets\text{All horizontal obstacle edges}$.
 \State Sort $E$ by the $y$ coordinates of the edges.
 \ForAll{$e\in E$}
 	\If{$e$ starts an obstacle}
-		\Comment Exactly one interval in $T$ intersects \xrange{e}.
+		\Comment Exactly one $x$-interval in $T$ intersects \xrange{e}.
 		\State $v\gets\text{Lookup $T$ for interval touching \xrange{e}}$.
 		\State Remove $v$ from $T$.
-		\State $\yranget{v}{2}\gets\y{e}$.
-		\ForAll{$u\gets v\setminus s$}
-			\State $\yranget{u}{1}\gets\y{e}$.
-			\State $a\gets\text{New rectangle}$.
-			\State $\xrange{a}\gets u$.
-			\State $\yranget{a}{1}\gets\y{e}$.
-			\State Insert $a$ to tree $T$.
+		\State $\yranget{v}{end}\gets\y{e}$.
+		\ForAll{$u\gets \xrange{v}\setminus \xrange{e}$}
+			\Comment Loop over remaining parts of the entry removed from $T$.
+			\State $a\gets$ New rectangle with $x$-range $u$ and starting $y$-coordinate $\y{e}$.
+			\State Insert $a$ into $T$.
 		\EndFor
 	\Else\Comment $e$ starts free space.
-		\State $a\gets\text{New rectangle}$
-		\State $\xrange{a}\gets\xrange{e}$.
-		\State $\yranget{a}{1}\gets\y{e}$.
+		\State $a\gets$ New rectangle.
+		\State $a\gets$ New rectangle with $x$-range $\xrange{e}$ and starting $y$-coordinate $\y{e}$.
 		\ForAll{$v\in$ lookup $T$ for intervals touching \xrange{e}}
 			\State Remove $v$ from $T$.
+			\State $\yranget{v}{end}\gets\y{e}$.
 			\State $\xrange{a}\gets\xrange{a}\cup\xrange{v}$.
 		\EndFor
-		\State Insert $a$ to $T$.
+		\State Insert $a$ into $T$.
 	\EndIf
 \EndFor
 \end{algorithmic}
 \end{alg}
 
-Algorithm~\ref{alg:split2d} only computes the cells, but not the links between them.
-It is straightforward to extend the algorithm to compute the links as well by inserting links between the cells that are removed and inserted in the binary search tree during each event.
+In addition to the cells, we also want to compute the links between all adjacent pairs.
+It is straightforward to extend Algorithm~\ref{alg:split2d} to compute the links by inserting links between the cells that are removed and inserted in the binary search tree during each event.
 The following lemma gives a bound on the complexity of the algorithm.
 
 \begin{lem}\label{lem:split2dtime}Algorithm~\ref{alg:split2d} works in $O(n\log n)$ time and $O(n)$ space.\end{lem}
 \begin{proof}
 The algorithm sorts all the horizontal edges in $O(n\log n)$ time and iterates over them in $O(n)$ steps.
-On each step we emit $O(1)$ cells and neighbor links, and perform $O(1)$ operations to the binary search tree.
-The search tree is a balanced binary tree, so each operation to it is carried out in $O(\log n)$ time.
-Thus the total complexity of the algorithm is $O(n\log n)$ and we only need $O(n)$ storage for the edge list and the binary search tree.
+On each step we create $O(1)$ new rectangles, and perform $O(1)$ operations to the binary search tree.
+The search tree is a balanced binary tree, so each tree operation is carried out in $O(\log n)$ time.
+Thus the total complexity of the algorithm is $O(n\log n)$ and we only need $O(n)$ storage for the edge list and the binary search tree as well as for storing the output.
 \end{proof}
 
 \subsection{3D cuboid decomposition}\label{sec:split3d}
 
-As a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids.
+As a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids~\cite{wagner,restricted}.
 Decomposition into cuboids is used in the algorithm for 3D minimum link paths in Section~\ref{sec:minlink3d}.
 The running time of the path finding algorithm depends on the size of the decomposition, so it is desirable to find as small decomposition as possible.
 
-The input is given as a list of 2-dimensional obstacle faces in 3-dimensional space.
-Each obstacle face is a polygon defined by a list of vertices.
-Denote the total number of vertices by $n$.
-
-We present a simple algorithm that uses the Algorithm~\ref{alg:split2d} as a subroutine~\cite{revisited}.
-This algorithm produces a decomposition with $O(n^2)$ cells and $O(n^2)$ links.
+We present a simple decomposition algorithm that uses the Algorithm~\ref{alg:split2d} as a subroutine~\cite{restricted}.
+The algorithm produces a decomposition with $O(n^2)$ cells and $O(n^2)$ links, where $n$ is the number of obstacle rectangles.
 Earlier work on minimum link path has used binary space partitioning to reduce the number of cells to $O(n^{1.5})$~\cite{wagner,bsp}.
 However the number of links in a binary space partitioning based decomposition can be as high as $O(n^{2.5})$, so we opt for a higher number of cells to reduce the number of links.
 
@@ -399,10 +398,10 @@ Figure~\ref{fig:split3d} shows how the 3D decomposition is created using a serie
 		\includegraphics[width=0.5\textwidth,page=4]{fig/split3d}
 		\caption{Cross section of the upper level}
 	\end{subfigure}
-	\caption{3D domain is decomposed into cuboids by taking the horizontal decomposition of each cross-section. The light-blue cell is shared between the two cross-sections, so the cuboids on the two levels are merged.}\label{fig:split3d}
+	\caption{3D domain is decomposed into cuboids by taking the horizontal decomposition of each cross section. The highlighted cell is shared between the two cross sections, so the cuboids on the two levels are merged.}\label{fig:split3d}
 \end{figure}
 
-The description below only calculates the cells, but not the links between them.
+The description below only calculates the cells but not the links between them.
 We discuss the computation of links below.
 
 \begin{alg}\label{alg:split3d}
@@ -417,7 +416,7 @@ Decompose the free space defined by a set $E$ of obstacle faces into cuboids.
 	\State $T\gets$ 2D decomposition for $E_z$ using Algorithm~\ref{alg:split2d}.
 	\ForAll{$m\in M\setminus T$}
 		\State $c\gets R[M[m]]$.
-		\State Upper $z$-coordinate of $c\gets z$.
+		\State $\zranget{c}{end}\gets z$.
 		\State Remove $m$ from $M$.
 	\EndFor
 	\ForAll{$t\in T\setminus M$}
@@ -430,8 +429,6 @@ Decompose the free space defined by a set $E$ of obstacle faces into cuboids.
 \end{algorithmic}
 \end{alg}
 
-The running time of the algorithm is easy to determine using Lemma~\ref{lem:split2dtime}.
-
 \begin{lem}\label{lem:split3dtime}Algorithm~\ref{alg:split3d} has running time $O(n^2\log n)$.\end{lem}
 \begin{proof}
 We loop through $O(n)$ unique $z$-coordinates.
@@ -441,7 +438,23 @@ For each $z$ we perform $O(n)$ map updates, so the total time complexity is $O(n
 \end{proof}
 
 Next we show how to compute the links between the cuboids generated by Algorithm~\ref{alg:split3d}.
-The following lemma helps us bound the number of links.
+The following lemma shows how the changes to the cross section affect the number of links.
+Figure~\ref{fig:linkproof} illustrates the case where two adjacent cross sections differ by a single obstacle rectangle.
+
+\begin{figure}\centering
+	\begin{subfigure}[t]{0.45\textwidth}\centering
+		\includegraphics[width=0.5\textwidth,page=1]{fig/linkproof}
+		\caption{Original domain}
+	\end{subfigure}
+	\hfil
+	\begin{subfigure}[t]{0.45\textwidth}\centering
+		\includegraphics[width=0.5\textwidth,page=2]{fig/linkproof}
+		\caption{Domain after adding an obstacle}
+	\end{subfigure}
+	\caption{Adding or removing a single obstacle can change all $O(n)$ cells of the horizontal decomposition.
+	However the intersection of the domain with any horizontal line is changed at only $O(1)$ points.
+	Because there are $O(n)$ unique cross sections, the number of overlapping pairs of rectangles in the old and the new domain is $O(n)$.}\label{fig:linkproof}
+\end{figure}
 
 \begin{lem}\label{lem:decomp2dch}
 Consider two obstacle sets $A$ and $B$ on 2D plane.
@@ -449,11 +462,17 @@ Let $n$ be the total number of obstacle edges in $A$ and $B$, and $k$ be the num
 The number of overlapping rectangles in \decomp{x}(A) and \decomp{x}(B) is $O(nk)$.
 \end{lem}
 \begin{proof}
-Consider how the sweep line of Algorithm~\ref{alg:split2d} advances in domains $A$ and $B$.
+We divide the intersecting rectangle pairs into two sets:
+pairs with identical $x$-range and pairs with different $x$-ranges.
+Let $a$ and $b$ be two rectangles with $\xrange{a}=\xrange{b}$.
+If $a\cap b\neq\emptyset$, then either $\yranget{a}{start}\in\yrange{b}$ or $\yranget{b}{start}\in\yrange{a}$.
+Since the starting $y$-coordinate of any rectangle can be inside only a single rectangle with the same $x$-range, the number of overlapping pairs with equal $x$-range is $O(n)$.
+
+To count the overlapping pairs with different $x$-ranges, consider how the sweep line of Algorithm~\ref{alg:split2d} advances in domains $A$ and $B$.
 Recall that the sweep line is a horizontal line moving in $y$-direction.
 
 The intersection of the sweep line and the free space is a sequence of disjoint intervals for both $A$ and $B$.
-Since there are $O(k)$ changes to the set of obstacles, the edit distance between the interval sets is $O(k)$.
+Since there are $O(k)$ changes to the set of obstacles, the edit distance between the interval sets is $O(k)$ during each point of the sweep.
 Thus each $y$ coordinate contributes $O(k)$ pairs to the overlap.
 Since the number of $y$ coordinates where the domain changes is $O(n)$, the total number of overlapping pairs is $O(nk)$.
 \end{proof}
@@ -463,13 +482,12 @@ Since the number of $y$ coordinates where the domain changes is $O(n)$, the tota
 Since the number of links produced by Algorithm~\ref{alg:split2d} is $O(n)$, any cross section has $O(n)$ links in $x$ and $y$ directions.
 Thus the total number of $x$ and $y$ links is $O(n^2)$.
 
-Let $k_z$ be the number of different obstacles on the cross sections on planes $z=z_k-\varepsilon$ and $z=z_k+\varepsilon$.
-Since the total number of obstacles is $n$, the sum of different $k_z$ values is $n$.
-The number of links between two adjacent layers is $O(nk_z)$ by Lemma~\ref{lem:decomp2dch}.
-Summing up all the changes gives the desired bound $\sum_z O(nk_z) = O(n^2)$.
+Let $k_z$ be the number of obstacles whose $z$-range either starts or ends at $z$.
+Since the total number of obstacles is $n$, the sum of $k_z$ values over all $z$-coordinates is $n$.
+By Lemma~\ref{lem:decomp2dch} the number of links between two adjacent layers is $O(nk_z)$, so the total number of $z$-links is $\sum_z O(nk_z)=O(n^2)$.
 \end{proof}
 
-Since we know how to compute links for 2D decomposition, the links in $x$ and $y$ directions can easily be obtained from the cross sections.
+To generate the links, notice that the links in $x$ and $y$ directions can be simply extracted from the 2D decompositions of each cross section.
 What remains is computing the links in $z$ direction.
 We compute the links between each pair of adjacent cross sections separately.
 
@@ -490,7 +508,7 @@ A more exact description of the algorithm is below.
 Find all overlapping pairs of two sets of rectangles $A$ and $B$.
 \begin{algorithmic}
 \State $E\gets$ All bottom and top edges of rectangles in $A$ and $B$.
-\State Sort $E$ by $y$-coordinate.
+\State Sort $E$ by $y$-coordinates.
 \State $T_A\gets$ Empty binary search tree.
 \State $T_B\gets$ Empty binary search tree.
 \ForAll{$e\in E$}
@@ -498,9 +516,9 @@ Find all overlapping pairs of two sets of rectangles $A$ and $B$.
 	\State $t\in\set{A,B}\gets$ Group to which $e$ does not belong to.
 	\If{$e$ starts a rectangle}
 		\State Find all elements from $T_t$ with $x$-range intersection the $x$-range of $e$.
-		\State Add the rectangle to $T_x$.
+		\State Add the rectangle to $T_s$.
 	\Else
-		\State Remove the rectangle from $T_x$.
+		\State Remove the rectangle from $T_s$.
 	\EndIf
 \EndFor
 \end{algorithmic}
@@ -520,12 +538,14 @@ Combining the time for sorting, tree additions, deletions and lookups, the total
 
 We are now ready to prove the main result of this section.
 
-\begin{theo}\label{theo:split3dtime}A 3D rectilinear domain defined by obstacles with a total of $n$ vertices can be decomposed into $O(n^2)$ cuboids with $O(n^2)$ links between them in $O(n^2\log n)$ time.\end{theo}
+\begin{theo}\label{theo:split3dtime}A 3D rectilinear domain defined by $n$ obstacle faces can be decomposed into $O(n^2)$ cuboids with $O(n^2)$ links between them in $O(n^2\log n)$ time and $O(n^2)$ space~\cite{restricted}.\end{theo}
 \begin{proof}
 The cuboids can be constructed in $O(n^2\log n)$ time according to Lemma~\ref{lem:split3dtime}.
-The total number of links between the nodes is $k=O(n^2)$ according to Lemma~\ref{lem:split3dcount}.
+The total number of links between the cells is $k=O(n^2)$ according to Lemma~\ref{lem:split3dcount}.
 Computing the links between all the layers can then be done in $O(n^2\log n+k)=O(n^2\log n)$ time by Lemma~\ref{lem:overlap2dtime}.
 Thus the total time complexity is $O(n^2\log n)$, and the total number of cuboids and links is $O(n^2)$.
+
+Algorithm~\ref{alg:split3d} and Algorithm~\ref{alg:overlap2d} both only require $O(n)$ additional space for binary search trees and event sets, so the space complexity equals the size of the output $O(n^2)$.
 \end{proof}
 
 
@@ -569,24 +589,24 @@ The analysis is similar to the 3D case, except that we now use induction on $D$.
 \begin{lem}\label{lem:splitddcells}The number of rectangles produced by Algorithm~\ref{alg:splitdd} is $O(n^{D-1})$.\end{lem}
 \begin{proof}
 Proof by induction on $D$.
-Since the size of the horizontal decomposition of 2D space is $O(n)$, the claim is clearly true for $D=2$.
-For $D>2$, we loop over the $O(n)$ unique values of the $D$-coordinate in the obstacles.
-For each cross-section we compute a $(D-1)$-dimensional decomposition, whose size is $O(n^{D-2})$ by induction.
-The combination of the $n$ sub-problem results has thus size $O(n^{D-2}n)=O(n^{D-1})$.
+Since the size of the horizontal decomposition of 2D space is $O(n)$, the claim is true for $D=2$.
+For $D\ge 3$ we loop over the $O(n)$ unique values of the $D$-coordinate in the obstacles.
+For each cross section we compute a $(D-1)$-dimensional decomposition, whose size is $O(n^{D-2})$ by induction.
+The combination of the $n$ cross sections has total size $O(n^{D-2}n)=O(n^{D-1})$.
 \end{proof}
 
 \begin{lem}\label{lem:splitddtime}The running time of Algorithm~\ref{alg:splitdd} is $O(n^{D-1}\log n)$.\end{lem}
 \begin{proof}
 Proof by induction on $D$.
-Since we use Algorithm~\ref{alg:split2d} for case $D=2$, Lemma~\ref{lem:split2dtime} proves the base case $D=2$.
+Since we use Algorithm~\ref{alg:split2d} if $D=2$, Lemma~\ref{lem:split2dtime} proves the base case $D=2$.
 
-For $D>2$, we solve $O(n)$ sub-problems, each of which can be done in $O(n^{D-2}\log n)$ time by induction.
+For $D\ge 3$  we solve $O(n)$ sub-problems, each of which can be done in $O(n^{D-2}\log n)$ time by induction.
 The total time of solving all the sub-problems is thus $O(n^{D-1}\log n)$.
 
 We also maintain a mapping from $(D-1)$-dimensional hyperrectangles to result indices.
 The size of the mapping is bounded by the size of the $(D-1)$-dimensional decompositions, which have size $O(n^{D-2})$ by Lemma~\ref{lem:splitddcells}.
 Thus each map operation can be done in $O(\log{n^{D-2}})=O(\log n)$ time.
-The number of map operations for each cross-section is $O(n^{D-2})$, so the total time spent in the map operations is $O(nn^{D-2}\log n)=O(n^{D-1}\log n)$.
+The number of map operations for each cross section is $O(n^{D-2})$, so the total time spent in the map operations is $O(nn^{D-2}\log n)=O(n^{D-1}\log n)$.
 \end{proof}
 
 Next we consider the generation of links in the $D$-dimensional decomposition.
@@ -600,13 +620,13 @@ The number of overlapping $D$-dimensional hyperrectangles in the decompositions 
 Proof by induction on $D$.
 The base case $D=2$ is proven by Lemma~\ref{lem:decomp2dch}.
 
-For $D\ge 3$ consider how the sweeps of Algorithm~\ref{alg:split3d} advance in domains defined by $A$ and $B$.
+For $D\ge 3$ consider how the sweeps of Algorithm~\ref{alg:splitdd} advance in the domains defined by $A$ and $B$.
 Each of the sweeps stops at $O(n)$ points, producing a $(D-1)$-dimensional decomposition for the cross section.
-For any $D$-coordinate, the cross-sections of the domains of $A$ and $B$ differ by $O(k)$ obstacles, so the number of links at a fixed $D$-coordinate is $O(n^{D-2}k)$ by induction.
+For any $D$-coordinate, the cross sections of the domains of $A$ and $B$ differ by $O(k)$ obstacles, so the number of links at a fixed $D$-coordinate is $O(n^{D-2}k)$ by induction.
 
-The total number of links between the two decompositions is the total number of links counted in each of the $O(n)$ cross-sections.
+The total number of links between the two decompositions is the total number of links counted in each of the $O(n)$ cross sections.
 This may count some links multiple times, but each link is counted at least once.
-Each cross-section has $O(n^{D-2}k)$ links, so the total number of links has upper bound $O(n^{D-1}k)$.
+Each cross section has $O(n^{D-2}k)$ links, so the total number of links has upper bound $O(n^{D-1}k)$.
 \end{proof}
 
 \begin{lem}\label{lem:splitddcount}The number of links between adjacent pairs of hyperrectangles produced by Algorithm~\ref{alg:splitdd} is $O(n^{D-1})$.\end{lem}
@@ -618,15 +638,15 @@ For the base case of the induction, the number of links in case $D=2$ is $O(n)$,
 The links in directions other than $Z$ can be obtained from the $(D-1)$-dimensional decompositions produced during the sweep.
 By induction, the number of links in each $(D-1)$-decomposition is $O(n^{D-2})$, so the total number of links in directions other than $Z$ is $O(n^{D-1})$.
 
-To count the number of links in direction $D$, observe how the cross-section changes as the sweep hyperplane advances through the domain.
-If two adjacent cross sections differ by $u$ obstacles, the number of links between the cross-sections is $O(n^{D-2}u)$ by Lemma~\ref{lem:decompddch}.
-The total number of obstacles changing during the sweep is $O(n)$, so the total count of the links between all adjacent levels is $O(n^{D-1})$.
+To count the number of links in direction $D$, observe how the cross section changes as the sweep hyperplane advances through the domain.
+If two adjacent cross sections differ by $u$ obstacles, the number of links between the cross sections is $O(n^{D-2}u)$ by Lemma~\ref{lem:decompddch}.
+The total number of obstacles changing during the sweep is $O(n)$, so the total number of links between all pairs of adjacent cross sections is $O(n^{D-1})$.
 \end{proof}
 
-The proof of Lemma~\ref{lem:splitddcount} gives a hint for designing an algorithm to compute the links.
+The proof of Lemma~\ref{lem:splitddcount} gives a hint for designing an algorithm for computing the links.
 Similarly to the proof, we consider separately the links in direction $D$ and in the other directions.
 The links in directions other than $D$ can be obtained recursively from the solutions of the sub-problems.
-The links in direction $D$ are computed by performing an additional sweep between each pair of adjacent cross-sections and using a recursive method similar to the proof above.
+The links in direction $D$ are computed by performing an additional sweep between each pair of adjacent cross sections and using a recursive method similar to the proof above.
 Each sweep finds the direction $D$ links by using the following recursive algorithm.
 
 \begin{alg}\label{alg:overlapdd}
@@ -636,7 +656,7 @@ Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ an
 	\If{$D=2$}
 		\State Return overlapping pairs computed with Algorithm~\ref{alg:overlap2d}.
 	\EndIf
-	\State $E\gets$ List of all faces of hyperrectangles in $A$ and $B$ perpendicular to $D$-axis.
+	\State $E\gets$ List of all hyperrectangles in $A$ and $B$ perpendicular to $D$-axis.
 	\State Sort $E$ by $D$-coordinate.
 	\State $G\gets$ Groups of consecutive elements of $E$ with equal $D$-coordinate.
 	\State $P_A\gets$ Empty set of references to $A$.
@@ -649,7 +669,7 @@ Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ an
 		\State $T_B\gets$ Ending elements of $B$ in $g$.
 		\State $P_A\gets P_A\setminus T_A$.
 		\State $P_B\gets P_B\setminus T_B$.
-		\State $R\gets R + \findol(D-1,P_A,B_B)$.
+		\State $R\gets R + \findol(D-1,P_A,S_B)$.
 		\State $R\gets R + \findol(D-1,S_A,P_B)$.
 		\State $R\gets R + \findol(D-1,S_A,S_B)$.
 		\State $P_A\gets P_A\cup S_A$.
@@ -662,7 +682,7 @@ Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ an
 
 The algorithm processes each set of events with equal $D$-coordinate as a single unit.
 For each unit we recursively search for new links between the newly added hyperrectangles, as well as between old and new hyperrectangles.
-We maintain the set of hyperrectangles currently intersecting the sweep hyperplane to avoid adding already included intersections to the result twice.
+We maintain the set of hyperrectangles currently intersecting the sweep hyperplane to avoid adding duplicate intersections to the result.
 
 \begin{lem}\label{lem:overlapddok}
 Algorithm~\ref{alg:overlapdd} finds each intersecting pair between the input sets $A$ and $B$ exactly once.
@@ -671,23 +691,22 @@ Algorithm~\ref{alg:overlapdd} finds each intersecting pair between the input set
 Proof by induction on $D$.
 If $D=2$, we use Algorithm~\ref{alg:overlap2d}, which was shown to work correctly in Section~\ref{sec:split3d}.
 
-Suppose $D\ge 3$.
-The algorithm iterates over the $D$-coordinates where at least one of $A$ or $B$ changes.
+For $D\ge 3$ the algorithm iterates over the $D$-coordinates where at least one of $A$ or $B$ changes.
 By induction we know that the 3 recursive calls inside the iteration each report the intersections of the provided inputs exactly once.
 On each iteration we create sets $S_A$ and $S_B$, which are the newly introduced hyperrectangles at this coordinate.
 Since $S_A$ and $S_B$ contain only new rectangles, none of the 3 recursive calls may find any pairs that were previously added.
 Thus the algorithm finds each intersecting pair at most once.
 
 At the point of making the recursive calls, the sets $P_A$ and $P_B$ contain all the rectangles whose $D$-ranges strictly contain the current $D$-coordinate.
-Two ranges can only intersect if they either share the starting point or the starting point of one of the ranges is inside the other range.
-The recursive call $\findol(D-1,S_A,S_B)$ handles the ranges with the common starting point, and the other two recursive calls handle the case of the starting point being inside the other range.
+Two ranges can only intersect if they either share the starting point or the starting point of one of the ranges is strictly inside the other range.
+The recursive call $\findol(D-1,S_A,S_B)$ handles the ranges with the common starting point, and the other two recursive calls handle the case of the starting point being strictly inside the other range.
 Thus the algorithm finds all the intersecting pairs at least once.
-Since we have proven that each pair is found at most once, this completes the proof.
+Since we have shown that each pair is found at most once, this completes the proof.
 \end{proof}
 
-The algorithm for the $D$-dimensional overlap computation is simpler than the special case for $D=2$.
-However Lemma~\ref{lem:overlap2dtime} cannot be directly extended to higher dimensions, because there is no guarantee that the subproblems are significantly smaller than the original problem.
-Instead we prove a less generic lemma by using the properties of the decompositions.
+To prove the running time of the link computation in 3D domain, we showed that Algorithm~\ref{alg:overlap2d} works in time $O(n\log n+k)$ for any input of size $n$.
+For Algorithm~\ref{alg:overlapdd} we cannot make as generic statement, because for arbitrary input there is no guarantee that the subproblems are significantly smaller than the original problem.
+Instead we prove a less generic bound by using the properties of the $D$-dimensional decomposition.
 
 \begin{lem}\label{lem:overlapddtime}
 Let $A$ and $B$ be two decompositions generated by Algorithm~\ref{alg:splitdd} for two different inputs that have a total of $n$ obstacles.
@@ -697,7 +716,7 @@ Then Algorithm~\ref{alg:overlapdd} runs in $O(n^{D-1}\log n + k)$ time for input
 Proof by induction on $D$.
 The base case $D=2$ is proven by Lemma~\ref{lem:overlap2dtime}.
 
-For $D\ge 3$, the decomposition is created by combining the $(D-1)$-dimensional decompositions at each cross section.
+For $D\ge 3$ the decomposition is created by combining the $(D-1)$-dimensional decompositions at each cross section.
 Thus the sweep hyperplane of Algorithm~\ref{alg:overlapdd} intersects a $(D-1)$-dimensional decomposition produced by Algorithm~\ref{alg:splitdd} at each point of the sweep.
 By Lemma~\ref{lem:splitddcells} this implies that the index sets maintained during the sweep have size $O(n^{D-2})$.
 Performing the set operations on the $n$ steps of the sweep then has total time complexity $O(n^{D-1}\log n)$.
@@ -706,14 +725,16 @@ The time taken by each of the 3 recursive calls on each cross section is $O(n^{D
 By Lemma~\ref{lem:overlapddok} each intersection is found exactly once, so the total complexity of the recursive calls during the sweep is $O(n^{D-1}\log n + k)$.
 \end{proof}
 
-Finally, we can generalize Theorem~\ref{theo:split3dtime} to $D$ dimensions.
+Finally, we can generalize Theorem~\ref{theo:split3dtime} to higher dimensional domains.
 
-\begin{theo}\label{theo:splitddtime}$D$-dimensional rectilinear domain defined by obstacles with a total of $n$ vertices can be decomposed into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1})$ links between them in $O(n^{D-1}\log n)$ time.\end{theo}
+\begin{theo}\label{theo:splitddtime}$D$-dimensional rectilinear domain defined by obstacles with a total of $n$ vertices can be decomposed into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1})$ links between them in $O(n^{D-1}\log n)$ time and $O(n^{D-1})$ space.\end{theo}
 \begin{proof}
 The hyperrectangles can be constructed in $O(n^{D-1}\log n)$ time according to Lemma~\ref{lem:splitddtime}.
-The total number of links between the nodes is $k=O(n^{D-1})$ according to Lemma~\ref{lem:splitddcount}.
+The total number of links between the cells is $k=O(n^{D-1})$ according to Lemma~\ref{lem:splitddcount}.
 Computing the links between all the layers can then be done in $O(n^{D-1}\log n+k)=O(n^{D-1}\log n)$ time by Lemma~\ref{lem:overlapddtime}.
 Thus the total time complexity is $O(n^{D-1}\log n)$, and the total number of hyperrectangles and links is $O(n^{D-1})$.
+
+Algorithm~\ref{alg:splitdd} and Algorithm~\ref{alg:overlapdd} both require $O(n^{D-2})$ additional space for binary search trees and event sets, so the space complexity equals the size of the output $O(n^{D-1})$.
 \end{proof}
 
 
