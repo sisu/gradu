@@ -1312,41 +1312,40 @@ The size of \canonpari{R_d}{d} is $O(\log\segsize)$, so by induction the total t
 
 
 
-\section{Planar minimum link paths}\label{sec:minlink2d}
+\section{Minimum link paths in plane}\label{sec:minlink2d}
 
-In this section we study the rectilinear minimum link path in a plane.
-In the rectilinear problem both the obstacle segments as well as the links of the path to be produced must be aligned to coordinate axes.
+In this section we study the rectilinear minimum link path problem in plane.
 We present a simple algorithm with time complexity $O(n\log n)$ and space complexity $O(n)$~\cite{revisited}.
-The ideas developed for the the simple algorithm are later generalized to solve the more difficult 3D minimum link path problem in Section~\ref{sec:minlink3d}.
+The ideas developed for the planar case are later generalized to solve the more difficult 3D and higher dimensional minimum link path problems in Section~\ref{sec:minlink3d}.
 
 \subsection{Intersection graph}
 
 We solve the minimum link path problem by applying the staged illumination paradigm outlined in Section~\ref{sec:overview}.
-We initialize \reach{0} to contain the starting point, and iteratively expand the illuminated area by computing \reach{k+1} based on \reach{k}.
-The iteration continues until we find the desired endpoint.
+We initialize \reach{0} to contain the starting point~\spt, and iteratively expand the illuminated area by computing \reach{k+1} based on \reach{k}.
+The iteration is continued until we find the endpoint~\ept.
 
-It is easy to see that in any minimum link path consists of alternation between horizontal and vertical links.
+Clearly any minimum link path consists of alternation between horizontal and vertical links.
 We split the problem into two subproblems, based on whether the first link is horizontal or vertical.
 The minimum link path can be found by solving both subproblems and choosing the shorter of the two solutions.
 
 Consider the case with the first link horizontal.
 It is easy to see that \reach{k+1} consists of points that can be reached by starting from \reach{k} and moving either horizontally or vertically, depending on the parity of $k$.
-The regions that are illuminated on each step can be expressed using the horizontal and vertical decompositions defined in Section~\ref{sec:decomp2d}.
-This is shown by the following lemma.
+The following lemma shows that the regions illuminated on each step can be expressed by using the horizontal and vertical decompositions defined in Section~\ref{sec:decomp2d}.
 
 \begin{lem}\label{lem:illum2d}
-For even $k>0$, the region \reach{k+1} consists of the rectangles $r\in\decomp{x}$ that intersect the region \reach{k}.
-For odd $k$ the same applies for \decomp{y}.
+For even $k\ge 2$, the region \reach{k+1} consists of the rectangles $r\in\decomp{x}$ that intersect the region \reach{k}.
+For odd $k\ge 3$ the same applies for \decomp{y}.
 \end{lem}
 \begin{proof}
-Let $k>0$ be even.
+Let $k\ge 2$ be even.
 The region \reach{k} is formed by illuminating in vertical direction from \reach{k-1}.
-Let $h$ be any rectangle in $\decomp{x}$ that is at least partially illuminated in \reach{k}, and $p$ any point in $h\cap\reach{k}$.
-Since \reach{k} is formed by illuminating vertically from \reach{k-1}, the vertical line segment passing between top and bottom edges of $h$ through $p$ must entirely belong to \reach{k}.
-Illuminating horizontally from the vertical line passing through $h$ illuminated the entire rectangle, so $h\subseteq\reach{k+1}$.
+
+Let $h$ be any rectangle in $\decomp{x}$ that is at least partially illuminated in \reach{k}.
+Since \reach{k} is formed by illuminating vertically from \reach{k-1}, there must be a vertical line passing through $h$ that is contained in \reach{k}.
+Illuminating horizontally from the vertical line illuminates $h$ entirely, so $h\subseteq\reach{k+1}$.
 Thus each rectangle of \decomp{x} intersected by \reach{k} is entirely contained in \reach{k+1}.
 
-For odd $k$ we form \reach{k+1} by illuminating in vertical direction from \reach{k}, and the same proof applies for \decomp{y}.
+For odd $k\ge 3$ we form \reach{k+1} by illuminating in vertical direction from \reach{k}, and the same proof applies for \decomp{y}.
 \end{proof}
 
 \begin{figure}\centering
@@ -1359,14 +1358,14 @@ For odd $k$ we form \reach{k+1} by illuminating in vertical direction from \reac
 For a set of geometric objects (such as rectangles) $G$, the \emph{intersection graph} of $G$ is a graph whose nodes are the elements of $G$, and there is an edge between each pair of intersecting objects.
 Figure~\ref{fig:inter} shows an example of the intersection graph.
 Consider the intersection graph of $\decomp{x}\cup\decomp{y}$.
-This graph has rectangles as nodes, and intersection rectangles between \decomp{x} and \decomp{y} are combined by an edge.
+This graph has rectangles as nodes, and intersecting rectangles between \decomp{x} and \decomp{y} are joined by an edge.
 Let $k$ be an even number and $r\in\decomp{x}$ contained in \reach{k}.
-Then for each neighbor $n$ of $r$ in the intersection graph applies $n\subseteq\reach{k+1}$ by Lemma~\ref{lem:illum2d}.
-In other words, the staged illumination finds the rectangles in the same order as breadth-first search in the intersection graph~\cite{dasnar}.
+Then for each neighbor $b$ of $r$ in the intersection graph applies $b\subseteq\reach{k+1}$ by Lemma~\ref{lem:illum2d}.
+In other words, the staged illumination finds the rectangles in the same order as breadth-first search in the intersection graph.
 
-The rectilinear minimum link path problem can thus be solved by forming the intersection graph and searching for the shortest path using breadth-first search.
-The intersection graph has quadratic size, so we don't want to form the graph explicitly.
-The challenging part of minimum link path finding is thus performing BFS in the intersection graph without explicitly forming the graph.
+The rectilinear minimum link path problem can thus be solved by forming the intersection graph and searching for the shortest path using breadth-first search~\cite{dasnar}.
+However the intersection graph has quadratic size, so building it takes at least quadratic time as well.
+The goal is thus to implicitly perform BFS in the intersection graph without explicitly constructing the graph.
 
 \subsection{Searching the intersection graph}
 
