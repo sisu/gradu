@@ -946,6 +946,7 @@ The number of canonical nodes and their ancestors is $O(\log\segsize)$, so the t
 The segment tree can be generalized into two or higher dimensional structure~\cite{highseg}.
 A two-dimensional segment tree allows storing rectangles and performing efficient queries for rectangular regions.
 Correspondingly a $D$-dimensional segment tree allows performing efficient operations for $D$-dimensional hyperrectangles.
+We use the terms rectangle and hyperrectangle interchangeably to refer to hyperrectangles of any dimension $D$.
 
 A multidimensional segment tree is composed of of nested regular segment trees.
 The shape of a $D$-dimensional segment tree is a 1-dimensional segment tree whose each node stores a $(D-1)$-dimensional segment tree.
@@ -956,7 +957,7 @@ For example the outer tree of a 2-dimensional segment tree represents the $y$ co
 Each node of the inner tree represents a rectangle whose $x$-bounds are determined by the position of the node in the inner tree, and the $y$-bounds are determined by the node of the outer tree that contains the inner tree.
 
 The concept of canonical nodes can also be extended to higher dimensions~\cite{segbool}.
-The canonical nodes \canon{R} of a $D$-dimensional hyperrectangle $R$ are the smallest set of nodes that fully cover $R$ but nothing else.
+The canonical nodes \canon{R} of a $D$-dimensional rectangle $R$ are the smallest set of nodes that fully cover $R$ but nothing else.
 Figure~\ref{fig:canon2d} illustrates the structure of a 2D segment tree and the canonical nodes.
 
 \begin{figure}\centering
@@ -975,7 +976,7 @@ Figure~\ref{fig:canon2d} illustrates the structure of a 2D segment tree and the 
 \end{figure}
 
 In order to compute the canonical nodes we look into each axis separately.
-Let interval $R_i$ be the projection of hyperrectangle $R$ into $i$-axis.
+Let interval $R_i$ be the projection of rectangle $R$ into $i$-axis.
 Let $\canoni{R_i}{i}$ be the canonical rectangles of $R_i$ in the 1-dimensional segment tree built for $i$-coordinates.
 
 Consider a 2-dimensional segment tree, and two arbitrary nodes of the projected 1-dimensional trees $c_1\in\canoni{R_1}{1}$ and $c_2\in\canoni{R_2}{2}$.
@@ -984,7 +985,7 @@ Similarly for $D$-dimensional trees we define product $c_1\times c_2\times\dots\
 The following lemma shows how the canonical nodes of 1-dimensional projections can be combined to get the canonical nodes of a $D$-dimensional tree.
 
 \begin{lem}\label{lem:canond}
-For any $D$-dimensional hyperrectangle $R$ applies
+For any $D$-dimensional rectangle $R$ applies
 $$\canon{R}=\set{c_1\times c_2\dots\times c_D \mid c_1\in\canoni{R_1}{1}, \dots, c_D\in\canoni{R_D}{D}}.$$
 In other words, \canon{R} is the Cartesian product of one-dimensional canonical sets
 $$\canon{R}=\bigtimes_{i=1}^D \canoni{R_i}{i}.$$
@@ -1017,9 +1018,9 @@ In multidimensional case it also applies that if $b$ is an ancestor of $a$, then
 However the reverse is not true; $\rect{a}\subseteq\rect{b}$ does not imply that $b$ is an ancestor of $a$ because $b$ can be in a different subtree in some of the outer trees.
 
 Instead of looking for parent-child relationships directly in the tree, we can look at them separately on each coordinate axis.
-This allows us to generalize Lemma~\ref{lem:segintersect} for segment interaction to work for $D$-dimensional hyperrectangles.
+This allows us to generalize Lemma~\ref{lem:segintersect} for segment interaction to work for $D$-dimensional rectangles.
 
-\begin{lem}\label{lem:rectintersect}Consider any two $D$-dimensional hyperrectangles $A$ and $B$.
+\begin{lem}\label{lem:rectintersect}Consider any two $D$-dimensional rectangles $A$ and $B$.
 If $A\cap B\neq\emptyset$, then at least one of the following holds for each coordinate axis $d\in\set{1,\dots,D}$.
 \begin{enumerate}
 \item $\canoni{A_d}{d}\cap\canoni{B_d}{d}\neq\emptyset$,
@@ -1035,20 +1036,20 @@ Then $A_d$ and $B_d$ overlap for each $d$, and by Lemma~\ref{lem:segintersect} t
 If $A\cap B=\emptyset$, then there exists some $d$ for which $A_d\cap B_d=\emptyset$, so again by Lemma~\ref{lem:segintersect} none of the conditions hold for $d$.
 \end{proof}
 
-To find pairs of hyperrectangles fulfilling the conditions of Lemma~\ref{lem:rectintersect}, we store \emph{two} $D-1$ dimensional inner trees in every outer node of a $D$-dimensional segment tree:
+To find pairs of rectangles fulfilling the conditions of Lemma~\ref{lem:rectintersect}, we store \emph{two} $D-1$ dimensional inner trees in every outer node of a $D$-dimensional segment tree:
 \begin{description}
-\item[\subtree{s}] where we store hyperrectangles $R$ for which $s\in\canoni{R_D}{D}$,
-\item[\subtreep{s}] where we store hyperrectangles $R$ for which $s\in\canonpari{R_D}{D}$.
+\item[\subtree{s}] where we store rectangles $R$ for which $s\in\canoni{R_D}{D}$,
+\item[\subtreep{s}] where we store rectangles $R$ for which $s\in\canonpari{R_D}{D}$.
 \end{description}
 
-We can implement hyperrectangle insertion and query operations by using these fields.
+We can implement rectangle insertion and query operations by using these fields.
 For simplicity we only support checking whether a query rectangle intersects any rectangle in the tree rather than returning the matching rectangles.
 The nodes $s$ of the innermost tree have dimension 0, and they contain only a single boolean \hasrect{s}, which indicates that at least one rectangle is inserted to this subtree.
 
 \begin{alg}\label{alg:rectadd}
-Add hyperrectangle $R$ to a $D$-dimensional segment tree.
+Add rectangle $R$ to a $D$-dimensional segment tree.
 \begin{algorithmic}
-\Procedure{InsertToTree}{$D,n$}
+\Procedure{InsertToTree}{$D,s$}
 \Comment{Insert to the subtree rooted at node $s$}
 	\If{$D=0$}
 		\State $\hasrect{s}\gets\texttt{true}$.
@@ -1064,9 +1065,9 @@ Add hyperrectangle $R$ to a $D$-dimensional segment tree.
 \end{alg}
 
 \begin{alg}\label{alg:rectcheck}
-Query whether hyperrectangle $R$ intersects with any rectangle in the $D$-dimensional segment tree.
+Query whether rectangle $R$ intersects with any rectangle in the $D$-dimensional segment tree.
 \begin{algorithmic}
-\Procedure{QueryTree}{$D,n$}
+\Procedure{QueryTree}{$D,s$}
 \Comment{Check subtree rooted at node $s$}
 	\State $R\gets\texttt{false}$.
 	\If{$D=0$}
@@ -1096,12 +1097,12 @@ Note that \subtree{} and \subtreep{} are used in opposite ways in the two operat
 In \adddt{} we recurse down to \subtree{} for canonical nodes, and to \subtreep{} for their ancestors, whereas in \checkdt{} we recurse to \subtree{} in the ancestor nodes, and to both of the trees in the canonical nodes.
 This allows us to ensure that \adddt{} and \checkdt{} arrive in the same node exactly in the case where the conditions of Lemma~\ref{lem:rectintersect} are fulfilled.
 
-Suppose we first add hyperrectangle $A$ and then query for hyperrectangle $B$ in the tree.
+Suppose we first add rectangle $A$ and then query for rectangle $B$ in the tree.
 The \checkdt operation returns true if the two operations end up in any common dimension~0 node.
-The only way the two operations end up in a common node is if in each dimension $d$ we are in a canonical node of at least one of $A_d$ and $B_d$, and in either a canonical node or in an ancestor of a canonical node for the other hyperrectangle.
+The only way the two operations end up in a common node is if in each dimension $d$ we are in a canonical node of at least one of $A_d$ and $B_d$, and in either a canonical node or in an ancestor of a canonical node for the other rectangle.
 
-Thus we can efficiently support inserting and querying for $D$-dimensional hyperrectangles by a nested structure consisting of multiple levels of segment trees.
-However clearing a hyperrectangle in this structure is a more complex operation.
+Thus we can efficiently support inserting and querying for $D$-dimensional rectangles by a nested structure consisting of multiple levels of segment trees.
+However clearing a rectangle in this structure is a more complex operation.
 To make the clear operation more simple, we turn into another variant of the multidimensional segment tree, the unified segment tree.
 
 \subsection{Unified segment tree}\label{sec:unifiedtree}
@@ -1126,22 +1127,25 @@ Figure~\ref{fig:unified} illustrates the structure of the unified segment tree i
 
 Note that in the unified tree there is no distinction between outer and inner tree.
 In the regular multidimensional segment tree the nodes of nested tree represent ranges in one of the coordinate axes, and the innermost nodes represent their Cartesian product.
-In the unified tree there is no concept of outer and inner nodes, and each node represents a $D$-dimensional hyperrectangle.
+In the unified tree there is no concept of outer and inner nodes, and each node represents a $D$-dimensional rectangle.
 
 The operations \adddt and \checkdt for the unified tree are largely similar to the algorithms for the regular multidimensional tree.
-We consider again checking whether the query hyperrectangle intersects with any of the hyperrectangles in the tree.
-Each tree node stores $2^D$ bits of information about the hyperrectangles stored in the subtree.
-When a hyperrectangle $R$ is added to node $s$, the bits are used to define whether $s$ represents a canonical node or an ancestor of a canonical node along each coordinate axis.
-The $2^D$ bits allow us to detect when the conditions of Lemma~\ref{lem:rectintersect} become fulfilled for the query rectangle and a rectangle in the tree.
-The following function computes the mask for a rectangle and a tree node.
+We consider again checking whether the query rectangle intersects with any of the rectangles in the tree.
+Each tree node stores $2^D$ bits of information about the rectangles stored in the subtree.
+The bit array stored in node $s$ is denoted \hasbita{s}.
+When a rectangle $R$ is added to node $s$, the bits are used to define whether $s$ represents a canonical node or an ancestor of a canonical node along each coordinate axis.
+The $2^D$ bits allow us to detect when the conditions of Lemma~\ref{lem:rectintersect} become fulfilled when querying for intersecting rectangles.
+
+The following function computes a bitmask of $s$ bits for a rectangle and a tree node.
+This bits are used to determine which bits of \hasbita{s} to access when adding a rectangle or querying the tree.
 
 \begin{alg}\label{alg:maskof}
-Compute bitmask representing how hyperrectangle $R$ is stored in unified tree node $s$.
+Compute bitmask representing whether node $s$ is covered by rectangle $R$ in each direction.
 \begin{algorithmic}
-\Procedure{NodeMask}{$R,n$}
+\Procedure{NodeMask}{$R,s$}
 	\State $m\gets 0$.
 	\ForAll{$d \in 1\dots D$}
-		\If{$\rect{s}_d\subseteq R_D$}
+		\If{$\rect{s}_d\subseteq R_d$}
 			\State $m\gets m | 2^{d-1}$.
 		\EndIf
 	\EndFor
@@ -1155,20 +1159,19 @@ We can implement procedures \adddt and \checkdt by using the bitmasks returned b
 \begin{alg}\label{alg:uadd}
 Add rectangle $R$ to $D$-dimensional unified tree.
 \begin{algorithmic}
-\Procedure{InsertToTree}{$d,n$}
+\Procedure{InsertToTree}{$d,s$}
 \Comment{Insert to the subtree rooted at node $s$ by moving along axes $1\dots d$}
 	\If{$d=0$}
-		\State $m\gets\maskof{R,n}$.
+		\State $m\gets\maskof{R,s}$.
 		\ForAll{$b \in 0\dots 2^D-1$}
 			\If{All bits of $b$ are set in $m$}
 				\State $\hasbits{s}{b}\gets\texttt{true}.$
 			\EndIf
 		\EndFor
-		\State $\hasrect{s}\gets\texttt{true}$.
 	\ElsIf{$\rect{s}_d\subseteq R_d$}
-		\State $\adddt(d-1,n)$.
+		\State $\adddt(d-1,s)$.
 	\ElsIf{$\rect{s}_d\cap R_d\neq\emptyset$}
-		\State $\adddt(d-1,n)$.
+		\State $\adddt(d-1,s)$.
 		\State $\adddt(d,\leftu{s}{d})$.
 		\State $\adddt(d,\rightu{s}{d})$.
 	\EndIf
@@ -1182,15 +1185,15 @@ For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
 \begin{alg}\label{alg:ucheck}
 Query whether rectangle $R$ intersects with any rectangle in the unified tree.
 \begin{algorithmic}
-\Procedure{QueryTree}{$d,n$}
+\Procedure{QueryTree}{$d,s$}
 \Comment{Check subtree rooted at node $s$}
 	\State $R\gets\texttt{false}$.
 	\If{$d=0$}
-		\State $R\gets\hasbits{s}{\texttt{reverseBits}(\maskof{R,n})}$.
+		\State $R\gets\hasbits{s}{\texttt{reverseBits}(\maskof{R,s})}$.
 	\ElsIf{$\rect{s}_d\subseteq R_d$}
-		\State $R\gets\checkdt(d-1,n)$.
+		\State $R\gets\checkdt(d-1,s)$.
 	\ElsIf{$\rect{s}_d\cap R_d\neq\emptyset$}
-		\State $R\gets\checkdt(d-1,n)$.
+		\State $R\gets\checkdt(d-1,s)$.
 		\State $R\gets R$ or $\checkdt(d,\leftu{s}{d})$.
 		\State $R\gets R$ or $\checkdt(d,\rightu{s}{d})$.
 	\EndIf
@@ -1199,47 +1202,48 @@ Query whether rectangle $R$ intersects with any rectangle in the unified tree.
 \end{algorithmic}
 \end{alg}
 
-The interesting part of the query algorithm is checking if the tree node contains a rectangle by expression $\hasbits{s}{\texttt{reverseBits}(\maskof{R,n})}$ when querying for hyperrectangle $R$.
-When adding a hyperrectangle $A$, we set $\hasbits{s}{b}$ for each bitmask $b$ whose bits are contained in $\maskof{A,n}$.
-Thus the expression in \checkdt detects $A$ if $\maskof{A,n}|\maskof{R,n}=2^D-1$, where $x|y$ represents the bitwise OR operation of $x$ and $y$.
-This is equivalent to condition that $\rect{s}_d$ is the range of a canonical node of either $R_d$ or $A_d$ in each dimension $d$.
-This matches the conditions of Lemma~\ref{lem:rectintersect} for rectangle intersection, so the intersection is returned if and only if $R$ and $A$ truly intersect.
+Both \adddt and \checkdt iterate over the canonical nodes of the input rectangle as well as their ancestors, and access \hasbita{s} for each such node $s$.
+When adding a rectangle $A$, we set $\hasbits{s}{b}$ for each bitmask $b$ whose bits are contained in $\maskof{A,s}$.
+To query for a rectangle $B$, we check the bit $\hasbits{s}{\texttt{reverseBits}(\maskof{B,s})}$ for the accessed nodes $s$.
+This expression detects $A$ if $\maskof{A,s}|\maskof{B,s}=2^D-1$, where $x|y$ represents the bitwise OR operation of $x$ and $y$.
+This is equivalent to condition that $\rect{s}_d$ is the range of a canonical node of either $R_d$ or $A_d$ or both in each dimension $d$.
+This matches the conditions of Lemma~\ref{lem:rectintersect} for rectangle intersection, so the match is returned if and only if $A$ and $B$ intersect.
 
 Next we consider clearing a rectangle from the unified tree.
 Clearing a rectangle $R$ means that all the rectangles in the tree are cut such that the region of $R$ becomes empty.
 The clear operation is implemented using the same three operations as we used for the 1-dimensional tree in Section~\ref{sec:treeops}:
-split touching intervals, clear subtrees of the canonical nodes, and finally recompute the information about hyperrectangles stored in the descendants.
+push down any intervals in the ancestors, clear the subtrees of the canonical nodes, and finally recompute the information about rectangles stored in the descendants.
 
 The three operations are performed by a recursive function \cleardt that traverses through the tree.
-The function guides the tree traversal with two arguments: the current subtree root $s$, and the axis where we are moving $d$.
+The function uses two arguments to control the tree traversal: the current subtree root $s$, and the axis where we are moving $d$.
 In each canonical ancestor $s\in\canonpari{R_d}{d}$ we split the contents of the subtree along axis $d$ before proceeding, and recompute the descendant information after finishing clearing the subtree.
 The full algorithm is described below.
 
 \begin{alg}\label{alg:segurm}
 Clear rectangle $R$ from $D$-dimensional unified segment tree.
 \begin{algorithmic}
-\Procedure{ClearFromTree}{$d,n$}
+\Procedure{ClearFromTree}{$d,s$}
 	\If{$\rect{s}_d\cap R_d=\emptyset$ or $\neg\hasbits{s}{0}$}
 		\State Return.
 	\EndIf
 	\If{$d=0$}
-		\State $\hasbita{s}\gets\texttt{false}$.
+		\State $\hasbits{s}{0\dots 2^{D-1}}\gets\texttt{false}$.
 		\State Return.
 	\EndIf
 	\If{$\rect{s}_d\nsubseteq R_d$}
-		\State $\pdst(d-1,n,d)$.
+		\State $\pdst(d-1,s,d)$.
 	\EndIf
-	\State $\cleardt(d-1,n)$.
-	\If{\leftu{s}{d} and \rightu{s}{d} defined}
+	\State $\cleardt(d-1,s)$.
+	\If{\leftu{s}{d} and \rightu{s}{d} are defined}
 		\State $\cleardt(d,\leftu{s}{d})$.
 		\State $\cleardt(d,\rightu{s}{d})$.
 	\EndIf
 	\If{$\rect{s}_d\nsubseteq R_d$}
-		\State $\recomp(d,n)$.
+		\State $\recomp(d,s)$.
 	\EndIf
 \EndProcedure
 
-\Procedure{PushDownSubtree}{$d,n,a$}
+\Procedure{PushDownSubtree}{$d,s,a$}
 	\Comment Pushes down values in subtree $s$ along axis $a$.
 	\If{$d=0$}
 		\State $\hasbita{\leftu{s}{a}}\gets \hasbita{\leftu{s}{a}} | \hasbita{s}$.
@@ -1248,38 +1252,42 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 	\ElsIf{$\rect{s}_d\cap R_d=\emptyset$}
 		\State Return.
 	\EndIf
-	\State $\pdst(d-1,n,a)$.
-	\If{\leftu{s}{d} and \rightu{s}{d} defined}
+	\State $\pdst(d-1,s,a)$.
+	\If{\leftu{s}{d} and \rightu{s}{d} are defined}
 		\State $\pdst(d,\leftu{s}{d},a)$.
 		\State $\pdst(d,\rightu{s}{d},a)$.
 	\EndIf
 \EndProcedure
 
-\Procedure{RecomputeSubtreeData}{$d,n$}
+\Procedure{RecomputeSubtreeData}{$d,s$}
 	\If{$d=0$}
-		\State $\hasbita{s}\gets\texttt{false}$.
-		\State $m\gets\maskof{R,n}$.
-		\ForAll{$a \in 1\dots D$}
-			\If{$\rect{s}_a \subseteq R_a$}
-				Continue.
-			\EndIf
-			\State $c_1\gets\leftu{s}{a}$.
-			\State $c_1\gets\rightu{s}{a}$.
-			\ForAll{$b \in 0 \dots 2^D-1$}
-				\If{$b$ does not have bit $a$ set}
-					\State $\hasbits{s}{b}\gets \hasbits{s}{b}$ or $\hasbits{c_1}{b}$ or $\hasbits{c_2}{b}$.
-				\EndIf
-			\EndFor
-		\EndFor
+		\State $\textsc{RecomputeSubtreeDataForNode}(s)$.
 		\State Return.
 	\ElsIf{$\rect{s}_d\cap R_d=\emptyset$}
 		\State Return.
 	\EndIf
-	\State $\recomp(d-1,n)$.
-	\If{\leftu{s}{d} and \rightu{s}{d} defined}
+	\State $\recomp(d-1,s)$.
+	\If{\leftu{s}{d} and \rightu{s}{d} are defined}
 		\State $\recomp(d,\leftu{s}{d})$.
 		\State $\recomp(d,\rightu{s}{d})$.
 	\EndIf
+\EndProcedure
+
+\Procedure{RecomputeSubtreeDataForNode}{$s$}
+	\State $\hasbita{s}\gets\texttt{false}$.
+	\State $m\gets\maskof{R,s}$.
+	\ForAll{$a \in 1\dots D$}
+		\If{$\rect{s}_a \subseteq R_a$}
+			\State Continue.
+		\EndIf
+		\State $c_1\gets\leftu{s}{a}$.
+		\State $c_2\gets\rightu{s}{a}$.
+		\ForAll{$b \in 0 \dots 2^D-1$}
+			\If{$b$ does not have bit $a$ set}
+				\State $\hasbits{s}{b}\gets \hasbits{s}{b}$ or $\hasbits{c_1}{b}$ or $\hasbits{c_2}{b}$.
+			\EndIf
+		\EndFor
+	\EndFor
 \EndProcedure
 \end{algorithmic}
 \end{alg}
@@ -1287,19 +1295,19 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 \begin{lem}\label{lem:segurmtime}Algorithm~\ref{alg:segurm} has running time $O(\segsize^{D-1}\log\segsize + k)$, where $k$ is the number of cleared canonical nodes.\end{lem}
 \begin{proof}
 We start by proving that \pdst and \recomp have running time $O(\segsize^d)$ by induction on the argument $d$.
-Clearly the functions perform $O(1)$ work in case $d=0$, which proves the base case.
-If $d\ge 1$, then both functions recursively iterate over the child nodes in direction $d$, making $O(\segsize)$ recursive calls with argument $d-1$.
+Clearly both functions perform $O(1)$ work when $d=0$, which proves the base case.
+If $d\ge 1$, both functions recursively iterate over the descendants in direction $d$, making $O(\segsize)$ recursive calls with argument $d-1$.
 By induction the recursive calls are done in $O(\segsize^{d-1})$ time, so the time complexity of both \pdst and \recomp is $O(\segsize^d)$.
 
 Next we prove the running time of \cleardt by induction on argument $d$.
+When called with argument $d$, function \cleardt calls functions \pdst and \recomp with argument $d-1$.
 If $d=1$ the calls to \pdst and \recomp perform $O(1)$ work, and the algorithm is equivalent to Algorithm~\ref{alg:segrm} for 1-dimensional segment tree removal.
 Thus the base case $d=1$ is proven by Lemma~\ref{lem:segrmtime}.
 
-In case $d\ge 2$ we iterate over the child nodes in direction $d$.
+In case $d\ge 2$ we iterate over the descendants in direction $d$.
 We call \pdst and \recomp with argument $d-1$ for every node in \canonpari{R_d}{d}.
 We also make $O(\segsize)$ calls to \cleardt with argument $d-1$.
 The size of \canonpari{R_d}{d} is $O(\log\segsize)$, so by induction the total time complexity is $O((\log\segsize)\segsize^{d-1} + \segsize(\segsize^{d-2}\log\segsize))=O(\segsize^{d-1}\log\segsize)$.
-
 \end{proof}
 
 
