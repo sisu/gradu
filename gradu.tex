@@ -64,8 +64,8 @@
 \newcommand\pdst{\ensuremath{\textsc{PushDownSubtree}}\xspace}
 \newcommand\recomp{\ensuremath{\textsc{RecomputeSubtreeData}}\xspace}
 
-\newcommand\nodecs[1]{\ensuremath{\textsc{ivc}(#1)}\xspace}
-\newcommand\nodeps[1]{\ensuremath{\textsc{ivp}(#1)}\xspace}
+\newcommand\nodecs[1]{\ensuremath{\textsc{ic}(#1)}\xspace}
+\newcommand\nodeps[1]{\ensuremath{\textsc{ip}(#1)}\xspace}
 \newcommand\subtree[1]{\ensuremath{\texttt{subtree}(#1)}\xspace}
 \newcommand\subtreep[1]{\ensuremath{\texttt{subtreeP}(#1)}\xspace}
 \newcommand\hasrect[1]{\ensuremath{\texttt{hasrect}(#1)}\xspace}
@@ -741,52 +741,49 @@ Algorithm~\ref{alg:splitdd} and Algorithm~\ref{alg:overlapdd} both require $O(n^
 
 \section{Segment tree}\label{sec:segtree}
 
-Segment tree is a classical data structure that allows storing and querying intervals~\cite{wagner}.
+Segment tree is a classical data structure that allows storing and querying intervals~\cite{wagner,berg2008}.
 The structure allows performing many operations such as looking up overlapping intervals in logarithmic time.
-
 The segment tree is a simple and flexible structure that can be adapted to solve various problems.
-It is straightforward to augment a segment tree to contain additional information about the intervals and use that in queries.
-For example we can associate a number with each interval, and efficiently query for the sum or maximum of intervals overlapping a given query interval.
 We first present the general idea of the tree, and then show how it can be applied to the minimum link path problem.
 
-Segment trees are typically implemented as semi-dynamic structures.
+Segment trees are typically implemented as semi-dynamic data structures.
 This means that the tree can be efficiently modified after it has been build, but we need to specify the set of possible endpoints \epts of intervals in advance.
 This allows implementing most operations in $O(\log\segsize)$ time, and the size of the tree is $O(\segsize)$, where $\segsize=\size{\epts}$.
 
 \subsection{Structure of the segment tree}
 
-A segment tree is a binary tree where each node $s$ corresponds to a fixed half-open interval $\inter{s}$.
-Each branch node $s$ has two child nodes \leftc{s} and \rightc{s}.
+A segment tree is a binary tree where each node $s$ corresponds to a fixed half-open interval $\inter{s}$~\cite{berg2008}.
+Each branch node $s$ has two child nodes, \leftc{s} and \rightc{s}.
 The intervals of the children divide the parent interval into two parts:
 $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
-The root node corresponds the largest supported interval \range{\epts[1]}{\epts[\segsize]}, and the leaf nodes correspond to the smallest possible intervals \range{\epts[i]}{\epts[i+1]}.
-Figure~\ref{fig:segtree} shows an example of the segment tree.
+The root node corresponds to the largest supported interval \range{\epts[1]}{\epts[\segsize]}, and the leaf nodes correspond to the smallest possible intervals \range{\epts[i]}{\epts[i+1]}.
+Figure~\ref{fig:segtree} illustrates the segment tree structure.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.7,page=1]{fig/segtree}
 	\caption{The segment tree is a complete or almost complete binary tree.
 	Each tree node is associated with an interval.
-	The root node represents the total range, and the children of each branch node $n$ divide the range of $n$ into two parts.}\label{fig:segtree}
+	The root node represents the total range, and the children of each branch node divide the range of the node into two parts.}\label{fig:segtree}
 \end{figure}
 
-The structure of a semi-dynamic segment tree is independent of the intervals added to the tree.
-The nodes are commonly arranged into an almost complete binary tree, which allows storing the tree nodes in an array similarly to binary heap:
-the root node is stored in index~1, and the child nodes of node $i$ are $2i$ and $2i+1$.
-This representation allows implementing segment tree operations with very low overhead, making segment tree a powerful practical tool in addition to providing asymptotical bounds~\cite{kkkk}.
+The structure of a semi-dynamic segment tree is independent of the intervals stored in the tree.
+The nodes are commonly arranged into an almost complete binary tree, which allows storing the tree nodes in an array similarly to binary heap~\cite{kkkk}:
+the root node is stored in index~1, and the children of node $i$ are $2i$ and $2i+1$.
+This representation allows implementing segment tree operations with very low overhead, making the segment tree a powerful practical tool in addition to providing asymptotical bounds.
 
 \subsection{Canonical nodes}
 
-When an interval $I$ is added to a segment tree, it is added to several tree nodes called the \emph{canonical nodes} of $I$, denoted by \canon{I}.
+When an interval $I$ is added to a segment tree, it is stored into several tree nodes called the \emph{canonical nodes} of $I$, denoted by \canon{I}.
 The canonical nodes of $I$ are the smallest set of nodes whose intervals cover $I$ but nothing else: $\cup_{c\in\canon{I}} \inter{c}=I$.
-Figure~\ref{fig:canon} shows examples of canonical nodes.
+Figure~\ref{fig:canon} shows an example of canonical nodes.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.75,page=1]{fig/canon}
 	\caption{The canonical nodes of an interval $I$ are the smallest set of nodes covering exactly $I$.
-	The number of canonical nodes and their ancestors $\canonpar{I}$ is $O(\log\segsize)$.}\label{fig:canon}
+	The number of canonical nodes \canon{I} and their ancestors \canonpar{I} is $O(\log\segsize)$.}\label{fig:canon}
 \end{figure}
 
-Let \canonpar{I} be the set of ancestors of \canon{I}.
+The set of ancestors of \canon{I} is denoted \canonpar{I}.
 The following two lemmas are useful for proving the running times of segment tree operations.
 
 \begin{lem}\label{lem:canonlog}$\size{\canon{I}}=O(\log\segsize)$ for any interval $I$.\end{lem}
@@ -804,7 +801,7 @@ Similarly to the previous proof we show that \canonpar{I} cannot contain more th
 
 Suppose, for a contradiction, that \canonpar{I} contains 3 nodes on the same depth: $a$, $b$ and $c$ in that order.
 Then $\inter{a}\cap I\neq\emptyset$ and $\inter{c}\cap I\neq\emptyset$, so $\inter{b}\subseteq I$.
-Some grandchild of $b$ belongs to \canon{I}, so \canon{I} is not a minimal cover, which is a contradiction.
+Some descendant of $b$ belongs to \canon{I}, so \canon{I} is not a minimal cover, which is a contradiction.
 \end{proof}
 
 We can iterate over the canonical nodes and their ancestors by using the following recursive algorithm starting from the root node.
@@ -825,30 +822,30 @@ Visit all the elements of \canon{I} and \canonpar{I}.
 \end{algorithmic}
 \end{alg}
 
-Algorithm~\ref{alg:segiter} can be used to implement other tree operations such as adding intervals to segment tree by defining the called methods \visitc and \visitp appropriately.
+Algorithm~\ref{alg:segiter} can be used to implement operations such as adding an interval to a segment tree by defining the methods \visitc and \visitp appropriately.
 The recursion traverses through the nodes in \canonpar{I}, and stops immediately when it arrives either to a node in \canon{I} or to a node neither in \canon{I} nor in \canonpar{I}.
 Thus the running time is proportional to the sizes of \canon{I} and \canonpar{I}, which is $O(\log\segsize)$ by Lemma~\ref{lem:canonlog} and Lemma~\ref{lem:canonplog}.
 
 \subsection{Tree operations}\label{sec:treeops}
 
 We now show how the segment tree can be used for finding intersecting intervals~\cite[Chapter 10]{berg2008}.
-The following lemma helps us find intersecting pairs of elements.
+The following lemma gives the necessary and sufficient conditions for detecting intersecting intervals by using the canonical nodes.
 Figure~\ref{fig:iproof} illustrates the different cases of the lemma.
 
 \begin{figure}\centering
 	\begin{subfigure}[t]{0.32\textwidth}\centering
 		\includegraphics[width=\textwidth,page=3]{fig/iproof}
-		\caption{A}\label{fig:iproof:common}
+		\caption{$\canon{I}\cap\canon{J}\neq\emptyset$}\label{fig:iproof:common}
 	\end{subfigure}
 	\hfil
 	\begin{subfigure}[t]{0.32\textwidth}\centering
 		\includegraphics[width=\textwidth,page=4]{fig/iproof}
-		\caption{B}\label{fig:iproof:anc}
+		\caption{$\canon{I}\cap\canonpar{J}\neq\emptyset$}\label{fig:iproof:anc}
 	\end{subfigure}
 	\hfil
 	\begin{subfigure}[t]{0.32\textwidth}\centering
 		\includegraphics[width=\textwidth,page=2]{fig/iproof}
-		\caption{C}\label{fig:iproof:no}
+		\caption{$I\cap J=\emptyset$}\label{fig:iproof:no}
 	\end{subfigure}
 	\caption{Different cases of Lemma~\ref{lem:segintersect}.
 	If a pair of intervals intersect, they either have a common canonical node (Fig.~\ref{fig:iproof:common}) or an ancestor of a canonical node of one interval is a canonical node of the other interval (Fig.~\ref{fig:iproof:anc}).
@@ -868,13 +865,13 @@ First suppose that $I\cap J\neq\emptyset$.
 Let $x$ be any leaf node of the segment tree such that $\inter{x}\in I\cap J$.
 Let $A$ be the set of ancestors of $x$.
 Since the canonical nodes of an interval cover the whole interval, $A$ intersects both \canon{I} and \canon{J}.
-Let $i$ and $j$ be the nodes where $A$ intersects with \canon{I} and \canon{J} respectively.
+Let $i$ and $j$ be the nodes where $A$ intersects \canon{I} and \canon{J} respectively.
 Either $i$ and $j$ are the same node, or one of them is an ancestor of the other, which proves the "if" part of the claim.
 
 For the "only if" part, we look at the three cases separately.
 \begin{enumerate}
 \item If there exists a node $s\in\canon{I}\cap\canon{J}$, then $\inter{s}\subseteq I\cap J$, so $I\cap J\neq\emptyset$.
-\item If there is a node $s\in\canonpar{I}\cap\canon{J}$, then there exists $m\in\canon{I}$ that is a grandchild of $s$. $\inter{m}\subseteq I$ and $\inter{m}\subsetneq\inter{s}\subseteq J$, so $I\cap J\neq\emptyset$.
+\item If there is a node $s\in\canon{I}\cap\canonpar{J}$, then there exists $m\in\canon{J}$ that is a descendant of $s$. $\inter{m}\subseteq J$ and $\inter{m}\subsetneq\inter{s}\subseteq I$, so $I\cap J\neq\emptyset$.
 \item Identical to the second case.
 \end{enumerate}
 \end{proof}
@@ -885,17 +882,17 @@ In each node $s$ of the segment tree, maintain two lists of intervals:
 \item \nodecs{s}: Intervals $I$ for which $s\in\canon{I}$,
 \item \nodeps{s}: Intervals $I$ for which $s\in\canonpar{I}$.
 \end{itemize}
-When interval $I$ is added to the segment tree, it is added to \nodecs{s} for all $s\in\canon{I}$ and to \nodeps{s} for all $s\in\canonpar{I}$.
+When an interval $I$ is added to the segment tree, it is added to \nodecs{s} for all $s\in\canon{I}$ and to \nodeps{s} for all $s\in\canonpar{I}$.
 When we look for intervals intersecting a given interval $J$, we report all the intervals in \nodecs{s} for all $s\in\canonpar{J}$ and in \nodeps{s} for all $s\in\canon{J}$.
 By Lemma~\ref{lem:segintersect} this finds exactly the intervals intersecting $J$ and nothing else.
 Note, though, that some intervals might be counted multiple times.
-The structure can be further extended to avoid reporting the duplicates, but for the minimum link paths use case we only need to be able to check whether the query interval overlaps any of the intervals in the tree, so this solution is sufficient.
+The structure can be further extended to avoid reporting the duplicates, but for the minimum link paths use case we only need to check whether the intersecting set is empty, so this solution is sufficient.
 
 We also want to support clearing an interval from the tree.
-Clearing interval $I$ means that all the intervals $J$ in the tree are cut into $J\setminus I$, potentially removing $J$ completely or cutting it into two parts.
+Clearing an interval $I$ means that all the intervals $J$ in the tree are cut into $J\setminus I$, potentially removing $J$ or cutting it into two parts.
 The clear operation is performed in the following three steps:
 \begin{enumerate}
-\item Split intervals that touch $I$ but are not contained by $I$ into smaller parts.
+\item Push down the intervals stored in each $s\in\canonpar{I}$ into \leftc{s} and \rightc{s}.
 \item Clear each subtree rooted in any node $s\in\canon{I}$.
 \item Recompute \nodeps{s} to match the remaining nodes for all nodes $s\in\canonpar{I}$.
 \end{enumerate}
@@ -903,7 +900,7 @@ The clear operation is performed in the following three steps:
 All the tree operations can be done in parallel during a single recursive traversal of the tree.
 For nodes $s\in\canonpar{I}$ we push down the intervals in \nodecs{s} to the child nodes before proceeding with the recursion.
 When we arrive in a node $s\in\canon{I}$, the entire subtree rooted at $s$ is cleared.
-After the child nodes are cleared, we also need to regenerate the \nodeps{s} list for the nodes $s\in\canonpar{I}$ to account for the intervals that are no longer present in the subtree.
+After the child nodes are cleared, we also need to regenerate the \nodeps{s} list for the nodes $s\in\canonpar{I}$ to remove the intervals that are no longer present in the subtree.
 The regeneration is done by merging the lists in the child nodes of $s$.
 The exact algorithm for clearing is shown below.
 
@@ -912,19 +909,19 @@ Clear interval $I$ from a segment tree.
 \begin{algorithmic}
 \Procedure{ClearInterval}{$s$}
 	\Comment Clears interval $I$ from subtree rooted at $s$.
-	\If{$\inter{s}\cap I=\emptyset$ or $\nodeps{s}$ is empty}
-		Return.
+	\If{$\inter{s}\cap I=\emptyset$ or (\nodeps{s} and \nodecs{s} are empty)}
+		\State Return.
 	\EndIf
 	\If{$\inter{s}\nsubseteq I$}
 		\State Copy \nodecs{s} to \nodecs{\leftc{s}} and to \nodecs{\rightc{s}}.
 	\EndIf
 	\State Clear \nodecs{s}.
 	\State Clear \nodeps{s}.
-	\If{\leftc{s} and \rightc{s} defined}
+	\If{\leftc{s} and \rightc{s} are defined}
 		\State $\cleariv(\leftc{s})$.
 		\State $\cleariv(\rightc{s})$.
 	\EndIf
-	\If{$\inter{s}\cap I\neq\emptyset$}
+	\If{$\inter{s}\nsubseteq I$}
 		\State $\nodeps{s}\gets \nodeps{\leftc{s}} \cup \nodeps{\rightc{s}} \cup \nodecs{\leftc{s}} \cup \nodecs{\rightc{s}}$.
 	\EndIf
 \EndProcedure
@@ -938,29 +935,29 @@ We analyze this more simple case.
 \begin{lem}\label{lem:segrmtime}Suppose that the copying and merging of interval sets in Algorithm~\ref{alg:segrm} can be done in constant time.
 Then the time complexity of clearing range $I$ is $O(\log\segsize + k)$, where $k$ is the number of cleared nodes.\end{lem}
 \begin{proof}
-The function $\textsc{ClearInterval}$ traverses through nodes \canon{I}, \canonpar{I}, and the descendants of the canonical nodes, stopping immediately if it ends up in a non-empty subtree.
-In each descendant node we either clear the node or return immediately, so the cost of visiting the descendants can be accounted to the cleared nodes.
-The number of canonical nodes and their ancestors is $O(\log\segsize)$, so the total complexity is $O(\log\segsize + k)$.
+The function \cleariv traverses through nodes \canon{I}, \canonpar{I}, and the descendants of the canonical nodes, stopping immediately if it ends up in an empty subtree.
+In each descendant node we either clear the node or return immediately, so we only visit as many descendants as there are cleared nodes.
+The number of canonical nodes and their ancestors is $O(\log\segsize)$, so the total time complexity is $O(\log\segsize + k)$.
 \end{proof}
 
 
 \subsection{Multidimensional segment tree}
 
-The segment tree can be generalized into two or higher dimensional structure.
-A two-dimensional segment tree stores rectangles, and allows efficient queries for rectangular regions.
-Correspondingly a $D$-dimensional segment tree provides efficient operations for $D$-dimensional hyperrectangles.
+The segment tree can be generalized into two or higher dimensional structure~\cite{highseg}.
+A two-dimensional segment tree allows storing rectangles and performing efficient queries for rectangular regions.
+Correspondingly a $D$-dimensional segment tree allows performing efficient operations for $D$-dimensional hyperrectangles.
 
-A multidimensional segment tree is composed of of nested regular segment trees~\cite{highseg}.
+A multidimensional segment tree is composed of of nested regular segment trees.
 The shape of a $D$-dimensional segment tree is a 1-dimensional segment tree whose each node stores a $(D-1)$-dimensional segment tree.
 
 Each tree dimension represents one of the $D$ coordinate axes.
-Each node $s$ of the innermost segment tree represents a $D$-dimensional hyperrectangle \rect{s}, whose bounds are defined by the position of the node on each of the $D$ tree levels.
+Each node $s$ of the innermost segment tree represents a $D$-dimensional hyperrectangle \rect{s}, whose bounds are defined by the position of the node in each of the $D$ tree layers.
 For example the outer tree of a 2-dimensional segment tree represents the $y$ coordinates, and each inner tree represents the $x$ coordinates.
 Each node of the inner tree represents a rectangle whose $x$-bounds are determined by the position of the node in the inner tree, and the $y$-bounds are determined by the node of the outer tree that contains the inner tree.
 
-The concept of canonical nodes can also be extended to higher dimensions.
+The concept of canonical nodes can also be extended to higher dimensions~\cite{segbool}.
 The canonical nodes \canon{R} of a $D$-dimensional hyperrectangle $R$ are the smallest set of nodes that fully cover $R$ but nothing else.
-Figure~\ref{fig:canon2d} shows the canonical nodes of a rectangle in a 2-dimensional segment tree.
+Figure~\ref{fig:canon2d} illustrates the structure of a 2D segment tree and the canonical nodes.
 
 \begin{figure}\centering
 	\begin{subfigure}[t]{0.15\textwidth}\centering
@@ -974,7 +971,7 @@ Figure~\ref{fig:canon2d} shows the canonical nodes of a rectangle in a 2-dimensi
 	\end{subfigure}
 	\caption{Each node of the outer tree defines a range of $y$-coordinates and an inner segment tree built on $x$-coordinates.
 	Each node of the inner trees is a rectangle that combines the $y$ and the $x$ ranges.
-	The canonical nodes of rectangle $R$ (Fig.~\ref{fig:canon2d:r}) are the smallest set of nodes of the inner trees that cover exactly $R$ (Fig.~\ref{fig:canon2d:tree}).}\label{fig:canon2d}
+	The canonical nodes of a rectangle $R$ (Fig.~\ref{fig:canon2d:r}) are the smallest set of nodes of the inner trees that cover exactly $R$ (Fig.~\ref{fig:canon2d:tree}).}\label{fig:canon2d}
 \end{figure}
 
 In order to compute the canonical nodes we look into each axis separately.
@@ -985,7 +982,6 @@ Consider a 2-dimensional segment tree, and two arbitrary nodes of the projected 
 Let $c_1\times c_2$ be the node of the 2-dimensional tree that is found in position of $c_1$ in the inner tree, and $c_2$ in the outer tree.
 Similarly for $D$-dimensional trees we define product $c_1\times c_2\times\dots\times c_n$ to be the node of a $D$-dimensional segment tree defined by positions of 1-dimensional tree nodes.
 The following lemma shows how the canonical nodes of 1-dimensional projections can be combined to get the canonical nodes of a $D$-dimensional tree.
-We abuse the notation a little and equate the segment tree nodes with their associated hyperrectangles.
 
 \begin{lem}\label{lem:canond}
 For any $D$-dimensional hyperrectangle $R$ applies
@@ -1003,9 +999,9 @@ By induction we should select the nodes $\bigtimes_{i=1}^{D-1} \canoni{R_i}{i}$ 
 To cover also axis $D$, it is optimal to select the nodes $\canoni{R_D}{D}$, and thus $\canon{R}=\bigtimes_{i=1}^D\canoni{R_i}{i}$.
 \end{proof}
 
-Combination of Lemma~\ref{lem:canond} and Lemma~\ref{lem:canonlog} gives bound for the size of the canonical set.
+Combination of Lemma~\ref{lem:canond} and Lemma~\ref{lem:canonlog} gives a bound for the number of canonical nodes.
 
-\begin{cor}$\size{\canon{R}}=O(\log^D\segsize)$ for any $D$-dimensional rectangle $R$.\end{cor}
+\begin{cor}\label{cor:canondcount}$\size{\canon{R}}=O(\log^D\segsize)$ for any $D$-dimensional rectangle $R$.\end{cor}
 \begin{proof}
 $$
 \size{\canon{R}} = \size{\bigtimes_{i=1}^D \canoni{R_i}{i}}
@@ -1016,21 +1012,21 @@ $$
 \end{proof}
 
 For 1-dimensional segment trees there is a clear connection between the parent-child hierarchy and interval overlap.
-For any two tree nodes $a$ and $b$, $\inter{a}\subseteq\inter{b}$ if and only if $b$ is an ancestor of $a$ in the tree.
+For any two tree nodes $a$ and $b$, $\inter{a}\subseteq\inter{b}$ holds if and only if $b$ is an ancestor of $a$ in the tree.
 In multidimensional case it also applies that if $b$ is an ancestor of $a$, then $\rect{a}\subseteq\rect{b}$.
 However the reverse is not true; $\rect{a}\subseteq\rect{b}$ does not imply that $b$ is an ancestor of $a$ because $b$ can be in a different subtree in some of the outer trees.
 
 Instead of looking for parent-child relationships directly in the tree, we can look at them separately on each coordinate axis.
-This allows us to generalize Lemma~\ref{lem:segintersect} for segment interaction to work for rectangles.
+This allows us to generalize Lemma~\ref{lem:segintersect} for segment interaction to work for $D$-dimensional hyperrectangles.
 
 \begin{lem}\label{lem:rectintersect}Consider any two $D$-dimensional hyperrectangles $A$ and $B$.
-If $A\cap B\neq\emptyset$, then the following holds for each coordinate axis $d\in\set{1,\dots,D}$.
+If $A\cap B\neq\emptyset$, then at least one of the following holds for each coordinate axis $d\in\set{1,\dots,D}$.
 \begin{enumerate}
 \item $\canoni{A_d}{d}\cap\canoni{B_d}{d}\neq\emptyset$,
 \item $\canoni{A_d}{d}\cap\canonpari{B_d}{d}\neq\emptyset$,
 \item $\canonpari{A_d}{d}\cap\canoni{B_d}{d}\neq\emptyset$.
 \end{enumerate}
-Furthermore, if $A\cap B=\emptyset$, then there is at least one coordinate axis for which none of the conditions hold.
+Furthermore, if $A\cap B=\emptyset$, then there is at least one coordinate axis for which none of the above conditions hold.
 \end{lem}
 \begin{proof}
 $A$ and $B$ overlap if and only if their projections to each coordinate axis overlap.
@@ -1039,18 +1035,18 @@ Then $A_d$ and $B_d$ overlap for each $d$, and by Lemma~\ref{lem:segintersect} t
 If $A\cap B=\emptyset$, then there exists some $d$ for which $A_d\cap B_d=\emptyset$, so again by Lemma~\ref{lem:segintersect} none of the conditions hold for $d$.
 \end{proof}
 
-To apply Lemma~\ref{lem:rectintersect} to detect intersecting rectangles, we create \emph{two} $D-1$ dimensional inner trees to every outer node of a $D$-dimensional segment tree:
+To find pairs of hyperrectangles fulfilling the conditions of Lemma~\ref{lem:rectintersect}, we store \emph{two} $D-1$ dimensional inner trees in every outer node of a $D$-dimensional segment tree:
 \begin{description}
-\item[\subtree{s}] where we store rectangles $R$ for which $s\in\canoni{R_D}{D}$,
-\item[\subtreep{s}] where we store rectangles $R$ for which $s\in\canonpari{R_D}{D}$.
+\item[\subtree{s}] where we store hyperrectangles $R$ for which $s\in\canoni{R_D}{D}$,
+\item[\subtreep{s}] where we store hyperrectangles $R$ for which $s\in\canonpari{R_D}{D}$.
 \end{description}
 
-We can write rectangle insertion and query operations by using these fields.
+We can implement hyperrectangle insertion and query operations by using these fields.
 For simplicity we only support checking whether a query rectangle intersects any rectangle in the tree rather than returning the matching rectangles.
 The nodes $s$ of the innermost tree have dimension 0, and they contain only a single boolean \hasrect{s}, which indicates that at least one rectangle is inserted to this subtree.
 
 \begin{alg}\label{alg:rectadd}
-Add rectangle $R$ to $D$-dimensional tree.
+Add hyperrectangle $R$ to a $D$-dimensional segment tree.
 \begin{algorithmic}
 \Procedure{InsertToTree}{$D,n$}
 \Comment{Insert to the subtree rooted at node $s$}
@@ -1068,7 +1064,7 @@ Add rectangle $R$ to $D$-dimensional tree.
 \end{alg}
 
 \begin{alg}\label{alg:rectcheck}
-Query whether rectangle $R$ intersects with any rectangle in the tree.
+Query whether hyperrectangle $R$ intersects with any rectangle in the $D$-dimensional segment tree.
 \begin{algorithmic}
 \Procedure{QueryTree}{$D,n$}
 \Comment{Check subtree rooted at node $s$}
@@ -1100,41 +1096,40 @@ Note that \subtree{} and \subtreep{} are used in opposite ways in the two operat
 In \adddt{} we recurse down to \subtree{} for canonical nodes, and to \subtreep{} for their ancestors, whereas in \checkdt{} we recurse to \subtree{} in the ancestor nodes, and to both of the trees in the canonical nodes.
 This allows us to ensure that \adddt{} and \checkdt{} arrive in the same node exactly in the case where the conditions of Lemma~\ref{lem:rectintersect} are fulfilled.
 
-Suppose we first add rectangle $A$ and then query for rectangle $B$ in the tree.
-The \checkdt operation returns true if the two operations end up in the same dimension-0 node.
-The only way the two operations end up in a common node is if in each dimension $d$ we are in a canonical node of at least one of $A_d$ and $B_d$, and in either a canonical node or an ancestor for the other rectangle.
-If \adddt{} and \checkdt{} operations end up in the same level-0 node, then in each dimension we are in the canonical node of at least either
+Suppose we first add hyperrectangle $A$ and then query for hyperrectangle $B$ in the tree.
+The \checkdt operation returns true if the two operations end up in any common dimension~0 node.
+The only way the two operations end up in a common node is if in each dimension $d$ we are in a canonical node of at least one of $A_d$ and $B_d$, and in either a canonical node or in an ancestor of a canonical node for the other hyperrectangle.
 
 Thus we can efficiently support inserting and querying for $D$-dimensional hyperrectangles by a nested structure consisting of multiple levels of segment trees.
-However clearing a rectangle in this structure is considerable more difficult to support.
-For that we turn into another variant of the multidimensional segment tree, the unified segment tree.
+However clearing a hyperrectangle in this structure is a more complex operation.
+To make the clear operation more simple, we turn into another variant of the multidimensional segment tree, the unified segment tree.
 
 \subsection{Unified segment tree}\label{sec:unifiedtree}
 
 The structure of a multidimensional segment tree depends on how we order the coordinate axes.
 For example a two-dimensional segment tree can have either the outer tree represent $y$-coordinates and each inner tree represent $x$-coordinates, or the other way round.
-The structure and parent-child relationships are different in the two cases, but the sets of rectangles represented by the nodes of the inner trees are exactly the same.
+The structure and the parent-child relationships are different in the two cases, but the set of rectangles represented by the nodes of all the inner trees is exactly the same regardless of the order.
 
 The \emph{unified segment tree}, developed by Wagner~\cite{unified}, combines the parent-child links of the different multidimensional segment trees into a single structure.
-The unified segment tree is not a tree, but a directed graph.
+The unified segment tree is actually not a tree, but a directed graph.
 Each node $s$ of the graph represents a $D$-dimensional hyperrectangle.
 For each axis $i$ where \rect{s} is not minimal, $s$ has links to two child nodes that divide \rect{s} into two parts along hyperplane perpendicular to $i$-axis.
 Thus each node has between 0 and $2D$ links to child nodes.
 The children splitting the node $s$ along axis $i$ are denoted by \leftu{s}{i} and \rightu{s}{i}.
-Figure~\ref{fig:unified} illustrates the structure of the unified segment tree.
+Figure~\ref{fig:unified} illustrates the structure of the unified segment tree in 2-dimensional case.
 
 \begin{figure}\centering
 	\includegraphics[width=0.5\textwidth]{fig/unified}
 	\caption{The nodes of the unified segment tree form a directed acyclic graph.
-	Each node can be split along any of the coordinate axes as long as the node is not already minimal in that direction.}\label{fig:unified}
+	Each node can be split along any of the coordinate axes as long as the node is not minimal in that direction.}\label{fig:unified}
 \end{figure}
 
 Note that in the unified tree there is no distinction between outer and inner tree.
 In the regular multidimensional segment tree the nodes of nested tree represent ranges in one of the coordinate axes, and the innermost nodes represent their Cartesian product.
-In the unified tree, there are no outer and inner nodes, and each node represents a $D$-dimensional hyperrectangle.
+In the unified tree there is no concept of outer and inner nodes, and each node represents a $D$-dimensional hyperrectangle.
 
-The operations \adddt and \checkdt for unified tree are largely similar to the algorithms for the regular multidimensional tree.
-We consider again checking whether the query rectangle intersects with any of the hyperrectangles in the tree rather than reporting all the intersecting hyperrectangles.
+The operations \adddt and \checkdt for the unified tree are largely similar to the algorithms for the regular multidimensional tree.
+We consider again checking whether the query hyperrectangle intersects with any of the hyperrectangles in the tree.
 Each tree node stores $2^D$ bits of information about the hyperrectangles stored in the subtree.
 When a hyperrectangle $R$ is added to node $s$, the bits are used to define whether $s$ represents a canonical node or an ancestor of a canonical node along each coordinate axis.
 The $2^D$ bits allow us to detect when the conditions of Lemma~\ref{lem:rectintersect} become fulfilled for the query rectangle and a rectangle in the tree.
@@ -1144,10 +1139,10 @@ The following function computes the mask for a rectangle and a tree node.
 Compute bitmask representing how hyperrectangle $R$ is stored in unified tree node $s$.
 \begin{algorithmic}
 \Procedure{NodeMask}{$R,n$}
-	\State $m\gets 0$
+	\State $m\gets 0$.
 	\ForAll{$d \in 1\dots D$}
 		\If{$\rect{s}_d\subseteq R_D$}
-			\State $m\gets m + 2^d$
+			\State $m\gets m | 2^{d-1}$.
 		\EndIf
 	\EndFor
 	\State Return $m$.
@@ -1155,7 +1150,7 @@ Compute bitmask representing how hyperrectangle $R$ is stored in unified tree no
 \end{algorithmic}
 \end{alg}
 
-We can write procedures \adddt and \checkdt by using this function.
+We can implement procedures \adddt and \checkdt by using the bitmasks returned by \maskof{}.
 
 \begin{alg}\label{alg:uadd}
 Add rectangle $R$ to $D$-dimensional unified tree.
