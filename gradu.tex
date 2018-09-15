@@ -1217,7 +1217,7 @@ push down any intervals in the ancestors, clear the subtrees of the canonical no
 The three operations are performed by a recursive function \cleardt that traverses through the tree.
 The function uses two arguments to control the tree traversal: the current subtree root $s$, and the axis where we are moving $d$.
 In each canonical ancestor $s\in\canonpari{R_d}{d}$ we split the contents of the subtree along axis $d$ before proceeding, and recompute the descendant information after finishing clearing the subtree.
-Figure~\ref{fig:uremove} shows the steps of the clearing process.
+Figure~\ref{fig:uremove} shows an example of the clearing process.
 The full algorithm is described below.
 
 \begin{figure}\centering
