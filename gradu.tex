@@ -1520,22 +1520,22 @@ augment the algorithm such that we store into each rectangle how it was initiall
 
 \section{Paths in three and higher dimensions}\label{sec:minlink3d}
 
-In this section we study the rectilinear minimum link path problem in 3D domain.
-We present an algorithm that has time complexity $O(n^2\log^2n)$ and space complexity $O(n^2)$~\cite{restricted}.
-We also extend the algorithm to work in higher dimensions.
-For any constant $D\ge 2$, the presented algorithm works in $O(n^{D-1}\log^{D-1}n)$ time.
+In this section we study the rectilinear minimum link path problem in 3D domains.
+We present an algorithm that has time complexity $O(n^2\log^2 n)$ and space complexity $O(n^2)$~\cite{restricted}.
+We also extend the algorithm to higher dimensions.
+For any constant $D\ge 2$, the presented algorithm works in $O(n^{D-1}\log^{D-1}n)$ time and $O(n^{D-1})$ space.
 
 Some of the basic ideas of the 2D minimum link path algorithm can also be applied to the 3D case.
-The path is computed using the staged illumination paradigm, and on each step we compute \reach{k+1} from \reach{k} by using sweep plane algorithms in all the coordinate axis directions.
-However in 3D case the representation of the illuminated space becomes more complicated, and also the sweep algorithms require more sophisticated logic.
+The path is computed using the staged illumination paradigm, and on each step we construct \reach{k+1} from \reach{k} by using a sweep plane algorithm in all the coordinate axis directions.
+However in 3D case the representation of the illuminated region is more complicated, and the sweep algorithm requires more sophisticated logic.
 
-We use the decomposition presented in Section~\ref{sec:split3d} to maintain the illuminated set and to guide the illumination during the sweeps.
-Unlike the 2D case, the algorithm does not use any specific properties of the decomposition, but can be used with any space decomposition.
-The running time of the algorithm depends on the number of cells and links between them, and the decomposition we use has the advantage of having only a small number of links.
+We use the decomposition presented in Section~\ref{sec:split3d} to maintain the illuminated region and to guide the illumination during the sweeps.
+Unlike the 2D case, the algorithm does not use any specific properties of the decomposition but can be used with any space decomposition.
+The running time of the algorithm depends on the number of cells and links between them, and the decomposition we use has the advantage of having a small number of both of them.
 
 The decomposition is used to implement plane sweep algorithm for computing \reach{k+1} from \reach{k}.
 On each step we run 6 sweeps, one in each of the directions $\pm x$, $\pm y$ and $\pm z$.
-By combining the results of sweeping in each direction we form the whole region \reach{k+1}.
+Combination of the results of the sweeps in each direction gives the whole region \reach{k+1}.
 Next we discuss how the sweep plane algorithm is implemented, and then show how the minimum link path algorithm is built around it.
 
 \subsection{Illumination by plane sweep}
@@ -1545,7 +1545,7 @@ The sweep performs two functions: it discovers which cells can be illuminated fr
 The boundary is used on the next step to compute \reach{k+2} from \reach{k+1}.
 
 During the sweep we maintain the intersection of the sweep plane with the newly illuminated region, and a priority queue of events.
-The events belong to one of the following types:
+Each event has one of the following types:
 
 \begin{description}
 \item[\addE] where a previously illuminated region is added to the sweep plane.
@@ -1555,17 +1555,16 @@ The events belong to one of the following types:
 
 Suppose that we are performing the sweep in direction $+z$.
 In \cellE we first check whether the reached cell $c$ is truly illuminated.
-If yes, we add a \cellE for each neighbor of $c$ in direction $+z$, and an \obsE for each obstacle adjacent to $c$ in direction $+z$.
+If yes, we create a \cellE for each neighbor of $c$ in direction $+z$, and an \obsE for each obstacle adjacent to $c$ in direction $+z$.
 In \obsE the projection of the encountered obstacle is cleared from the sweep plane.
 Additionally the cleared rectangles are used to construct new \addEs on the boundary of the illuminated region to be used on the next illumination step.
 
-During the sweep, the intersection of the illuminated region with the sweep plane is stored in the Unified 2D segment tree presented in Section~\ref{sec:unifiedtree}.
+During the sweep, the intersection of the illuminated region with the sweep plane is stored in the unified 2D segment tree presented in Section~\ref{sec:unifiedtree}.
 Each \addE inserts a new rectangle to the tree.
-Each illuminated canonical node of the tree stores reference to the event that was used to generate it.
+Each illuminated canonical node of the tree stores a reference to the event that was used to generate it.
 If multiple \addEs illuminate the same canonical rectangle, only the one inserted first is stored.
-This reference is used to determine the $z$-range of the \addEs generated during \obsE, as well as for tracing back the path from \ept to \spt after the illumination is finished.
-
-Pseudocode for the illumination plane sweep is as following.
+This reference is used to determine the $z$-range of the \addEs generated during the \obsEs, as well as for tracing back the path from \ept to \spt when the illumination finishes.
+The pseudocode below describes the sweep.
 
 \begin{alg}\label{alg:sweep3d}
 Illuminate by plane sweep in direction $+z$ starting from a provided event set $E$.
@@ -1594,14 +1593,14 @@ Illuminate by plane sweep in direction $+z$ starting from a provided event set $
 \end{algorithmic}
 \end{alg}
 
-We can write down the basic pseudocode for the staged illumination by iteratively applying the sweep algorithm.
+We can implement the staged illumination process by iteratively applying the sweep algorithm.
 
 \begin{alg}\label{alg:minlink3d}
 Run staged illumination in 3D domain \fspace starting from point \spt.
 \begin{algorithmic}
 \State Compute decomposition of \fspace into cells using Algorithm~\ref{alg:split3d}.
 \ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
-	\State $E_d\gets$ Event set containing \addE at \spt and \cellE for the cell containing \spt.
+	\State $E_d\gets$ Event set containing \addE at \spt with witdh and height 0, and \cellE for the cell containing \spt.
 \EndFor
 \While{$E_d$ is not empty for some $d$}
 	\ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
@@ -1621,32 +1620,38 @@ Run staged illumination in 3D domain \fspace starting from point \spt.
 \subsection{Event generation}\label{sec:evtgen}
 
 We now discuss how the \addEs for the next round are generated when the sweep processes an \obsE.
-We again explain only the case for $+z$ sweep, as the other cases are identical.
-The goal is to generate \addEs on the boundary of the space illuminated on step $k$, such that the sweeps on step $k+1$ correctly generate \reach{k+1}.
+We explain again only the $+z$ sweep, the other directions being identical.
+The goal is to generate \addEs on the boundary of the space illuminated during illumination of \reach{k} such that the sweeps on the following step correctly generate \reach{k+1}.
 
 During the $+z$ sweep we generate \addEs in directions $\pm x$ and $\pm y$.
-On a \obsE we perform a clear operation on the unified tree containing the sweep plane status.
-Thus operations clears some of the tree nodes.
-As a first step in even generation, we create an \addEs on each side of every cleared canonical rectangle.
-This can create an unnecessarily large amount of events, because rectangles added to the tree are split to up to $(\log^2 n)$ canonical rectangles.
+On an \obsE we perform a clear operation on the unified tree containing the sweep plane status.
+The clear operation operations removes some of the tree nodes.
+As a first step in even generation, we create an \addE on each side of every cleared canonical rectangle.
+This can create an unnecessarily large amount of events, because rectangles added to the tree may be split to up to $(\log^2 n)$ canonical rectangles.
 
 To reduce the number of generated events we perform \emph{filtering}, which consists of the following two steps:
 \begin{enumerate}
 \item Remove all the pairs of \addEs with the same position but opposite direction.
-\item Merge all sets of aligned \addEs with the same $z$-range into a single larger \addE.
+\item Merge all sequences of aligned \addEs with the same $z$-range into a single \addE.
 \end{enumerate}
 
 The aligned \addEs in direction $+x$ are the ones that occur on the same $x$ coordinate and have the same bounds in direction $z$, and the bounds in $y$-direction touch each other at endpoints.
-The definition is similar in all the other directions.
+The definition is similar in the other directions.
 The aligned \addEs are searched for the events in all directions separately.
-Performing these operations allow us to bound the number of \addEs generated during the illumination.
+The filtering allow us to bound the number of \addEs generated during the illumination.
 Figure~\ref{fig:filter} shows the generated \addEs on an obstacle before and after filtering.
 
 \begin{figure}\centering
-	\includegraphics[scale=0.5,page=1]{fig/filter}
+	\begin{subfigure}[t]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth,page=2]{fig/filter}
+		\caption{Initially generated \addEs}
+	\end{subfigure}
 	\hfil
-	\includegraphics[scale=0.5,page=2]{fig/filter}
-	\caption{Initially we can create a large number of \addEs because of the segment tree structured, but after filtering the overhead is reduced.}\label{fig:filter}
+	\begin{subfigure}[t]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth,page=3]{fig/filter}
+		\caption{\addEs after filtering}
+	\end{subfigure}
+	\caption{Initially we can create a large number of \addEs because of the segment tree structured, but the filtering clears the redundant ones.}\label{fig:filter}
 \end{figure}
 
 Filtering can be done in linear time with respect to the number of unfiltered rectangles.
@@ -1654,17 +1659,17 @@ To see why, notice that there are only $O(n^2)$ possible coordinates that a corn
 We can group the rectangles by their corners into an array of size $O(n^2)$ and use the array to find matching pairs of rectangles to remove or merge.
 
 To make the minimum link path computation efficient, we want to avoid reilluminating the same cells multiple times.
-For the 2D minimum link paths this was done by turning cells into obstacles once enough steps have passed since the cell was first discovered.
-This approach works also for 3D, but since there are $O(n^2)$ cells and clearing a rectangle from the unified tree requires $O(n\log n)$ steps, having to do the clear operations for all the cells would increase the time complexity significantly.
+In the 2D algorithm this was done by turning cells into obstacles once enough steps have passed since the cell was first discovered.
+This approach works also for 3D, but since there are $O(n^2)$ cells and clearing a rectangle from the unified tree requires $O(n\log n)$ steps, having to do the clear operation for each of the cells would increase the time complexity significantly.
 
 To overcome this problem, instead of limiting the reachable cells we limit the creation of \addEs.
-We create \addEs for the next step when a plane sweep hits an obstacle.
+We create \addEs for the next step when the sweep plane hits an obstacle.
 If the illumination first reaches an obstacle face $o$ on step $k$, then after step $k+2$ all the points touching $o$ are illuminated, so after step $k+3$ all the points visible from $o$ are illuminated.
-Thus we don't create any \addEs for an obstacle $o$ that was first found more than 3 steps ago, as any point illuminated through such events has been illuminated already.
+Thus we can stop creating \addEs for an obstacle $o$ that was first found more than 3 steps ago, as any point illuminated through such events has been discovered already.
 
 \subsection{Complexity}
 
-We now prove the complexity of the minimum link computation algorithm.
+We now prove the time and space complexity of the minimum link path algorithm~\cite{restricted}.
 
 \begin{lem}\label{lem:obse3}For each obstacle we generate \obsE on at most 9 steps of the illumination.\end{lem}
 \begin{proof}
@@ -1681,13 +1686,13 @@ The proof is very similar to Lemma~\ref{lem:obse3}.
 If we discover a cell $c$ on step $k$ then all the points visible from $c$ are illuminated after step $k+3$, so no more sweeps can reach $c$ after step $k+8$.
 \end{proof}
 
-\begin{lem}\label{lem:adde3}The number of \addEs generated during the illumination after after filtering is $O(n^2)$.\end{lem}
+\begin{lem}\label{lem:adde3}The number of \addEs generated during the illumination after filtering is $O(n^2)$.\end{lem}
 \begin{proof}
 We only count the \addEs in direction $+z$.
 The other directions are identical.
-Each \addE lies on the same plane with some obstacle face whose normal points to direction $-z$.
+Each \addE lies on a common plane with some obstacle face whose normal points to direction $-z$.
 For the purpose of deriving an upper bound, we assume that each obstacle face has unique $z$-coordinate.
-We may overcount the number of \addEs this way by counting the same events multiple times, but not undercount.
+We may overcount the number of \addEs this way by counting the some events multiple times, but we only need to prove an upper bound.
 
 Consider the events on the plane $P$ of obstacle $o$ at $z$-coordinate $\hat{z}$.
 Events in direction $+z$ can be generated during the sweeps to direction $\pm x$ and $\pm y$.
@@ -1695,8 +1700,25 @@ We only consider the sweep in direction $+y$.
 We generate an event on plane $P$ if an \obsE removes a rectangle $R$ from the unified tree such that the upper $z$-coordinate of $R$ is $\hat{z}$.
 
 Some \addEs might be generated on $P$ because of how the rectangles are stored in the unified segment tree.
-When we add a rectangle to the tree it is split to canonical nodes, and some of them might have boundary on $P$.
-In such cases we generate \addEs both from canonical nodes on both sides of $P$, so the events are removed during the filtering, where we remove pairs of events at identical positions that have opposite directions.
+When a rectangle is added to the tree it is split to canonical nodes, and some of them might have boundary on $P$ even if the original rectangle didn't.
+In such cases we generate \addEs from canonical nodes on both sides of $P$, so the events are removed during the filtering where we remove pairs of events at identical positions with opposite directions.
+Figure~\ref{fig:addeproof} shows an example of such a situation.
+
+\begin{figure}\centering
+	\begin{subfigure}[t]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth,page=1]{fig/addeproof}
+		\caption{Initially generated \addEs}\label{fig:addeproof:start}
+	\end{subfigure}
+	\hfil
+	\begin{subfigure}[t]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth,page=2]{fig/addeproof}
+		\caption{\addEs after filtering}\label{fig:addeproof:end}
+	\end{subfigure}
+	\caption{We may initially generate \addEs on plane $P$ because of how the rectangles are splitted to canonical nodes in the unified segment tree.
+	In Figure~\ref{fig:addeproof:start} event is on plane $P$, but it is removed together with $e_2$.
+	Similarly illumination from $e_3$ might create events on $P$ on the next step, but we combine it with $e_4$ to a larger \addE that no longer has boundary on $P$.
+	}\label{fig:addeproof}
+\end{figure}
 
 Because of the canonical nodes aligned with sides on $P$, we may also generate \addEs in direction $\pm x$ whose $z$-range is bounded by $\hat{z}$.
 In the second part of the filtering we merge aligned events into larger events.
@@ -1706,26 +1728,26 @@ Because of the filtering, we can only have events on plane $P$ after the sweep h
 There are three cases for how an event might be generated on plane $P$ that is not removed by the filtering.
 \begin{enumerate}
 \item During a sweep in direction $+z$ we hit the obstacle $o$.
-	We generate \addEs in directions $\pm x$ and $\pm y$ that are bounded by $\hat{z}$.
+	We generate \addEs in directions $\pm x$ and $\pm y$ that are bounded by $P$.
 	From these \addEs we create events on plane $P$ on the following illumination step.
 \item During a sweep in direction $\pm x$ or $\pm y$ the obstacle face $o$ cuts a rectangle in the tree such that the remaining part has boundary on $P$.
 \item If on the previous step we created $\addE$ on plane $P$, then we also created events in directions $\pm x$ or $\pm y$ that have plane $P$ as one of the sides.
-	From those events we create more $+z$ events on plane $P$ on the following step.
+	From those events we create more $+z$ events on plane $P$ in the following illumination step.
 \end{enumerate}
 
 First let us consider the first two types of events.
 They only occur through sweeps touching the surface of obstacle $o$.
 By Lemma~\ref{lem:obse3} and Lemma~\ref{lem:celle3} such sweeps occur only on $O(1)$ steps.
-On a single sweep, the number of events created on $P$ is bounded by the number of canonical rectangles whose $z$-range is bounded by $\hat{z}$.
+On a single sweep, the number of events created on $P$ is bounded by the number of canonical rectangles that have $P$ as one of their sides.
 There are $O(n)$ such rectangles, so the number of events is $O(n)$.
 
-Now consider the third type of events.
-A crucial observation is the following:
+The following observation allows us to bound the number of type 3 events:
 After the illumination has reached obstacle $o$, the illumination on $P$ proceeds exactly like the 2D staged illumination in the cross section of $P$.
 The 2D illumination illuminates maximal rectangles of \decomp{x} and \decomp{y}, producing a total of $O(n)$ illuminated rectangles.
 There is some overhead because of reilluminating the same parts multiple times, but by Lemma~\ref{lem:celle3} each part of the domain can be illuminated only $O(1)$ times.
+Thus the event count is within a constant factor of the event count in the 2D case.
 
-The number of events on the plane of a single obstacle $o$ is $O(n)$, so the total number of events is $O(n^2)$.
+The number of events on the plane of each obstacle $o$ is $O(n)$, so the total number of events is $O(n^2)$.
 \end{proof}
 
 We are ready to prove the main result of this section.
@@ -1737,11 +1759,12 @@ On each \cellE we perform a single lookup to the unified tree in $O(\log^2 n)$ t
 Since the decomposition has $O(n^2)$ cells and $O(n^2)$ links between cells, the total time taken in processing \cellEs is $O(n^2\log^2 n)$.
 
 On each \addE we insert a new rectangle to the unified tree in $O(\log^2 n)$ time.
+By Lemma~\ref{lem:adde3} the number of \addEs is $O(n^2)$, so the events are processed in $O(n^2\log^2 n)$ time.
 The filtering of \addEs can be done in linear time, and the total number of unfiltered events is at most the number of \addEs multiplied by the $O(\log^2 n)$ canonical nodes used to store a rectangle in the unified tree.
-Thus the time complexity of the filtering is $O(n^2\log^2 n)$.
+Thus the time spent in filtering is also $O(n^2\log^2 n)$.
 
 On each \obsE we clear a rectangle from the tree.
-The clearing takes $O(n\log n + k)$ time, where $k$ is the number of cleared canonical rectangles.
+The clearing takes $O(n\log n + k)$ time, where $k$ is the number of cleared canonical nodes.
 Each \addE adds $O(\log^2 n)$ canonical rectangles to the tree, so the total number of rectangles to be cleared is $O(n^2\log^2 n)$.
 There are $O(n)$ \obsEs by Lemma~\ref{lem:obse3}, so the total time taken in \obsEs is $O(n^2\log^2 n)$.
 
@@ -1752,9 +1775,9 @@ The size of the decomposition as well as the segment tree used during the sweeps
 
 \subsection{Higher dimensional paths}
 
-The algorithm for 3D minimum link paths can be generalized to higher dimensions.
-We now assume that \fspace is a $D$-dimensional rectilinear region for arbitrary fixed $D\ge 2$.
-We develop a generalization of Algorithm~\ref{alg:minlink3d} that computes the rectilinear minimum link path in $D$-dimensional space in $O(n^{D-1}\log^{D-1}n)$ time.
+The 3D minimum link path algorithm can be generalized to higher dimensions.
+We now assume that \fspace is a $D$-dimensional rectilinear region for an arbitrary constant $D\ge 2$.
+We develop a generalization of Algorithm~\ref{alg:minlink3d} that computes the rectilinear minimum link path in $D$-dimensional space in $O(n^{D-1}\log^{D-1}n)$ time and $O(n^{D-1})$ space.
 
 The algorithm uses the same set of events during the sweeps in the $D$-dimensional space as were used in 3D space.
 The 2D sweep plane is replaced by a $(D-1)$-dimensional hyperplane, so each event $e$ defines a $(D-1)$-dimensional hyperrectangle \hrectof{e} instead of \rectof{e}.
