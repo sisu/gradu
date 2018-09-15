@@ -92,7 +92,7 @@
 \newcommand\decomp[1]{\ensuremath{\textsc{dec}_{#1}}\xspace}
 %\newcommand\decompc[1]{\ensuremath{\textsc{dec}({#1})}\xspace}
 \newcommand\sweep[2]{\ensuremath{\textsc{sweep}_{#2}{(#1)}}\xspace}
-\newcommand\stepof[1]{\ensuremath{\textsc{step}{(#1)}}\xspace}
+\newcommand\stepof[1]{\ensuremath{\texttt{step}{[#1]}}\xspace}
 \newcommand\proj[2]{\ensuremath{\text{proj}_{#1}(#2)}\xspace}
 
 \newcommand\rotr[1]{\ensuremath{\top #1}\xspace}
@@ -1365,21 +1365,22 @@ In other words, the staged illumination finds the rectangles in the same order a
 
 The rectilinear minimum link path problem can thus be solved by forming the intersection graph and searching for the shortest path using breadth-first search~\cite{dasnar}.
 However the intersection graph has quadratic size, so building it takes at least quadratic time as well.
-The goal is thus to implicitly perform BFS in the intersection graph without explicitly constructing the graph.
+The goal is thus to run breadth-first search in the intersection graph without explicitly constructing the graph.
 
 \subsection{Searching the intersection graph}
 
-Consider again the case where the first link of the path is horizontal.
+We consider again the case where the first link of the path is horizontal.
 We start by constructing the horizontal decomposition with Algorithm~\ref{alg:split2d}.
 The vertical decomposition is used implicitly in the analysis, but there is no need to construct it explicitly.
 
-\reach{0} contains the start point~\spt, and \reach{1} is the horizontal line segment passing through \spt.
+\reach{0} contains the starting point~\spt, and \reach{1} is the horizontal line segment passing through \spt.
 The path finding algorithm works by alternating between two phases~\cite{revisited}:
 
 \begin{enumerate}
-\item For odd $k$, \reach{k} consists of a set of rectangles $R_k\subseteq\decomp{x}$.
-	Inspect which obstacles can be reached by a vertical line starting from any point in \reach{k}, and form $\hat{R}_{k+1}=\set{r \mid r\in\decomp{x}, r\cap\reach{k+1}\neq\emptyset}$.
-\item For even $k$, we simply set $R_{k+1}=\hat{R}_k$.
+\item For odd $k$, \reach{k} consists of a set of rectangles $R_k\subseteq\decomp{x}$ when $k\ge 3$.
+	In the special case $k=1$, \reach{k} is a horizontal line through a single rectangle of \decomp{x}.
+	We inspect which obstacles can be reached by a vertical line starting from any point in \reach{k}, and form $\hat{R}_{k+1}=\set{r \mid r\in\decomp{x}, r\cap\reach{k+1}\neq\emptyset}$.
+\item For even $k\ge 2$ we set $R_{k+1}=\hat{R}_k$.
 	Then $\reach{k+1}=\bigcup_{r\in R_{k+1}}r$ by Lemma~\ref{lem:illum2d}.
 \end{enumerate}
 
@@ -1415,25 +1416,25 @@ The path finding algorithm works by alternating between two phases~\cite{revisit
 	\end{subfigure}
 	\caption{The staged illumination proceeds from starting state (Fig.~\ref{fig:light2d:start}) by iterating two phases:
 	1. Illuminate up and down (Fig.~\ref{fig:light2d:up},~\ref{fig:light2d:down},~\ref{fig:light2d:updown}).
-	2. Select illuminated rectangles (Fig.~\ref{fig:light2d:sel1},~\ref{fig:light2d:sel2}).
+	2. Select the illuminated rectangles (Fig.~\ref{fig:light2d:sel1},~\ref{fig:light2d:sel2}).
 	}\label{fig:light2d}
 \end{figure}
 
 We keep iterating the two phases until the endpoint~\ept is reached in either phase.
-Figure~\ref{fig:light2d} shows the illumination process.
+Figure~\ref{fig:light2d} illustrates the illumination process.
 
 For performance, it is important to ensure that we don't reilluminate the same parts of the domain many times.
-We avoid the reillumination by marking cells of \decomp{x} as obstacles some time after they have been found.
+We avoid the reillumination by treating cells of \decomp{x} as obstacles if they have been found on some previous illumination step.
 If rectangle $r$ is discovered on step $k$, then it is fully illuminated in \reach{k+1}, and each point visible from $r$ is illuminated in \reach{k+2}.
-After this there is no longer any need to illuminate through $r$, so we can treat $r$ as an obstacle after 2 steps have passed since the illumination first reached $k$.
+After this there is no longer any need to illuminate through $r$, so we can mark $r$ as an obstacle when 2 steps have passed since the illumination first reached $k$.
 This ensures that each rectangle is illuminated only a constant number of times.
 
 Next we show how to implement illumination in $y$-direction starting from \reach{k}, which is represented as a set of rectangles $R\in\subseteq\decomp{x}$.
-The illuminated area is computed with two line sweeps, in in direction $+y$ and the other in direction $-y$.
+The illuminated area is computed with two line sweeps, one in direction $+y$ and the other in direction $-y$.
 
 The sweep line stops at each rectangle to be illuminated.
 During the sweep we maintain the intersection between the sweep line and the newly illuminated region \reach{k+1}.
-The intersection consists of non-overlapping intervals stored in a binary search tree.
+The intersection consists of non-overlapping intervals, which we store in a binary search tree.
 
 Let \nbsd{r}{d} and \obsd{r}{d} be the neighbor cell and the adjacent obstacles of rectangle $r$ in direction $d$ in \decomp{x}.
 The algorithm below describes the illumination in direction $+y$.
@@ -1442,7 +1443,7 @@ The sweep in direction $-y$ is identical.
 \begin{alg}\label{alg:light2d}
 Compute illuminated rectangles from group $R$ into direction $+y$.
 \begin{algorithmic}
-\State $Q\gets\text{Priority queue containing the rectangles of $R$, ordered by the highest $y$-coordinate}$.
+\State $Q\gets\text{Priority queue containing the rectangles of $R$, ordered by the topmost $y$-coordinate}$.
 \State $T\gets\text{Empty binary search tree}$.
 \While{$Q$ is not empty}
 	\State $r\gets\pop{Q}$.
@@ -1466,17 +1467,17 @@ Compute illuminated rectangles from group $R$ into direction $+y$.
 \begin{lem}\label{lem:light2dtime}The running time of Algorithm~\ref{alg:light2d} is $O(m\log m)$ where $m$ is the number of visited rectangles and their neighbor links.\end{lem}
 \begin{proof}
 The outermost loop processes a different rectangle $r$ each time, so it is executed $O(m)$ times.
-For each obstacle adjacent to $r$ we cut of all the intersections with the obstacle from the binary search tree.
-At most two of the intersected intervals remain in the tree, the others are removed, so the cost of the clearing operation can be accounted to the point when the nodes where added to the tree.
-Thus the cost of processing an obstacle if $O(\log m)$ when the removing time is accounted to the insertions.
-For each rectangle adjacent to $r$ we perform a single binary tree operation and possibly a single operation to the binary queue, which can both be done in $O(\log m)$ time.
+For each obstacle adjacent to $r$, we cut of all the parts of ranges touching the obstacle from the binary search tree.
+The cutting takes $O(\log m + k)$ time, where $k$ is the number of removed ranges.
+For each rectangle adjacent to $r$, we perform a single binary tree operation and possibly a single insertion to the priority queue, which can both be done in $O(\log m)$ time.
 Thus the total time complexity is $O(m\log m)$.
 \end{proof}
 
 The link distance between \spt and \ept can be computed by iteratively performing the illumination sweeps in $+y$ and $-y$ directions until the endpoint is found.
+In the pseudocode below we mark the step when the illumination first reaches each rectangle $r$ as \stepof{r}.
 
 \begin{alg}\label{alg:minlink2d}
-Run staged illumination starting from \spt within \fspace such that the first link is horizontal.
+Run staged illumination starting from \spt within :ree space \fspace such that the first link is horizontal.
 \begin{algorithmic}
 \State Form \decomp{x} for \fspace with Algorithm~\ref{alg:split2d}.
 \State $R\gets\set{r\in\decomp{x} \mid \spt\in r}$
@@ -1505,14 +1506,15 @@ Run staged illumination starting from \spt within \fspace such that the first li
 Each cell is marked as an obstacle 2 steps after it has been found.
 On each iteration of the main loop we perform two sweeps, so each cell can be visited at most 4 times by the sweeps.
 The time complexity of a single sweep is $O(m\log m)$ by Lemma~\ref{lem:light2dtime}, where $m$ is the number of visited rectangles.
-Since each rectangle can be visited $O(1)$ times, the total time complexity of all the sweeps is $O(n\log n)$.
+Since each rectangle is visited $O(1)$ times, the total time complexity of all the sweeps is $O(n\log n)$.
 
-The decomposition is created in linear space, and the sweeps only use simple binary search tree and binary heap structures taking linear space, so the whole algorithm runs in $O(n)$ space.
+The decomposition is created in linear space by Lemma~\ref{lem:split2dtime}, and the sweeps only use simple binary search tree and binary heap structures taking linear space, so the whole algorithm runs in $O(n)$ space.
 \end{proof}
 
 The link distance between \spt and a target point \ept can be found by stopping the illumination process as soon as \ept becomes illuminated.
-\epts can become illuminated either during a vertical sweep, or the implicit horizontal sweep that happens when we assign $H_{+y}\cup H_{-y}$ into $H$.
-To construct the minimum link path between \spt and \ept, augment the algorithm such that we store into each rectangle how it was initially illuminated, and trace back the path when \ept gets illuminated.
+\epts can become illuminated either during a vertical sweep or the implicit horizontal sweep that happens when we assign $H_{+y}\cup H_{-y}$ into $H$.
+The path can then be constructed similar to regular shortest path computation in a graph~\cite{clrs}:
+augment the algorithm such that we store into each rectangle how it was initially illuminated, and trace back the path when \ept gets illuminated.
 
 
 
