@@ -1619,7 +1619,9 @@ Run staged illumination in 3D domain \fspace starting from point \spt.
 
 \subsection{Event generation}\label{sec:evtgen}
 
-We now discuss how the \addEs for the next round are generated when the sweep processes an \obsE.
+We need to provide \addEs and an initial set of \cellEs as input to each sweep operation.
+We create \cellEs for all the cells illuminated during the previous step.
+The \addEs for the next illumination step are generated during the processing of \obsEs.
 We explain again only the $+z$ sweep, the other directions being identical.
 The goal is to generate \addEs on the boundary of the space illuminated during illumination of \reach{k} such that the sweeps on the following step correctly generate \reach{k+1}.
 
