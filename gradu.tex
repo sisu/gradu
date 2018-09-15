@@ -62,7 +62,7 @@
 \newcommand\cleardt{\ensuremath{\textsc{ClearFromTree}}\xspace}
 \newcommand\clearst{\ensuremath{\textsc{ClearSubtree}}\xspace}
 \newcommand\pdst{\ensuremath{\textsc{PushDownSubtree}}\xspace}
-\newcommand\recomp{\ensuremath{\textsc{RecomputeSubtreeData}}\xspace}
+\newcommand\recomp{\ensuremath{\textsc{ComputeSubtreeData}}\xspace}
 
 \newcommand\nodecs[1]{\ensuremath{\textsc{ic}(#1)}\xspace}
 \newcommand\nodeps[1]{\ensuremath{\textsc{ip}(#1)}\xspace}
@@ -1217,7 +1217,36 @@ push down any intervals in the ancestors, clear the subtrees of the canonical no
 The three operations are performed by a recursive function \cleardt that traverses through the tree.
 The function uses two arguments to control the tree traversal: the current subtree root $s$, and the axis where we are moving $d$.
 In each canonical ancestor $s\in\canonpari{R_d}{d}$ we split the contents of the subtree along axis $d$ before proceeding, and recompute the descendant information after finishing clearing the subtree.
+Figure~\ref{fig:uremove} shows the steps of the clearing process.
 The full algorithm is described below.
+
+\begin{figure}\centering
+	\begin{subfigure}[t]{0.4\textwidth}\centering
+		\includegraphics[width=0.5\textwidth,page=1]{fig/uremove}
+		\caption{We first insert $A$ and then clear $B$.}\label{fig:urm:rects}
+	\end{subfigure}
+	\hfil
+	\begin{subfigure}[t]{0.4\textwidth}\centering
+		\includegraphics[width=\textwidth,page=3]{fig/uremove}
+		\caption{Canonical nodes of $A$ in dark grey and their ancestors in light grey in the unified segment tree.}\label{fig:urm:canon}
+	\end{subfigure}
+	\hfil
+	\begin{subfigure}[t]{0.4\textwidth}\centering
+		\includegraphics[width=\textwidth,page=4]{fig/uremove}
+		\caption{\pdst is performed in all the orange rectangles, shifting $A$ to dark grey rectangles. The black rectangle is cleared.}\label{fig:urm:push}
+	\end{subfigure}
+	\hfil
+	\begin{subfigure}[t]{0.4\textwidth}\centering
+		\includegraphics[width=\textwidth,page=5]{fig/uremove}
+		\caption{\recomp visits all the ancestors of the remaining nodes, marking information about the descendants into the light-grey nodes.}\label{fig:urm:recomp}
+	\end{subfigure}
+	\caption{
+	Example of clearing a rectangle in unified segment tree with Algorithm~\ref{alg:segurm}.
+	The rectangle $A$ (Fig.~\ref{fig:urm:rects}) is stored in a single canonical node and two ancestors (Fig.~\ref{fig:urm:canon}).
+	To clear rectangle $B$, we first push $A$ down into descendants from nodes touched by $B$ (Fig.~\ref{fig:urm:push}).
+	Finally we fill descendant information into ancestors of the remaining parts of $A$ (Fig.~\ref{fig:urm:recomp}).
+	}\label{fig:uremove}
+\end{figure}
 
 \begin{alg}\label{alg:segurm}
 Clear rectangle $R$ from $D$-dimensional unified segment tree.
@@ -1259,9 +1288,9 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 	\EndIf
 \EndProcedure
 
-\Procedure{RecomputeSubtreeData}{$d,s$}
+\Procedure{ComputeSubtreeData}{$d,s$}
 	\If{$d=0$}
-		\State $\textsc{RecomputeSubtreeDataForNode}(s)$.
+		\State $\textsc{ComputeSubtreeDataForNode}(s)$.
 		\State Return.
 	\ElsIf{$\rect{s}_d\cap R_d=\emptyset$}
 		\State Return.
@@ -1273,7 +1302,7 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 	\EndIf
 \EndProcedure
 
-\Procedure{RecomputeSubtreeDataForNode}{$s$}
+\Procedure{ComputeSubtreeDataForNode}{$s$}
 	\State $\hasbita{s}\gets\texttt{false}$.
 	\State $m\gets\maskof{R,s}$.
 	\ForAll{$a \in 1\dots D$}
