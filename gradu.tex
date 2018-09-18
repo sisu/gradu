@@ -24,6 +24,8 @@
 \theoremstyle{remark}
 \newtheorem*{note}{Remark}
 
+\newcommand\apxsrc{1}
+
 \newcommand\range[2]{\ensuremath{\left [ #1 , #2 \right )}\xspace}
 \newcommand\orange[2]{\ensuremath{\left ( #1 , #2 \right )}\xspace}
 \newcommand\crange[2]{\ensuremath{\left [ #1 , #2 \right ]}\xspace}
@@ -1968,7 +1970,7 @@ Finally, we showed that the algorithm can be generalized to work in any dimensio
 The new algorithms provide significant improvements over the previous best known results $O(n^{2.5}\log n)$~\cite{wagner} and $O(n^D\log n)$~\cite{de1992}.
 
 The key techniques for achieving the new results were the recursive space decomposition (Sec.~\ref{sec:decomposition}) and the multidimensional segment tree (Sec.~\ref{sec:segtree}).
-The algorithms are relatively simple, which is demonstrated by the implementation linked in Appendix~1.
+The algorithms are relatively simple, which is demonstrated by the implementation linked in Appendix~\apxsrc.
 
 A natural follow up question is whether the result could be improved further.
 The planar problem was shown to be as difficult as sorting the input~\cite{dasnar}, so the known algorithms are asymptotically optimal.
@@ -1992,7 +1994,7 @@ However the idea has not been explored further, so developing a faster multidime
 
 \pagestyle{empty}
 
-\internalappendix{1}{Source code location}\label{apx:src}
+\internalappendix{\apxsrc}{Source code location}\label{apx:src}
 
 An implementation of the high-dimensional rectilinear minimum link path algorithm presented in the thesis is available in the following URL: \\
 \url{https://github.com/sisu/gradu/tree/master/code}
