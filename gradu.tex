@@ -55,18 +55,20 @@
 \newcommand\canonpar[1]{\ensuremath{\textsc{a}_{\textsc{c}}(#1)}\xspace}
 \newcommand\canonpari[2]{\ensuremath{\textsc{a}_{\textsc{c},#2}(#1)}\xspace}
 \newcommand\epar[1]{\ensuremath{\textsc{p}(#1)}\xspace}
-\newcommand\findol{\ensuremath{\textsc{FindOverlapping}}\xspace}
-\newcommand\iterc{\ensuremath{\textsc{IterCanonical}}\xspace}
-\newcommand\visitp{\ensuremath{\textsc{VisitAncestor}}\xspace}
-\newcommand\visitc{\ensuremath{\textsc{VisitCanonical}}\xspace}
-\newcommand\adddt{\ensuremath{\textsc{InsertToTree}}\xspace}
-\newcommand\checkdt{\ensuremath{\textsc{QueryTree}}\xspace}
-\newcommand\cleariv{\ensuremath{\textsc{ClearInterval}}\xspace}
-\newcommand\maskof[1]{\ensuremath{\textsc{NodeMask}(#1)}\xspace}
-\newcommand\cleardt{\ensuremath{\textsc{ClearFromTree}}\xspace}
-\newcommand\clearst{\ensuremath{\textsc{ClearSubtree}}\xspace}
-\newcommand\pdst{\ensuremath{\textsc{PushDownSubtree}}\xspace}
-\newcommand\recomp{\ensuremath{\textsc{ComputeSubtreeData}}\xspace}
+\newcommand\findol{\ensuremath{\texttt{FindOverlapping}}\xspace}
+\newcommand\iterc{\ensuremath{\texttt{IterCanonical}}\xspace}
+\newcommand\visitp{\ensuremath{\texttt{VisitAncestor}}\xspace}
+\newcommand\visitc{\ensuremath{\texttt{VisitCanonical}}\xspace}
+\newcommand\adddt{\ensuremath{\texttt{InsertToTree}}\xspace}
+\newcommand\checkdt{\ensuremath{\texttt{QueryTree}}\xspace}
+\newcommand\cleariv{\ensuremath{\texttt{ClearInterval}}\xspace}
+\newcommand\maskoff{\ensuremath{\texttt{NodeMask}}\xspace}
+\newcommand\maskof[1]{\ensuremath{\texttt{NodeMask}(#1)}\xspace}
+\newcommand\cleardt{\ensuremath{\texttt{ClearFromTree}}\xspace}
+\newcommand\clearst{\ensuremath{\texttt{ClearSubtree}}\xspace}
+\newcommand\pdst{\ensuremath{\texttt{PushDownSubtree}}\xspace}
+\newcommand\recomp{\ensuremath{\texttt{ComputeSubtreeData}}\xspace}
+\newcommand\recompn{\ensuremath{\texttt{ComputeSubtreeDataForNode}}\xspace}
 
 \newcommand\nodecs[1]{\ensuremath{\textsc{ic}(#1)}\xspace}
 \newcommand\nodeps[1]{\ensuremath{\textsc{ip}(#1)}\xspace}
@@ -655,7 +657,7 @@ Each sweep finds the direction $D$ links by using the following recursive algori
 \begin{alg}\label{alg:overlapdd}
 Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ and $B$.
 \begin{algorithmic}
-\Procedure{FindOverlapping}{$D,A,B$}
+\Procedure{\findol}{$D,A,B$}
 	\If{$D=2$}
 		\State Return overlapping pairs computed with Algorithm~\ref{alg:overlap2d}.
 	\EndIf
@@ -813,7 +815,7 @@ We can iterate over the canonical nodes and their ancestors by using the followi
 \begin{alg}\label{alg:segiter}
 Visit all the elements of \canon{I} and \canonpar{I}.
 \begin{algorithmic}
-\Procedure{IterCanonical}{$s$}
+\Procedure{\iterc}{$s$}
 \Comment{Visit the canonical nodes in the subtree rooted at node $s$}
 	\If{$\inter{s}\subseteq I$}
 		\State $\visitc(s)$.
@@ -911,7 +913,7 @@ The exact algorithm for clearing is shown below.
 \begin{alg}\label{alg:segrm}
 Clear interval $I$ from a segment tree.
 \begin{algorithmic}
-\Procedure{ClearInterval}{$s$}
+\Procedure{\cleariv}{$s$}
 	\Comment Clears interval $I$ from subtree rooted at $s$.
 	\If{$\inter{s}\cap I=\emptyset$ or (\nodeps{s} and \nodecs{s} are empty)}
 		\State Return.
@@ -1053,7 +1055,7 @@ The nodes $s$ of the innermost tree have dimension 0, and they contain only a si
 \begin{alg}\label{alg:rectadd}
 Add rectangle $R$ to a $D$-dimensional segment tree.
 \begin{algorithmic}
-\Procedure{InsertToTree}{$D,s$}
+\Procedure{\adddt}{$D,s$}
 \Comment{Insert to the subtree rooted at node $s$}
 	\If{$D=0$}
 		\State $\hasrect{s}\gets\texttt{true}$.
@@ -1071,7 +1073,7 @@ Add rectangle $R$ to a $D$-dimensional segment tree.
 \begin{alg}\label{alg:rectcheck}
 Query whether rectangle $R$ intersects with any rectangle in the $D$-dimensional segment tree.
 \begin{algorithmic}
-\Procedure{QueryTree}{$D,s$}
+\Procedure{\checkdt}{$D,s$}
 \Comment{Check subtree rooted at node $s$}
 	\State $R\gets\texttt{false}$.
 	\If{$D=0$}
@@ -1146,7 +1148,7 @@ This bits are used to determine which bits of \hasbita{s} to access when adding 
 \begin{alg}\label{alg:maskof}
 Compute bitmask representing whether node $s$ is covered by rectangle $R$ in each direction.
 \begin{algorithmic}
-\Procedure{NodeMask}{$R,s$}
+\Procedure{\maskof}{$R,s$}
 	\State $m\gets 0$.
 	\ForAll{$d \in 1\dots D$}
 		\If{$\rect{s}_d\subseteq R_d$}
@@ -1163,7 +1165,7 @@ We can implement procedures \adddt and \checkdt by using the bitmasks returned b
 \begin{alg}\label{alg:uadd}
 Add rectangle $R$ to $D$-dimensional unified tree.
 \begin{algorithmic}
-\Procedure{InsertToTree}{$d,s$}
+\Procedure{\adddt}{$d,s$}
 \Comment{Insert to the subtree rooted at node $s$ by moving along axes $1\dots d$}
 	\If{$d=0$}
 		\State $m\gets\maskof{R,s}$.
@@ -1189,7 +1191,7 @@ For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
 \begin{alg}\label{alg:ucheck}
 Query whether rectangle $R$ intersects with any rectangle in the unified tree.
 \begin{algorithmic}
-\Procedure{QueryTree}{$d,s$}
+\Procedure{\checkdt}{$d,s$}
 \Comment{Check subtree rooted at node $s$}
 	\State $R\gets\texttt{false}$.
 	\If{$d=0$}
@@ -1255,7 +1257,7 @@ The full algorithm is described below.
 \begin{alg}\label{alg:segurm}
 Clear rectangle $R$ from $D$-dimensional unified segment tree.
 \begin{algorithmic}
-\Procedure{ClearFromTree}{$d,s$}
+\Procedure{\cleardt}{$d,s$}
 	\If{$\rect{s}_d\cap R_d=\emptyset$ or $\neg\hasbits{s}{0}$}
 		\State Return.
 	\EndIf
@@ -1276,7 +1278,7 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 	\EndIf
 \EndProcedure
 
-\Procedure{PushDownSubtree}{$d,s,a$}
+\Procedure{\pdst}{$d,s,a$}
 	\Comment Pushes down values in subtree $s$ along axis $a$.
 	\If{$d=0$}
 		\State $\hasbita{\leftu{s}{a}}\gets \hasbita{\leftu{s}{a}} | \hasbita{s}$.
@@ -1292,9 +1294,9 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 	\EndIf
 \EndProcedure
 
-\Procedure{ComputeSubtreeData}{$d,s$}
+\Procedure{\recomp}{$d,s$}
 	\If{$d=0$}
-		\State $\textsc{ComputeSubtreeDataForNode}(s)$.
+		\State $\recompn(s)$.
 		\State Return.
 	\ElsIf{$\rect{s}_d\cap R_d=\emptyset$}
 		\State Return.
@@ -1306,7 +1308,7 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 	\EndIf
 \EndProcedure
 
-\Procedure{ComputeSubtreeDataForNode}{$s$}
+\Procedure{\recompn}{$s$}
 	\State $\hasbita{s}\gets\texttt{false}$.
 	\State $m\gets\maskof{R,s}$.
 	\ForAll{$a \in 1\dots D$}
