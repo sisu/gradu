@@ -1539,7 +1539,7 @@ Run staged illumination starting from \spt within free space \fspace such that t
 \decomp{x} is formed in $O(n\log n)$ time by Lemma~\ref{lem:split2dtime}.
 \decomp{x} has $O(n)$ cells and links between cells.
 Each cell is marked as an obstacle 2 steps after it has been found.
-On each iteration of the main loop we perform two sweeps, so each cell can be visited at most 4 times by the sweeps.
+On each iteration of the main loop we perform two sweeps, so each cell can be visited at most four times by the sweeps.
 The time complexity of a single sweep is $O(m\log m)$ by Lemma~\ref{lem:light2dtime}, where $m$ is the number of visited rectangles.
 Since each rectangle is visited $O(1)$ times, the total time complexity of all the sweeps is $O(n\log n)$.
 
@@ -1983,7 +1983,7 @@ The planar minimum link path problem without orientation restriction was shown t
 
 One of the main bottlenecks of the $D$-dimensional minimum link path algorithm are operations on the unified segment tree.
 A potential way to speed up the algorithm would be to develop a faster data structure for hyperrectangle intersection testing.
-Fractional cascading is a technique that allows speeding up operations in some $D$-dimensional data structures from $O(\log^D n)$ to $O(\log^{D-1} n)$~\cite{fractional}.
+Fractional cascading is a technique that allows speeding up operations in some $D$-dimensional data structures from $O(\log^D n)$ to $O(\log^{D-1} n)$~\cite{ortho,fractional}.
 Wagner~\cite{unified} suggest that this technique might be applicable also for the unified segment tree.
 However the idea has not been explored further, so developing a faster multidimensional segment tree varient remains as a future challenge.
 
