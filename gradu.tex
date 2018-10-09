@@ -1548,7 +1548,7 @@ The decomposition is created in linear space by Lemma~\ref{lem:split2dtime}, and
 
 The link distance between \spt and a target point \ept can be found by stopping the illumination process as soon as \ept becomes illuminated.
 \epts can become illuminated either during a vertical sweep or the implicit horizontal sweep that happens when we assign $H_{+y}\cup H_{-y}$ into $H$.
-The path can then be constructed similar to regular shortest path computation in a graph~\cite{clrs}:
+The path can then be constructed similar to regular shortest path computation in a graph:
 augment the algorithm such that we store into each rectangle how it was initially illuminated, and trace back the path when \ept gets illuminated.
 
 
@@ -1965,7 +1965,7 @@ The decomposition and the unified segment tree both require $O(n^{D-1})$ memory,
 
 We studied the rectilinear minimum link path problem in two, three and higher dimensions.
 We presented new algorithms for the problem with lower asymptotical running times than the previous known solutions.
-The results are exciting since computing rectilinear minimum link paths is an old and well studied problem~\cite{wagner,restricted}.
+The results are interesting since computing rectilinear minimum link paths is an old and well studied problem~\cite{wagner,restricted}.
 
 We gave a simple algorithm for the planar rectilinear minimum link path problem with running time $O(n\log n)$~\cite{revisited}.
 The algorithm has the same asymptotic complexity as older results~\cite{dasnar,sato}, but it uses simpler data structures.
@@ -1983,7 +1983,8 @@ The planar minimum link path problem without orientation restriction was shown t
 
 One of the main bottlenecks of the $D$-dimensional minimum link path algorithm are operations on the unified segment tree.
 A potential way to speed up the algorithm would be to develop a faster data structure for hyperrectangle intersection testing.
-Wagner~\cite{unified} suggest that it might be possible to speed up the operations on the unified segment tree by a logarithmic factor through the use of fractional cascading.
+Fractional cascading is a technique that allows speeding up operations in some $D$-dimensional data structures from $O(\log^D n)$ to $O(\log^{D-1} n)$~\cite{fractional}.
+Wagner~\cite{unified} suggest that this technique might be applicable also for the unified segment tree.
 However the idea has not been explored further, so developing a faster multidimensional segment tree varient remains as a future challenge.
 
 
