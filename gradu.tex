@@ -56,6 +56,7 @@
 \newcommand\canonpari[2]{\ensuremath{\textsc{a}_{\textsc{c},#2}(#1)}\xspace}
 \newcommand\epar[1]{\ensuremath{\textsc{p}(#1)}\xspace}
 \newcommand\findol{\ensuremath{\textsc{FindOverlapping}}\xspace}
+\newcommand\iterc{\ensuremath{\textsc{IterCanonical}}\xspace}
 \newcommand\visitp{\ensuremath{\textsc{VisitAncestor}}\xspace}
 \newcommand\visitc{\ensuremath{\textsc{VisitCanonical}}\xspace}
 \newcommand\adddt{\ensuremath{\textsc{InsertToTree}}\xspace}
@@ -136,12 +137,11 @@ F.2.2 [Nonnumerical Algorithms and Problems]}}
 \additionalinformation{Thesis for the Algorithms, Data Analytics and Machine Learning subprogramme}
 
 \begin{abstract}
-The thesis subject are algorithms for the minimum link path problem.
-The minimum link path problem is a well known geometric path finding problem.
+The thesis discusses algorithms for the minimum link path problem, which is a well known geometric path finding problem.
 The goal is to find a path that does the minimum number of turns amidst obstacles in a plane.
 We focus on the rectilinear variant of the problem, where the path and the obstacles are restricted to the directions of the coordinate axes.
 
-We study the rectilinear minimum link path problem in plane and in three-dimensional space, as well as in higher dimensional domains.
+We study the rectilinear minimum link path problem in the plane and in three-dimensional space, as well as in higher dimensional domains.
 We develop new algorithms for the 3D and the high-dimensional case that achieve better asymptotic running times than the previous known methods.
 We present an algorithm for the 3D rectilinear path problem with running time $O(n^2\log^2 n)$ and space complexity $O(n^2)$ in a domain with $n$ obstacle vertices.
 We show that the solution can be generalized to higher dimensions, leading to an algorithm for the $D$-dimensional minimum link path problem with $O(n^{D-1}\log^{D-1} n)$ running time and $O(n^{D-1})$ space complexity.
@@ -152,7 +152,7 @@ We show that the solution can be generalized to higher dimensions, leading to an
 
 \section{Introduction}
 
-Various kinds of path finding problems are an extremely common topic in algorithmics~\cite{survey}.
+Various kinds of path finding problems are a very common topic in algorithmics~\cite{survey}.
 The regular shortest path problem asks for the shortest path between two nodes in a graph.
 The geometric version of the problem asks for the shortest path in a continuous space, such as a plane with polygonal obstacles.
 The typical goal is to minimize the Euclidean length of the path, but for some applications other distance metrics are also relevant.
@@ -199,14 +199,14 @@ The following results have been published in peer-reviewed journals and conferen
 \begin{itemize}
 \item A simplified $O(n\log n)$ algorithm for the 2-dimensional case~\cite{revisited}.
 The article was written with the co-authors Valentin Polishchuk and Joseph S. B. Mitchell.
-The main algorithmic ideas of the algorithm were invented by the author, though many details of it were worked out with Polishchuk.
+The main ideas of the algorithm were invented by the author, though many details of it were worked out with Polishchuk.
 The contribution of Mitchell was mainly for other results not discussed in this thesis, such as the approximation algorithm for the non-rectilinear minimum link path problem.
 \item A new algorithm for the 3D minimum link path problem, improving the running time from the previous best result of $O(n^{2.5}\log n)$ to $O(n^2\log^2 n)$~\cite{restricted}.
 The publication was written with the co-author Valentin Polishchuk.
-The main algorithmic ideas were invented by the author, but many details and proofs of the running time were worked out together with Polishchuk.
+The main ideas were invented by the author, but many details and proofs of the running time were worked out together with Polishchuk.
 \end{itemize}
 
-The following items are new original contributions in this thesis.
+The following items are new contributions in this thesis.
 
 \begin{itemize}
 \item An algorithm for the minimum link path problem in higher dimensions.
@@ -221,7 +221,7 @@ The following items are new original contributions in this thesis.
 \subsection{Overview of the algorithms}\label{sec:overview}
 
 Majority of the known algorithms for the minimum link path problem use the same basic idea~\cite[Sections 26.4, 27.3]{handbook}:
-The tasks is to find a minimum link path from point \spt to point \ept within free space~\fspace.
+The task is to find a minimum link path from point \spt to point \ept within free space~\fspace.
 The free space is the area not blocked by any obstacles.
 Let \reach{k} be the set of points reachable by at most $k$ links from \spt.
 We start by defining $\reach{0}=\set{\spt}$, and iteratively compute \reach{k+1} from \reach{k}.
@@ -254,7 +254,7 @@ As the sweep line progresses, we gradually update the solution to take into acco
 The sweep line method allows us to transform the 2-dimensional illumination problem into a series of easier 1-dimensional problems on the sweep line.
 
 During the sweeps we need to maintain the relationship between the sweep line and the obstacles as well as the region \reach{k}.
-We want to maintain the intersection of the sweep line with the illuminated area, which requires efficient handling of number intervals.
+We want to maintain the intersection of the sweep line with the illuminated area, which requires efficient handling of intervals of real numbers.
 \emph{Segment tree} is a generic data structure for working with intervals.
 It is flexible enough to allow implementing all the operations required by the staged illumination.
 Segment trees are described in Section~\ref{sec:segtree}.
@@ -283,18 +283,18 @@ This allows us to decompose the free space into axis-aligned rectangles, which i
 For each cell of the decomposition we also construct links to neighboring cells and obstacles.
 In other words, the decomposition can be seen as a graph with rectangles as vertices and an edge between each pair of adjacent rectangles.
 Let $n$ be the total number of vertices in all the obstacles.
-The space can decomposed into $O(n)$ cells such the total number of links between cells is $O(n)$.
+We will present a method that decomposes the space into $O(n)$ cells such the total number of links between cells is $O(n)$.
 
 A similar structure can also be used for computing minimum link paths in 3-dimensional domains.
 In the 3D rectilinear case each obstacle face is an axis-aligned rectangle in 3D space.
 The free space of a 3D domain can be decomposed into a graph with $O(n^2)$ cuboid as vertices and $O(n^2)$ edges.
-This decomposition algorithm can also be extended to higher dimensions: a $D$-dimensional domain can be split into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1}$ links between them.
+This decomposition algorithm can also be extended to higher dimensions: a $D$-dimensional domain can be split into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1})$ links between them.
 
 \subsection{Planar decomposition}\label{sec:decomp2d}
 
 A rectilinear domain can be decomposed into rectangles by extending each horizontal obstacle edge in both directions until the sides hit a vertical obstacle edge~\cite{imai86}.
 This defines the \emph{horizontal decomposition} of the domain, denoted \decomp{x}.
-The vertical decomposition \decomp{y} is defined correspondingly by extending all the vertical edges until they hit a horizontal obstacle.
+The \emph{vertical decomposition} \decomp{y} is defined correspondingly by extending all the vertical edges until they hit a horizontal obstacle.
 Figure~\ref{fig:decomp} shows an example of the two two decompositions.
 We focus on \decomp{x} below, as \decomp{y} has all the same properties with coordinate axes swapped.
 
@@ -312,15 +312,16 @@ Each pair of touching rectangles also shares a common obstacle corner, so the nu
 \decomp{x} can be constructed by a line sweep algorithm~\cite{dasnar}.
 We sweep over the domain by a horizontal line moving from $y$ coordinate $-\infty$ (down) to $\infty$ (up).
 During the sweep we maintain the intersection of the free space \fspace and the sweep line.
-The intersection consists of non-overlapping intervals, which we store in a binary search tree.
-Each element added to the binary tree is a rectangle $a$ defined by intervals \xrange{a} and \yrange{a}.
+The intersection consists of non-overlapping intervals, which are used as $x$-ranges of the constructed rectangles.
+The rectangles touching the sweep line are stored in a binary tree during the sweep.
+Each rectangle $a$ in the binary tree is defined by intervals \xrange{a} and \yrange{a}.
 We refer to lower and upper bound of each range $r$ by $r_{start}$ and $r_{end}$.
 \yranget{a}{end} is initially undefined when a rectangle $a$ is added to the tree, because we don't know how tall the rectangle will be until $a$ is removed from the tree.
 
 The sweep stops at each horizontal obstacle edge.
-When moving from down to up, each edge starts either starts or ends an obstacle.
-If the edge starts an obstacle, the $x$-range of the edge is fully contained in one of the intervals in the search tree.
-If the edge ends an obstacle, the $x$-range does not intersect any intervals in the tree, but the left and right endpoints may touch some intervals.
+Each edge is either the bottom or the top of an obstacle.
+If the edge is the bottom of an obstacle, the $x$-range of the edge is fully contained in one of the intervals in the search tree.
+If the edge is the top of an obstacle, the $x$-range does not intersect any intervals in the tree, but the left and right endpoints may touch some intervals.
 In both cases the rectangles touching the encountered edge are removed from the search tree, and $O(1)$ new rectangles are inserted to maintain the sweep line state.
 A more exact description of the algorithm follows below.
 
@@ -341,7 +342,6 @@ Decompose the free space defined by a set $E$ of obstacle edges into \decomp{x}.
 			\State Insert $a$ into $T$.
 		\EndFor
 	\Else\Comment $e$ starts free space.
-		\State $a\gets$ New rectangle.
 		\State $a\gets$ New rectangle with $x$-range $\xrange{e}$ and starting $y$-coordinate $\y{e}$.
 		\ForAll{$v\in$ lookup $T$ for intervals touching \xrange{e}}
 			\State Remove $v$ from $T$.
@@ -372,7 +372,7 @@ As a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be
 Decomposition into cuboids is used in the algorithm for 3D minimum link paths in Section~\ref{sec:minlink3d}.
 The running time of the path finding algorithm depends on the size of the decomposition, so it is desirable to find as small decomposition as possible.
 
-We present a simple decomposition algorithm that uses the Algorithm~\ref{alg:split2d} as a subroutine~\cite{restricted}.
+We present a simple decomposition algorithm that uses Algorithm~\ref{alg:split2d} as a subroutine~\cite{restricted}.
 The algorithm produces a decomposition with $O(n^2)$ cells and $O(n^2)$ links, where $n$ is the number of obstacle rectangles.
 Earlier work on minimum link path has used binary space partitioning to reduce the number of cells to $O(n^{1.5})$~\cite{wagner,bsp}.
 However the number of links in a binary space partitioning based decomposition can be as high as $O(n^{2.5})$, so we opt for a higher number of cells to reduce the number of links.
@@ -404,8 +404,8 @@ Figure~\ref{fig:split3d} shows how the 3D decomposition is created using a serie
 	\caption{3D domain is decomposed into cuboids by taking the horizontal decomposition of each cross section. The highlighted cell is shared between the two cross sections, so the cuboids on the two levels are merged.}\label{fig:split3d}
 \end{figure}
 
-The description below only calculates the cells but not the links between them.
-We discuss the computation of links below.
+The algorithm below only calculates the cells but not the links between them.
+We discuss the computation of links after the algorithm description.
 
 \begin{alg}\label{alg:split3d}
 Decompose the free space defined by a set $E$ of obstacle faces into cuboids.
@@ -503,9 +503,9 @@ During the sweep we maintain two binary search tree $T_A$ and $T_B$, containing 
 The binary search tree is ordered by the $x$-coordinate of the rectangle.
 Note that the rectangles in each of the sets $A$ and $B$ are disjoint, so the $x$-ranges are disjoint as well.
 
-Each time the sweep line arrives into a new rectangle $a\in A$, the tree $T_B$ is queries to find all the rectangles touched by the bottom line of $a$.
+Each time the sweep line arrives into a new rectangle $a\in A$, the tree $T_B$ is queried to find all the rectangles touched by the bottom line of $a$.
 Similarly for each new rectangle $b\in B$, we query the tree $T_A$ for rectangles touching the bottom line of $b$.
-A more exact description of the algorithm is below.
+A more detailed description of the algorithm is below.
 
 \begin{alg}\label{alg:overlap2d}
 Find all overlapping pairs of two sets of rectangles $A$ and $B$.
@@ -530,7 +530,7 @@ Find all overlapping pairs of two sets of rectangles $A$ and $B$.
 \begin{lem}\label{lem:overlap2dtime}Algorithm~\ref{alg:overlap2d} runs in $O(n\log n + k)$ time, where $n$ is the total size of $A$ and $B$, and $k$ is the number of overlapping pairs.\end{lem}
 \begin{proof}
 First we sort all the top and bottom edges in the input in $O(n\log n)$ time.
-We then iterate over all the edges, performing 3 kinds of tree operations: add, remove and lookup.
+We then iterate over all the edges, performing three kinds of tree operations: add, remove and lookup.
 
 Each add and lookup operation takes $O(\log n)$ time in a balanced binary search tree.
 The lookup of elements intersecting the given element is done by first finding the leftmost intersecting element in the tree, and then scanning adjacent tree nodes until all the intersecting elements have been found.
@@ -557,7 +557,7 @@ Algorithm~\ref{alg:split3d} and Algorithm~\ref{alg:overlap2d} both only require 
 
 The ideas of the 3D decomposition can be generalized to allow decomposing 4D and higher dimensional rectilinear domains into hyperrectangles.
 The construction is done recursively so that the $D$-dimensional decomposition is created by solving a sequence of $(D-1)$-dimensional sub-problems.
-The method is similar to how Algorthm~\ref{alg:split3d} forms the 3D decomposition from a series of 2D decompositions.
+The method is similar to how Algorithm~\ref{alg:split3d} forms the 3D decomposition from a series of 2D decompositions.
 
 \begin{alg}\label{alg:splitdd}
 Decompose the free space defined by a set $E$ of $(D-1)$-dimensional obstacle faces into $D$-dimensional hyperrectangles.
@@ -638,8 +638,8 @@ Consider separately the links in direction $D$ and in the other directions.
 For both cases, we count the number of links using induction on $D$.
 For the base case of the induction, the number of links in case $D=2$ is $O(n)$, as shown in Section~\ref{sec:decomp2d}.
 
-The links in directions other than $Z$ can be obtained from the $(D-1)$-dimensional decompositions produced during the sweep.
-By induction, the number of links in each $(D-1)$-decomposition is $O(n^{D-2})$, so the total number of links in directions other than $Z$ is $O(n^{D-1})$.
+The links in directions other than $D$ can be obtained from the $(D-1)$-dimensional decompositions produced during the sweep.
+By induction, the number of links in each $(D-1)$-decomposition is $O(n^{D-2})$, so the total number of links in directions other than $D$ is $O(n^{D-1})$.
 
 To count the number of links in direction $D$, observe how the cross section changes as the sweep hyperplane advances through the domain.
 If two adjacent cross sections differ by $u$ obstacles, the number of links between the cross sections is $O(n^{D-2}u)$ by Lemma~\ref{lem:decompddch}.
@@ -695,9 +695,9 @@ Proof by induction on $D$.
 If $D=2$, we use Algorithm~\ref{alg:overlap2d}, which was shown to work correctly in Section~\ref{sec:split3d}.
 
 For $D\ge 3$ the algorithm iterates over the $D$-coordinates where at least one of $A$ or $B$ changes.
-By induction we know that the 3 recursive calls inside the iteration each report the intersections of the provided inputs exactly once.
+By induction we know that the three recursive calls inside the iteration each report the intersections of the provided inputs exactly once.
 On each iteration we create sets $S_A$ and $S_B$, which are the newly introduced hyperrectangles at this coordinate.
-Since $S_A$ and $S_B$ contain only new rectangles, none of the 3 recursive calls may find any pairs that were previously added.
+Since $S_A$ and $S_B$ contain only new rectangles, none of the three recursive calls may find any pairs that were previously added.
 Thus the algorithm finds each intersecting pair at most once.
 
 At the point of making the recursive calls, the sets $P_A$ and $P_B$ contain all the rectangles whose $D$-ranges strictly contain the current $D$-coordinate.
@@ -724,7 +724,7 @@ Thus the sweep hyperplane of Algorithm~\ref{alg:overlapdd} intersects a $(D-1)$-
 By Lemma~\ref{lem:splitddcells} this implies that the index sets maintained during the sweep have size $O(n^{D-2})$.
 Performing the set operations on the $n$ steps of the sweep then has total time complexity $O(n^{D-1}\log n)$.
 
-The time taken by each of the 3 recursive calls on each cross section is $O(n^{D-2}\log n + u)$ by induction, where $u$ is the number of overlapping pairs returned from the subproblem.
+The time taken by each of the three recursive calls on each cross section is $O(n^{D-2}\log n + u)$ by induction, where $u$ is the number of overlapping pairs returned from the subproblem.
 By Lemma~\ref{lem:overlapddok} each intersection is found exactly once, so the total complexity of the recursive calls during the sweep is $O(n^{D-1}\log n + k)$.
 \end{proof}
 
@@ -745,8 +745,8 @@ Algorithm~\ref{alg:splitdd} and Algorithm~\ref{alg:overlapdd} both require $O(n^
 \section{Segment tree}\label{sec:segtree}
 
 Segment tree is a classical data structure that allows storing and querying intervals~\cite{wagner,berg2008}.
-The structure allows performing many operations such as looking up overlapping intervals in logarithmic time.
-The segment tree is a simple and flexible structure that can be adapted to solve various problems.
+The structure allows performing many operations efficiently.
+For example we can use the segment tree to find all the intervals containing a given number in time $O(\log n)$ from a collection of $n$ intervals.
 We first present the general idea of the tree, and then show how it can be applied to the minimum link path problem.
 
 Segment trees are typically implemented as semi-dynamic data structures.
@@ -755,7 +755,8 @@ This allows implementing most operations in $O(\log\segsize)$ time, and the size
 
 \subsection{Structure of the segment tree}
 
-A segment tree is a binary tree where each node $s$ corresponds to a fixed half-open interval $\inter{s}$~\cite{berg2008}.
+A segment tree is a binary tree where each node $s$ corresponds to a fixed interval $\inter{s}$~\cite{berg2008}.
+In the version presented here we assume \inter{s} to be a half-open interval.
 Each branch node $s$ has two child nodes, \leftc{s} and \rightc{s}.
 The intervals of the children divide the parent interval into two parts:
 $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
@@ -792,17 +793,17 @@ The following two lemmas are useful for proving the running times of segment tre
 \begin{lem}\label{lem:canonlog}$\size{\canon{I}}=O(\log\segsize)$ for any interval $I$.\end{lem}
 \begin{proof}
 As the segment tree is a balanced binary tree, it has depth $\Theta(\log\segsize)$.
-We show that $\canon{I}$ contains at most 2 nodes on each depth, which proves the claim.
+We show that $\canon{I}$ contains at most two nodes on each depth, which proves the claim.
 
-If a set $S$ contains 3 nodes on the same depth, we can replace the middle one with its parent node without affecting the interval covered by $S$.
+If a set $S$ contains three nodes on the same depth, we can replace the middle one with its parent node without affecting the interval covered by $S$.
 Thus $S$ is not a minimal cover of $I$, and can not be \canon{I}.
 \end{proof}
 
 \begin{lem}\label{lem:canonplog}$\size{\canonpar{I}})=O(\log\segsize)$ for any interval $I$.\end{lem}
 \begin{proof}
-Similarly to the previous proof we show that \canonpar{I} cannot contain more than 2 nodes on the same depth.
+Similarly to the previous proof we show that \canonpar{I} cannot contain more than two nodes on the same depth.
 
-Suppose, for a contradiction, that \canonpar{I} contains 3 nodes on the same depth: $a$, $b$ and $c$ in that order.
+Suppose, for a contradiction, that \canonpar{I} contains three nodes on the same depth: $a$, $b$ and $c$ in that order.
 Then $\inter{a}\cap I\neq\emptyset$ and $\inter{c}\cap I\neq\emptyset$, so $\inter{b}\subseteq I$.
 Some descendant of $b$ belongs to \canon{I}, so \canon{I} is not a minimal cover, which is a contradiction.
 \end{proof}
@@ -818,8 +819,8 @@ Visit all the elements of \canon{I} and \canonpar{I}.
 		\State $\visitc(s)$.
 	\ElsIf{$\inter{s}\cap I\neq\emptyset$}
 		\State $\visitp(s)$.
-		\State $\textsc{IterCanonical}(\leftc{s})$.
-		\State $\textsc{IterCanonical}(\rightc{s})$.
+		\State $\iterc(\leftc{s})$.
+		\State $\iterc(\rightc{s})$.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
@@ -869,9 +870,9 @@ Let $x$ be any leaf node of the segment tree such that $\inter{x}\in I\cap J$.
 Let $A$ be the set of ancestors of $x$.
 Since the canonical nodes of an interval cover the whole interval, $A$ intersects both \canon{I} and \canon{J}.
 Let $i$ and $j$ be the nodes where $A$ intersects \canon{I} and \canon{J} respectively.
-Either $i$ and $j$ are the same node, or one of them is an ancestor of the other, which proves the "if" part of the claim.
+Either $i$ and $j$ are the same node, or one of them is an ancestor of the other, which proves the ``if'' part of the claim.
 
-For the "only if" part, we look at the three cases separately.
+For the ``only if'' part, we look at the three cases separately.
 \begin{enumerate}
 \item If there exists a node $s\in\canon{I}\cap\canon{J}$, then $\inter{s}\subseteq I\cap J$, so $I\cap J\neq\emptyset$.
 \item If there is a node $s\in\canon{I}\cap\canonpar{J}$, then there exists $m\in\canon{J}$ that is a descendant of $s$. $\inter{m}\subseteq J$ and $\inter{m}\subsetneq\inter{s}\subseteq I$, so $I\cap J\neq\emptyset$.
@@ -888,11 +889,11 @@ In each node $s$ of the segment tree, maintain two lists of intervals:
 When an interval $I$ is added to the segment tree, it is added to \nodecs{s} for all $s\in\canon{I}$ and to \nodeps{s} for all $s\in\canonpar{I}$.
 When we look for intervals intersecting a given interval $J$, we report all the intervals in \nodecs{s} for all $s\in\canonpar{J}$ and in \nodeps{s} for all $s\in\canon{J}$.
 By Lemma~\ref{lem:segintersect} this finds exactly the intervals intersecting $J$ and nothing else.
-Note, though, that some intervals might be counted multiple times.
+Note that some intervals might be found multiple times as they are split into $O(\log n)$ canonical nodes in the tree.
 The structure can be further extended to avoid reporting the duplicates, but for the minimum link paths use case we only need to check whether the intersecting set is empty, so this solution is sufficient.
 
 We also want to support clearing an interval from the tree.
-Clearing an interval $I$ means that all the intervals $J$ in the tree are cut into $J\setminus I$, potentially removing $J$ or cutting it into two parts.
+Clearing an interval $I$ means that each interval $J$ in the tree is replaced by $J\setminus I$, potentially removing $J$ or cutting it into two parts.
 The clear operation is performed in the following three steps:
 \begin{enumerate}
 \item Push down the intervals stored in each $s\in\canonpar{I}$ into \leftc{s} and \rightc{s}.
@@ -988,7 +989,7 @@ Similarly for $D$-dimensional trees we define product $c_1\times c_2\times\dots\
 The following lemma shows how the canonical nodes of 1-dimensional projections can be combined to get the canonical nodes of a $D$-dimensional tree.
 
 \begin{lem}\label{lem:canond}
-For any $D$-dimensional rectangle $R$ applies
+For any $D$-dimensional rectangle $R$
 $$\canon{R}=\set{c_1\times c_2\dots\times c_D \mid c_1\in\canoni{R_1}{1}, \dots, c_D\in\canoni{R_D}{D}}.$$
 In other words, \canon{R} is the Cartesian product of one-dimensional canonical sets
 $$\canon{R}=\bigtimes_{i=1}^D \canoni{R_i}{i}.$$
@@ -1344,9 +1345,9 @@ The size of \canonpari{R_d}{d} is $O(\log\segsize)$, so by induction the total t
 
 
 
-\section{Minimum link paths in plane}\label{sec:minlink2d}
+\section{Minimum link paths in the plane}\label{sec:minlink2d}
 
-In this section we study the rectilinear minimum link path problem in plane.
+In this section we study the rectilinear minimum link path problem in the plane.
 We present a simple algorithm with time complexity $O(n\log n)$ and space complexity $O(n)$~\cite{revisited}.
 The ideas developed for the planar case are later generalized to solve the more difficult 3D and higher dimensional minimum link path problems in Section~\ref{sec:minlink3d}.
 
@@ -1509,7 +1510,7 @@ The link distance between \spt and \ept can be computed by iteratively performin
 In the pseudocode below we mark the step when the illumination first reaches each rectangle $r$ as \stepof{r}.
 
 \begin{alg}\label{alg:minlink2d}
-Run staged illumination starting from \spt within :ree space \fspace such that the first link is horizontal.
+Run staged illumination starting from \spt within free space \fspace such that the first link is horizontal.
 \begin{algorithmic}
 \State Form \decomp{x} for \fspace with Algorithm~\ref{alg:split2d}.
 \State $R\gets\set{r\in\decomp{x} \mid \spt\in r}$
@@ -1775,7 +1776,7 @@ By Lemma~\ref{lem:obse3} and Lemma~\ref{lem:celle3} such sweeps occur only on $O
 On a single sweep, the number of events created on $P$ is bounded by the number of canonical rectangles that have $P$ as one of their sides.
 There are $O(n)$ such rectangles, so the number of events is $O(n)$.
 
-The following observation allows us to bound the number of type 3 events:
+The following observation allows us to bound the number of type~3 events:
 After the illumination has reached obstacle $o$, the illumination on $P$ proceeds exactly like the 2D staged illumination in the cross section of $P$.
 The 2D illumination illuminates maximal rectangles of \decomp{x} and \decomp{y}, producing a total of $O(n)$ illuminated rectangles.
 There is some overhead because of reilluminating the same parts multiple times, but by Lemma~\ref{lem:celle3} each part of the domain can be illuminated only $O(1)$ times.
@@ -1922,7 +1923,7 @@ We classify the events remaining after filtering similarly to the 3D case:
 Similar to the 3D case, a single sweep can only produce as many events on $P$ as the number of canonical hyperrectangles bounded by $P$, which in the $(D-1)$-dimensional unified tree is $O(n^{D-2})$.
 By Lemma~\ref{lem:obsed} and Lemma~\ref{lem:celled} the illumination can only touch $o$ on $O(1)$ steps, so the number of type 1 and 2 events on $P$ is $O(n^{D-2})$.
 
-We use induction on $D$ to prove the number of type 3 events.
+We use induction on $D$ to prove the number of type~3 events.
 The base case $D=2$ is proven by Lemma~\ref{lem:adde3}.
 
 For $D\ge 3$ notice that again the illumination on the boundary of $P$ advances exactly like the $(D-1)$-dimensional illumination in the cross section of $P$.
