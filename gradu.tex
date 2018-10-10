@@ -223,9 +223,9 @@ The following items are new contributions in this thesis.
 \subsection{Overview of the algorithms}\label{sec:overview}
 
 Majority of the known algorithms for the minimum link path problem use the same basic idea~\cite[Sections 26.4, 27.3]{handbook}:
-The task is to find a minimum link path from point \spt to point \ept within free space~\fspace.
-The free space is the area not blocked by any obstacles.
-Let \reach{k} be the set of points reachable by at most $k$ links from \spt.
+Let \fspace be the region not blocked by obstacles, and let $\spt\in\fspace$ and $\ept\in\fspace$ be the starting and the ending point of the path.
+The region \fspace is also called the \emph{free space}.
+Let $\reach{k}\subseteq\fspace$ be the set of points reachable by at most $k$ links from \spt.
 We start by defining $\reach{0}=\set{\spt}$, and iteratively compute \reach{k+1} from \reach{k}.
 The iteration continues until we find $k$ such that $\ept\in\reach{k}$.
 This iteration is often called \emph{staged illumination}, because the computation of \reach{k+1} can be illustrated as placing light sources on the boundaries of \reach{k}.
