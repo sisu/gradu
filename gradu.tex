@@ -962,7 +962,7 @@ Each node $s$ of the innermost segment tree represents a $D$-dimensional hyperre
 For example the outer tree of a 2-dimensional segment tree represents the $y$ coordinates, and each inner tree represents the $x$ coordinates.
 Each node of the inner tree represents a rectangle whose $x$-bounds are determined by the position of the node in the inner tree, and the $y$-bounds are determined by the node of the outer tree that contains the inner tree.
 
-The concept of canonical nodes can also be extended to higher dimensions~\cite{segbool}.
+The concept of canonical nodes can also be extended to higher dimensions.
 The canonical nodes \canon{R} of a $D$-dimensional rectangle $R$ are the smallest set of nodes that fully cover $R$ but nothing else.
 Figure~\ref{fig:canon2d} illustrates the structure of a 2D segment tree and the canonical nodes.
 
