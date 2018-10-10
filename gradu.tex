@@ -171,7 +171,7 @@ Figure~\ref{fig:paths} shows an example of two kinds of minimum link paths as we
 	\caption{There are many variants of the geometric path finding problem, producing different kinds of paths.}\label{fig:paths}
 \end{figure}
 
-Finding minimum link paths is a well studied algorithmic problem\cite{restricted,wagner,dasnar,de1991,de1992,fitch,handbook}.
+Finding minimum link paths is a well studied algorithmic problem\cite{dasnar,de1991,de1992,fitch,handbook,restricted,wagner}.
 The basic idea employed by most known algorithms is a simple extension of the breadth-first search:
 First find all the points that have link distance~1 from the starting point, then points with link distance~2, and similarly iterate until the desired endpoint is encountered.
 As the search happens in continuous space, the tricky part of the algorithms is defining the appropriate data structures to store and update the discovered area.
@@ -272,7 +272,7 @@ These elements are combined into an algorithm for finding minimum link paths in 
 
 \section{Space decomposition}\label{sec:decomposition}
 
-The first step of many minimum link path algorithms is decomposing the free space into simple primitives~\cite{imai86,dasnar,revisited}.
+The first step of many minimum link path algorithms is decomposing the free space into simple primitives~\cite{dasnar,imai86,revisited}.
 The decomposition has two purposes during the staged illumination:
 to track the illuminated area and to guide the sweep line algorithms that illuminate new areas.
 
@@ -370,13 +370,13 @@ Thus the total complexity of the algorithm is $O(n\log n)$ and we only need $O(n
 
 \subsection{3D cuboid decomposition}\label{sec:split3d}
 
-As a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids~\cite{wagner,restricted}.
+As a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids~\cite{restricted,wagner}.
 Decomposition into cuboids is used in the algorithm for 3D minimum link paths in Section~\ref{sec:minlink3d}.
 The running time of the path finding algorithm depends on the size of the decomposition, so it is desirable to find as small decomposition as possible.
 
 We present a simple decomposition algorithm that uses Algorithm~\ref{alg:split2d} as a subroutine~\cite{restricted}.
 The algorithm produces a decomposition with $O(n^2)$ cells and $O(n^2)$ links, where $n$ is the number of obstacle rectangles.
-Earlier work on minimum link path has used binary space partitioning to reduce the number of cells to $O(n^{1.5})$~\cite{wagner,bsp}.
+Earlier work on minimum link path has used binary space partitioning to reduce the number of cells to $O(n^{1.5})$~\cite{bsp,wagner}.
 However the number of links in a binary space partitioning based decomposition can be as high as $O(n^{2.5})$, so we opt for a higher number of cells to reduce the number of links.
 
 The decomposition is created by a sweep plane algorithm, which sweeps through the domain with a plane perpendicular to $z$-axis.
@@ -746,7 +746,7 @@ Algorithm~\ref{alg:splitdd} and Algorithm~\ref{alg:overlapdd} both require $O(n^
 
 \section{Segment tree}\label{sec:segtree}
 
-Segment tree is a classical data structure that allows storing and querying intervals~\cite{wagner,berg2008}.
+Segment tree is a classical data structure that allows storing and querying intervals~\cite{berg2008,wagner}.
 The structure allows performing many operations efficiently.
 For example we can use the segment tree to find all the intervals containing a given number in time $O(\log n)$ from a collection of $n$ intervals.
 We first present the general idea of the tree, and then show how it can be applied to the minimum link path problem.
@@ -1965,7 +1965,7 @@ The decomposition and the unified segment tree both require $O(n^{D-1})$ memory,
 
 We studied the rectilinear minimum link path problem in two, three and higher dimensions.
 We presented new algorithms for the problem with lower asymptotical running times than the previous known solutions.
-The results are interesting since computing rectilinear minimum link paths is an old and well studied problem~\cite{wagner,restricted}.
+The results are interesting since computing rectilinear minimum link paths is an old and well studied problem~\cite{restricted,wagner}.
 
 We gave a simple algorithm for the planar rectilinear minimum link path problem with running time $O(n\log n)$~\cite{revisited}.
 The algorithm has the same asymptotic complexity as older results~\cite{dasnar,sato}, but it uses simpler data structures.
@@ -1983,7 +1983,7 @@ The planar minimum link path problem without orientation restriction was shown t
 
 One of the main bottlenecks of the $D$-dimensional minimum link path algorithm are operations on the unified segment tree.
 A potential way to speed up the algorithm would be to develop a faster data structure for hyperrectangle intersection testing.
-Fractional cascading is a technique that allows speeding up operations in some $D$-dimensional data structures from $O(\log^D n)$ to $O(\log^{D-1} n)$~\cite{ortho,fractional}.
+Fractional cascading is a technique that allows speeding up operations in some $D$-dimensional data structures from $O(\log^D n)$ to $O(\log^{D-1} n)$~\cite{fractional,ortho}.
 Wagner~\cite{unified} suggest that this technique might be applicable also for the unified segment tree.
 However the idea has not been explored further, so developing a faster multidimensional segment tree varient remains as a future challenge.
 
