@@ -1125,6 +1125,11 @@ Thus each node has between 0 and $2D$ links to child nodes.
 The children splitting the node $s$ along axis $i$ are denoted by \leftu{s}{i} and \rightu{s}{i}.
 Figure~\ref{fig:unified} illustrates the structure of the unified segment tree in 2-dimensional case.
 
+For our purposes, the main advantage of the unified segment tree over a regular multidimensional segment tree is that clearing a rectangle from the tree is more straightforward.
+The basic idea of clearing a hyperrectangle is similar to Algorithm~\ref{alg:segrm} for clearing an interval.
+However in the multidimensional case we need to be able to split partially cleared large rectangles into child rectangles along multiple axes.
+The regular segment tree structure is not well suited for this task, but in the unified segment tree the splitting is trivial.
+
 \begin{figure}\centering
 	\includegraphics[width=0.5\textwidth]{fig/unified}
 	\caption{The nodes of the unified segment tree form a directed acyclic graph.
