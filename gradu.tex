@@ -758,7 +758,10 @@ This allows implementing most operations in $O(\log\segsize)$ time, and the size
 \subsection{Structure of the segment tree}
 
 A segment tree is a binary tree where each node $s$ corresponds to a fixed interval $\inter{s}$~\cite{berg2008}.
-In the version presented here we assume \inter{s} to be a half-open interval.
+The child nodes of each branch node divide the interval into smaller parts.
+There are several variations of how to exactly define the intervals of the nodes~\cite{berg2008,kkkk}.
+In this thesis we assume \inter{s} to be a half-open interval.
+
 Each branch node $s$ has two child nodes, \leftc{s} and \rightc{s}.
 The intervals of the children divide the parent interval into two parts:
 $\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
@@ -773,7 +776,7 @@ Figure~\ref{fig:segtree} illustrates the segment tree structure.
 \end{figure}
 
 The structure of a semi-dynamic segment tree is independent of the intervals stored in the tree.
-The nodes are commonly arranged into an almost complete binary tree, which allows storing the tree nodes in an array similarly to binary heap~\cite{kkkk}:
+The nodes are commonly arranged into an almost complete binary tree, which allows storing the tree nodes in an array similarly to binary heap:
 the root node is stored in index~1, and the children of node $i$ are $2i$ and $2i+1$.
 This representation allows implementing segment tree operations with very low overhead, making the segment tree a powerful practical tool in addition to providing asymptotical bounds.
 
