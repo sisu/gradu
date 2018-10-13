@@ -760,7 +760,7 @@ This allows implementing most operations in $O(\log\segsize)$ time, and the size
 A segment tree is a binary tree where each node $s$ corresponds to a fixed interval $\inter{s}$~\cite{berg2008}.
 The child nodes of each branch node divide the interval into smaller parts.
 There are several variations of how to exactly define the intervals of the nodes~\cite{berg2008,kkkk}.
-In this thesis we assume \inter{s} to be a half-open interval.
+In this thesis we define \inter{s} to be a half-open real number interval for each $s$.
 
 Each branch node $s$ has two child nodes, \leftc{s} and \rightc{s}.
 The intervals of the children divide the parent interval into two parts:
