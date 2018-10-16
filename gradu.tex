@@ -831,13 +831,15 @@ Then $\inter{a}\cap I\neq\emptyset$ and $\inter{c}\cap I\neq\emptyset$, so $\int
 Some descendant of $b$ belongs to \canon{I}, so \canon{I} is not a minimal cover, which is a contradiction.
 \end{proof}
 
-We can iterate over the canonical nodes and their ancestors by using the following recursive algorithm starting from the root node.
+We can iterate over the canonical nodes and their ancestors by using Algorithm~\ref{alg:segiter} starting from the root node.
 
-\begin{alg}\label{alg:segiter}
-Visit all the elements of \canon{I} and \canonpar{I}.
+\begin{algorithm}
+\caption{Visit all the canonical nodes of an interval and their ancestors.}\label{alg:segiter}
 \begin{algorithmic}
+\Require Interval $I$.
+\Ensure Call $\visitc$ and $\visitp$ for all the elements in \canon{I} and in \canonpar{I} respectively.
 \Procedure{\iterc}{$s$}
-\Comment{Visit the canonical nodes in the subtree rooted at node $s$}
+	\Comment{Visit nodes in the subtree rooted at $s$}
 	\If{$\inter{s}\subseteq I$}
 		\State $\visitc(s)$.
 	\ElsIf{$\inter{s}\cap I\neq\emptyset$}
@@ -847,7 +849,7 @@ Visit all the elements of \canon{I} and \canonpar{I}.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 Algorithm~\ref{alg:segiter} can be used to implement operations such as adding an interval to a segment tree by defining the methods \visitc and \visitp appropriately.
 The recursion traverses through the nodes in \canonpar{I}, and stops immediately when it arrives either to a node in \canon{I} or to a node neither in \canon{I} nor in \canonpar{I}.
@@ -931,11 +933,12 @@ After the child nodes are cleared, we also need to regenerate the \nodeps{s} lis
 The regeneration is done by merging the lists in the child nodes of $s$.
 The exact algorithm for clearing is shown below.
 
-\begin{alg}\label{alg:segrm}
-Clear interval $I$ from a segment tree.
+\begin{algorithm}
+\caption{Clear interval $I$ from a segment tree.}\label{alg:segrm}
 \begin{algorithmic}
+\Require Node $s$ of the segment tree
+\Ensure Clear interval $I$ from subtree $s$
 \Procedure{\cleariv}{$s$}
-	\Comment Clears interval $I$ from subtree rooted at $s$.
 	\If{$\inter{s}\cap I=\emptyset$ or (\nodeps{s} and \nodecs{s} are empty)}
 		\State Return.
 	\EndIf
@@ -953,7 +956,7 @@ Clear interval $I$ from a segment tree.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 The running time of Algorithm~\ref{alg:segrm} depends on the time taken for copying and merging the intervals stored in the tree nodes.
 If we are only interested in querying whether a given interval overlaps any interval in the tree rather than finding the overlapping intervals, we can replace the interval lists by booleans indicating whether the list is empty.
@@ -1073,9 +1076,11 @@ We can implement rectangle insertion and query operations by using these fields.
 For simplicity we only support checking whether a query rectangle intersects any rectangle in the tree rather than returning the matching rectangles.
 The nodes $s$ of the innermost tree have dimension 0, and they contain only a single boolean \hasrect{s}, which indicates that at least one rectangle is inserted to this subtree.
 
-\begin{alg}\label{alg:rectadd}
-Add rectangle $R$ to a $D$-dimensional segment tree.
+\begin{algorithm}
+\caption{Add rectangle $R$ to a $D$-dimensional segment tree.}\label{alg:rectadd}
 \begin{algorithmic}
+\Require Node $s$ of the $D$-dimensional segment tree
+\Ensure \dots
 \Procedure{\adddt}{$D,s$}
 \Comment{Insert to the subtree rooted at node $s$}
 	\If{$D=0$}
@@ -1089,10 +1094,10 @@ Add rectangle $R$ to a $D$-dimensional segment tree.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
-\begin{alg}\label{alg:rectcheck}
-Query whether rectangle $R$ intersects with any rectangle in the $D$-dimensional segment tree.
+\begin{algorithm}
+\caption{Query whether rectangle $R$ intersects with any rectangle in the $D$-dimensional segment tree.}\label{alg:rectcheck}
 \begin{algorithmic}
 \Procedure{\checkdt}{$D,s$}
 \Comment{Check subtree rooted at node $s$}
@@ -1110,7 +1115,7 @@ Query whether rectangle $R$ intersects with any rectangle in the $D$-dimensional
 	\State Return $R$.
 \EndProcedure
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 \begin{lem}\adddt and \checkdt both have time complexity $O(\log^D\segsize)$.\end{lem}
 \begin{proof}
