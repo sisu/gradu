@@ -8,9 +8,15 @@
 \usepackage{subcaption,xspace}
 \usepackage{cleveref}
 \usepackage{algpseudocode}
+%\usepackage{algorithm}
+\usepackage[section]{algorithm}
 \begin{document}
 \onehalfspacing
 \sloppy
+
+%\floatname{algorithm}{Procedure}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
 
 \newtheorem{theo}{Theorem}
 \newtheorem{lem}{Lemma}[section]
@@ -327,9 +333,11 @@ If the edge is the top of an obstacle, the $x$-range does not intersect any inte
 In both cases the rectangles touching the encountered edge are removed from the search tree, and $O(1)$ new rectangles are inserted to maintain the sweep line state.
 A more exact description of the algorithm follows below.
 
-\begin{alg}\label{alg:split2d}
-Decompose the free space defined by a set $E$ of obstacle edges into \decomp{x}.
+\begin{algorithm}
+\caption{Decompose the free space into \decomp{x}.}\label{alg:split2d}
 \begin{algorithmic}
+\Require Set of obstacle line segments $E$
+\Ensure Decomposition \decomp{x} of the region defined by $E$
 \State $T\gets \text{Empty binary search tree}$.
 \State Sort $E$ by the $y$ coordinates of the edges.
 \ForAll{$e\in E$}
@@ -354,7 +362,7 @@ Decompose the free space defined by a set $E$ of obstacle edges into \decomp{x}.
 	\EndIf
 \EndFor
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 In addition to the cells, we also want to compute the links between all adjacent pairs.
 It is straightforward to extend Algorithm~\ref{alg:split2d} to compute the links by inserting links between the cells that are removed and inserted in the binary search tree during each event.
@@ -409,9 +417,11 @@ Figure~\ref{fig:split3d} shows how the 3D decomposition is created using a serie
 The algorithm below only calculates the cells but not the links between them.
 We discuss the computation of links after the algorithm description.
 
-\begin{alg}\label{alg:split3d}
-Decompose the free space defined by a set $E$ of obstacle faces into cuboids.
+\begin{algorithm}
+\caption{Decompose the 3-dimensional free space into cuboids.}\label{alg:split3d}
 \begin{algorithmic}
+\Require Set of rectangular obstacle faces $E$
+\Ensure 3-dimensional decomposition of the volume defined by $E$
 \State $Z\gets$ All $z$-coordinates of obstacle vertices.
 \State Sort $Z$ in increasing order.
 \State $R\gets$ Empty list of result cells.
@@ -430,9 +440,9 @@ Decompose the free space defined by a set $E$ of obstacle faces into cuboids.
 		\State $M[t]\gets$ index of $c$ in $R$.
 	\EndFor
 \EndFor
-\State Return list $R$.
+\State Return $R$.
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 \begin{lem}\label{lem:split3dtime}Algorithm~\ref{alg:split3d} has running time $O(n^2\log n)$.\end{lem}
 \begin{proof}
@@ -509,9 +519,11 @@ Each time the sweep line arrives into a new rectangle $a\in A$, the tree $T_B$ i
 Similarly for each new rectangle $b\in B$, we query the tree $T_A$ for rectangles touching the bottom line of $b$.
 A more detailed description of the algorithm is below.
 
-\begin{alg}\label{alg:overlap2d}
-Find all overlapping pairs of two sets of rectangles $A$ and $B$.
+\begin{algorithm}
+\caption{Find all the overlapping pairs of elements in two sets of rectangles.}\label{alg:overlap2d}
 \begin{algorithmic}
+\Require Sets of rectangles $A$ and $B$
+\Ensure All overlapping pairs of elements in $A$ and $B$
 \State $E\gets$ All bottom and top edges of rectangles in $A$ and $B$.
 \State Sort $E$ by $y$-coordinates.
 \State $T_A\gets$ Empty binary search tree.
@@ -527,7 +539,7 @@ Find all overlapping pairs of two sets of rectangles $A$ and $B$.
 	\EndIf
 \EndFor
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 \begin{lem}\label{lem:overlap2dtime}Algorithm~\ref{alg:overlap2d} runs in $O(n\log n + k)$ time, where $n$ is the total size of $A$ and $B$, and $k$ is the number of overlapping pairs.\end{lem}
 \begin{proof}
@@ -561,9 +573,12 @@ The ideas of the 3D decomposition can be generalized to allow decomposing 4D and
 The construction is done recursively so that the $D$-dimensional decomposition is created by solving a sequence of $(D-1)$-dimensional sub-problems.
 The method is similar to how Algorithm~\ref{alg:split3d} forms the 3D decomposition from a series of 2D decompositions.
 
-\begin{alg}\label{alg:splitdd}
-Decompose the free space defined by a set $E$ of $(D-1)$-dimensional obstacle faces into $D$-dimensional hyperrectangles.
+\begin{algorithm}
+\caption{Decompose a $D$-dimensional region into $D$-dimensional hyperrectangles.}
+\label{alg:splitdd}
 \begin{algorithmic}
+\Require Set $E$ of $(D-1)$-dimensional obstacle faces
+\Ensure Decomposition of the $D$-dimensional region defined by $E$
 \If{$D=2$}
 	\State Compute the decomposition using Algorithm~\ref{alg:split2d} and return.
 \EndIf
@@ -585,9 +600,9 @@ Decompose the free space defined by a set $E$ of $(D-1)$-dimensional obstacle fa
 		\State $M[t]\gets$ index of $c$ in $R$.
 	\EndFor
 \EndFor
-\State Return list $R$.
+\State Return $R$.
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 The analysis is similar to the 3D case, except that we now use induction on $D$.
 
@@ -654,9 +669,12 @@ The links in directions other than $D$ can be obtained recursively from the solu
 The links in direction $D$ are computed by performing an additional sweep between each pair of adjacent cross sections and using a recursive method similar to the proof above.
 Each sweep finds the direction $D$ links by using the following recursive algorithm.
 
-\begin{alg}\label{alg:overlapdd}
-Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ and $B$.
+\begin{algorithm}
+\caption{Find all the overlapping pairs of two sets of $D$-dimensional hyperrectangles.}
+\label{alg:overlapdd}
 \begin{algorithmic}
+\Require Sets of $D$-dimensional hyperrectangles $A$ and $B$
+\Ensure All overlapping pairs of elements in $A$ and $B$
 \Procedure{\findol}{$D,A,B$}
 	\If{$D=2$}
 		\State Return overlapping pairs computed with Algorithm~\ref{alg:overlap2d}.
@@ -680,10 +698,10 @@ Find all overlapping pairs of two sets of $D$-dimensional hyperrectangles $A$ an
 		\State $P_A\gets P_A\cup S_A$.
 		\State $P_B\gets P_B\cup S_B$.
 	\EndFor
-	\State Return list $R$.
+	\State Return $R$.
 \EndProcedure
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 The algorithm processes each set of events with equal $D$-coordinate as a single unit.
 For each unit we recursively search for new links between the newly added hyperrectangles, as well as between old and new hyperrectangles.
