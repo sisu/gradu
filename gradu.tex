@@ -326,12 +326,12 @@ Each rectangle $a$ in the binary tree is defined by intervals \xrange{a} and \yr
 We refer to lower and upper bound of each range $r$ by $r_{start}$ and $r_{end}$.
 \yranget{a}{end} is initially undefined when a rectangle $a$ is added to the tree, because we don't know how tall the rectangle will be until $a$ is removed from the tree.
 
+Algorithm~\ref{alg:split2d} shows the sweep line process.
 The sweep stops at each horizontal obstacle edge.
 Each edge is either the bottom or the top of an obstacle.
 If the edge is the bottom of an obstacle, the $x$-range of the edge is fully contained in one of the intervals in the search tree.
 If the edge is the top of an obstacle, the $x$-range does not intersect any intervals in the tree, but the left and right endpoints may touch some intervals.
 In both cases the rectangles touching the encountered edge are removed from the search tree, and $O(1)$ new rectangles are inserted to maintain the sweep line state.
-A more exact description of the algorithm follows below.
 
 \begin{algorithm}
 \caption{Decompose the free space into \decomp{x}.}\label{alg:split2d}
@@ -391,7 +391,9 @@ The decomposition is created by a sweep plane algorithm, which sweeps through th
 During the sweep we maintain the intersection of the sweep plane and the domain~\fspace.
 The intersection of the domain and a plane is called a \emph{cross section} of the domain.
 
-In each cross section we form a 2D decomposition of the domain with Algorithm~\ref{alg:split2d}, and extend the $xy$-rectangles in $z$-direction so that they fill the whole free space.
+Algorithm~\ref{alg:split3d} constructs the cells of the decomposition.
+%We discuss the computation of links below.
+In each cross section the algorithm forms a 2D decomposition of the domain with Algorithm~\ref{alg:split2d}, and extends the $xy$-rectangles in $z$-direction so that they fill the whole free space.
 Any common rectangles shared by consecutive cross sections are merged into a single larger cuboid.
 The merging is done by by maintaining a binary search tree of the cells of the previous decomposition.
 Figure~\ref{fig:split3d} shows how the 3D decomposition is created using a series of 2D decompositions.
@@ -413,9 +415,6 @@ Figure~\ref{fig:split3d} shows how the 3D decomposition is created using a serie
 	\end{subfigure}
 	\caption{3D domain is decomposed into cuboids by taking the horizontal decomposition of each cross section. The highlighted cell is shared between the two cross sections, so the cuboids on the two levels are merged.}\label{fig:split3d}
 \end{figure}
-
-The algorithm below only calculates the cells but not the links between them.
-We discuss the computation of links after the algorithm description.
 
 \begin{algorithm}
 \caption{Decompose the 3-dimensional free space into cuboids.}\label{alg:split3d}
@@ -510,14 +509,14 @@ Let $A$ and $B$ be the sets of rectangles that are different on the horizontal d
 Finding the $z$-links in the 3D decomposition is equivalent to finding the set of overlapping pairs between $A$ and $B$.
 The pairs are found by running \emph{another} line sweep algorithm after both $A$ and $B$ have been created by Algorithm~\ref{alg:split2d}.
 
-We sweep through the domain again by a horizontal line.
+Algorithm~\ref{alg:overlap2d} shows the computation of the overlapping pairs.
+The algorithm sweeps through the domain by a horizontal line.
 During the sweep we maintain two binary search tree $T_A$ and $T_B$, containing the rectangles of $A$ and $B$ touching the sweep line respectively.
 The binary search tree is ordered by the $x$-coordinate of the rectangle.
 Note that the rectangles in each of the sets $A$ and $B$ are disjoint, so the $x$-ranges are disjoint as well.
 
 Each time the sweep line arrives into a new rectangle $a\in A$, the tree $T_B$ is queried to find all the rectangles touched by the bottom line of $a$.
 Similarly for each new rectangle $b\in B$, we query the tree $T_A$ for rectangles touching the bottom line of $b$.
-A more detailed description of the algorithm is below.
 
 \begin{algorithm}
 \caption{Find all the overlapping pairs of elements in two sets of rectangles.}\label{alg:overlap2d}
@@ -574,7 +573,7 @@ The construction is done recursively so that the $D$-dimensional decomposition i
 The method is similar to how Algorithm~\ref{alg:split3d} forms the 3D decomposition from a series of 2D decompositions.
 
 \begin{algorithm}
-\caption{Decompose a $D$-dimensional region into $D$-dimensional hyperrectangles.}
+\caption{Decompose the free space into $D$-dimensional hyperrectangles.}
 \label{alg:splitdd}
 \begin{algorithmic}
 \Require Set $E$ of $(D-1)$-dimensional obstacle faces
@@ -604,6 +603,7 @@ The method is similar to how Algorithm~\ref{alg:split3d} forms the 3D decomposit
 \end{algorithmic}
 \end{algorithm}
 
+Algorithm~\ref{alg:splitdd} shows how the domain is split into hyperrectangles.
 The analysis is similar to the 3D case, except that we now use induction on $D$.
 
 \begin{lem}\label{lem:splitddcells}The number of rectangles produced by Algorithm~\ref{alg:splitdd} is $O(n^{D-1})$.\end{lem}
@@ -667,7 +667,7 @@ The proof of Lemma~\ref{lem:splitddcount} gives a hint for designing an algorith
 Similarly to the proof, we consider separately the links in direction $D$ and in the other directions.
 The links in directions other than $D$ can be obtained recursively from the solutions of the sub-problems.
 The links in direction $D$ are computed by performing an additional sweep between each pair of adjacent cross sections and using a recursive method similar to the proof above.
-Each sweep finds the direction $D$ links by using the following recursive algorithm.
+Algorithm~\ref{alg:overlapdd} shows how to find the overlapping pairs in a single cross section.
 
 \begin{algorithm}
 \caption{Find all the overlapping pairs of two sets of $D$-dimensional hyperrectangles.}
@@ -1999,7 +1999,7 @@ We also provided a new algorithm for the 3-dimensional variant of the problem wi
 Finally, we showed that the algorithm can be generalized to work in any dimension $D$ with running time $O(n^{D-1}\log^{D-1}n)$.
 The new algorithms provide significant improvements over the previous best known results $O(n^{2.5}\log n)$~\cite{wagner} and $O(n^D\log n)$~\cite{de1992}.
 
-The key techniques for achieving the new results were the recursive space decomposition (Sec.~\ref{sec:decomposition}) and the multidimensional segment tree (Sec.~\ref{sec:segtree}).
+The key techniques for achieving the new results were the recursive space decomposition (Section~\ref{sec:decomposition}) and the multidimensional segment tree (Section~\ref{sec:segtree}).
 The algorithms are relatively simple, which is demonstrated by the implementation linked in Appendix~\apxsrc.
 
 A natural follow up question is whether the result could be improved further.
