@@ -1179,8 +1179,10 @@ The following function computes a bitmask of $s$ bits for a rectangle and a tree
 This bits are used to determine which bits of \hasbita{s} to access when adding a rectangle or querying the tree.
 
 \begin{algorithm}
-\caption{Compute bitmask representing whether node $s$ is covered by rectangle $R$ in each direction.}\label{alg:maskof}
+\caption{Compute the bitmask representing whether a node is covered by a rectangle in each direction.}\label{alg:maskof}
 \begin{algorithmic}
+\Require $D$-dimensional rectangle $R$ and segment tree node $s$
+\Ensure Bitmask of $D$ bits representing the dimensions where $R$ fully covers $s$
 \Procedure{\maskof}{$R,s$}
 	\State $m\gets 0$.
 	\ForAll{$d \in 1\dots D$}
@@ -1196,10 +1198,10 @@ This bits are used to determine which bits of \hasbita{s} to access when adding 
 We can implement procedures \adddt and \checkdt by using the bitmasks returned by \maskof{}.
 
 \begin{algorithm}
-\caption{Add rectangle $R$ to $D$-dimensional unified tree.}\label{alg:uadd}
+\caption{Add a rectangle to a $D$-dimensional unified tree.}\label{alg:uadd}
 \begin{algorithmic}
-\Require \dots
-\Ensure \dots
+\Require $D$-dimensional hyperrectangle $R$
+\Ensure Set \hasbits{s}{b} for each node $s$ and bitmask $b$ matching $R$
 \Procedure{\adddt}{$d,s$}
 \Comment{Insert to the subtree rooted at node $s$ by moving along axes $1\dots d$}
 	\If{$d=0$}
@@ -1223,9 +1225,11 @@ We can implement procedures \adddt and \checkdt by using the bitmasks returned b
 For \checkdt we use function $\texttt{reverseBits}$, which reverses the bits of a $2^D$-bit input.
 For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
 
-\begin{alg}\label{alg:ucheck}
-Query whether rectangle $R$ intersects with any rectangle in the unified tree.
+\begin{algorithm}
+\caption{Query whether a rectangle intersects with any rectangle in the unified tree.}\label{alg:ucheck}
 \begin{algorithmic}
+\Require $D$-dimensional hyperrectangle $R$
+\Ensure Whether \hasbits{s}{b} is set for any node $s$ and bitmask $b$ matching $R$
 \Procedure{\checkdt}{$d,s$}
 \Comment{Check subtree rooted at node $s$}
 	\State $R\gets\texttt{false}$.
@@ -1241,7 +1245,7 @@ Query whether rectangle $R$ intersects with any rectangle in the unified tree.
 	\State Return $R$.
 \EndProcedure
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 Both \adddt and \checkdt iterate over the canonical nodes of the input rectangle as well as their ancestors, and access \hasbita{s} for each such node $s$.
 When adding a rectangle $A$, we set $\hasbits{s}{b}$ for each bitmask $b$ whose bits are contained in $\maskof{A,s}$.
@@ -1289,8 +1293,8 @@ The full algorithm is described below.
 	}\label{fig:uremove}
 \end{figure}
 
-\begin{alg}\label{alg:segurm}
-Clear rectangle $R$ from $D$-dimensional unified segment tree.
+\begin{algorithm}
+\caption{Clear rectangle $R$ from $D$-dimensional unified segment tree.}\label{alg:segurm}
 \begin{algorithmic}
 \Procedure{\cleardt}{$d,s$}
 	\If{$\rect{s}_d\cap R_d=\emptyset$ or $\neg\hasbits{s}{0}$}
@@ -1312,7 +1316,12 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 		\State $\recomp(d,s)$.
 	\EndIf
 \EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
+\begin{algorithm}
+\caption{Helper procedure for \cleardt: Push down values in a subtree.}\label{alg:segurm:pdst}
+\begin{algorithmic}
 \Procedure{\pdst}{$d,s,a$}
 	\Comment Pushes down values in subtree $s$ along axis $a$.
 	\If{$d=0$}
@@ -1328,7 +1337,12 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 		\State $\pdst(d,\rightu{s}{d},a)$.
 	\EndIf
 \EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
+\begin{algorithm}
+\begin{algorithmic}
+\caption{Helper procedure for \cleardt: Recompute data about rectangles stored in successor nodes subtree.}\label{alg:segurm:recomp}
 \Procedure{\recomp}{$d,s$}
 	\If{$d=0$}
 		\State $\recompn(s)$.
@@ -1360,7 +1374,7 @@ Clear rectangle $R$ from $D$-dimensional unified segment tree.
 	\EndFor
 \EndProcedure
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 \begin{lem}\label{lem:segurmtime}Algorithm~\ref{alg:segurm} has running time $O(\segsize^{D-1}\log\segsize + k)$, where $k$ is the number of cleared canonical nodes.\end{lem}
 \begin{proof}
