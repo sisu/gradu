@@ -836,7 +836,7 @@ We can iterate over the canonical nodes and their ancestors by using Algorithm~\
 \begin{algorithm}
 \caption{Visit all the canonical nodes of an interval and their ancestors.}\label{alg:segiter}
 \begin{algorithmic}
-\Require Interval $I$.
+\Require Interval $I$
 \Ensure Call $\visitc$ and $\visitp$ for all the elements in \canon{I} and in \canonpar{I} respectively.
 \Procedure{\iterc}{$s$}
 	\Comment{Visit nodes in the subtree rooted at $s$}
@@ -936,8 +936,8 @@ The exact algorithm for clearing is shown below.
 \begin{algorithm}
 \caption{Clear interval $I$ from a segment tree.}\label{alg:segrm}
 \begin{algorithmic}
-\Require Node $s$ of the segment tree
-\Ensure Clear interval $I$ from subtree $s$
+\Require Interval $I$
+\Ensure Clear interval $I$ from the segment tree.
 \Procedure{\cleariv}{$s$}
 	\If{$\inter{s}\cap I=\emptyset$ or (\nodeps{s} and \nodecs{s} are empty)}
 		\State Return.
@@ -1077,10 +1077,10 @@ For simplicity we only support checking whether a query rectangle intersects any
 The nodes $s$ of the innermost tree have dimension 0, and they contain only a single boolean \hasrect{s}, which indicates that at least one rectangle is inserted to this subtree.
 
 \begin{algorithm}
-\caption{Add rectangle $R$ to a $D$-dimensional segment tree.}\label{alg:rectadd}
+\caption{Add a rectangle to a $D$-dimensional segment tree.}\label{alg:rectadd}
 \begin{algorithmic}
-\Require Node $s$ of the $D$-dimensional segment tree
-\Ensure \dots
+\Require $D$-dimensional rectangle $R$
+\Ensure Set \hasrect{s} for each canonical node $s$ of $R$.
 \Procedure{\adddt}{$D,s$}
 \Comment{Insert to the subtree rooted at node $s$}
 	\If{$D=0$}
@@ -1097,8 +1097,10 @@ The nodes $s$ of the innermost tree have dimension 0, and they contain only a si
 \end{algorithm}
 
 \begin{algorithm}
-\caption{Query whether rectangle $R$ intersects with any rectangle in the $D$-dimensional segment tree.}\label{alg:rectcheck}
+\caption{Query whether a rectangle intersects with any rectangle in a multidimensional segment tree.}\label{alg:rectcheck}
 \begin{algorithmic}
+\Require $D$-dimensional rectangle $R$
+\Ensure Whether \hasrect{s} is true for any node $s$ matching $R$.
 \Procedure{\checkdt}{$D,s$}
 \Comment{Check subtree rooted at node $s$}
 	\State $R\gets\texttt{false}$.
@@ -1176,8 +1178,8 @@ The $2^D$ bits allow us to detect when the conditions of Lemma~\ref{lem:rectinte
 The following function computes a bitmask of $s$ bits for a rectangle and a tree node.
 This bits are used to determine which bits of \hasbita{s} to access when adding a rectangle or querying the tree.
 
-\begin{alg}\label{alg:maskof}
-Compute bitmask representing whether node $s$ is covered by rectangle $R$ in each direction.
+\begin{algorithm}
+\caption{Compute bitmask representing whether node $s$ is covered by rectangle $R$ in each direction.}\label{alg:maskof}
 \begin{algorithmic}
 \Procedure{\maskof}{$R,s$}
 	\State $m\gets 0$.
@@ -1189,13 +1191,15 @@ Compute bitmask representing whether node $s$ is covered by rectangle $R$ in eac
 	\State Return $m$.
 \EndProcedure
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 We can implement procedures \adddt and \checkdt by using the bitmasks returned by \maskof{}.
 
-\begin{alg}\label{alg:uadd}
-Add rectangle $R$ to $D$-dimensional unified tree.
+\begin{algorithm}
+\caption{Add rectangle $R$ to $D$-dimensional unified tree.}\label{alg:uadd}
 \begin{algorithmic}
+\Require \dots
+\Ensure \dots
 \Procedure{\adddt}{$d,s$}
 \Comment{Insert to the subtree rooted at node $s$ by moving along axes $1\dots d$}
 	\If{$d=0$}
@@ -1214,7 +1218,7 @@ Add rectangle $R$ to $D$-dimensional unified tree.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 For \checkdt we use function $\texttt{reverseBits}$, which reverses the bits of a $2^D$-bit input.
 For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
