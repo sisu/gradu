@@ -931,7 +931,7 @@ For nodes $s\in\canonpar{I}$ we push down the intervals in \nodecs{s} to the chi
 When we arrive in a node $s\in\canon{I}$, the entire subtree rooted at $s$ is cleared.
 After the child nodes are cleared, we also need to regenerate the \nodeps{s} list for the nodes $s\in\canonpar{I}$ to remove the intervals that are no longer present in the subtree.
 The regeneration is done by merging the lists in the child nodes of $s$.
-The exact algorithm for clearing is shown below.
+The exact process is shown in Algorithm~\ref{alg:segrm}.
 
 \begin{algorithm}
 \caption{Clear interval $I$ from a segment tree.}\label{alg:segrm}
@@ -1073,6 +1073,7 @@ To find pairs of rectangles fulfilling the conditions of Lemma~\ref{lem:rectinte
 \end{description}
 
 We can implement rectangle insertion and query operations by using these fields.
+Algorithm~\ref{alg:rectadd} shows the insert operation and Algorithm~\ref{alg:rectcheck} shows the query operation.
 For simplicity we only support checking whether a query rectangle intersects any rectangle in the tree rather than returning the matching rectangles.
 The nodes $s$ of the innermost tree have dimension 0, and they contain only a single boolean \hasrect{s}, which indicates that at least one rectangle is inserted to this subtree.
 
@@ -1175,15 +1176,15 @@ The bit array stored in node $s$ is denoted \hasbita{s}.
 When a rectangle $R$ is added to node $s$, the bits are used to define whether $s$ represents a canonical node or an ancestor of a canonical node along each coordinate axis.
 The $2^D$ bits allow us to detect when the conditions of Lemma~\ref{lem:rectintersect} become fulfilled when querying for intersecting rectangles.
 
-The following function computes a bitmask of $s$ bits for a rectangle and a tree node.
-This bits are used to determine which bits of \hasbita{s} to access when adding a rectangle or querying the tree.
+Algorithm~\ref{alg:maskof} defines function~\maskof{} that computes a bitmask of $s$ bits for a rectangle and a tree node.
+This mask is used to determine which bits of \hasbita{s} to access when adding a rectangle or querying the tree.
 
 \begin{algorithm}
 \caption{Compute the bitmask representing whether a node is covered by a rectangle in each direction.}\label{alg:maskof}
 \begin{algorithmic}
 \Require $D$-dimensional rectangle $R$ and segment tree node $s$
 \Ensure Bitmask of $D$ bits representing the dimensions where $R$ fully covers $s$
-\Procedure{\maskof}{$R,s$}
+\Procedure{\maskoff}{$R,s$}
 	\State $m\gets 0$.
 	\ForAll{$d \in 1\dots D$}
 		\If{$\rect{s}_d\subseteq R_d$}
@@ -1195,7 +1196,8 @@ This bits are used to determine which bits of \hasbita{s} to access when adding 
 \end{algorithmic}
 \end{algorithm}
 
-We can implement procedures \adddt and \checkdt by using the bitmasks returned by \maskof{}.
+We can use the \maskoff function to implement insertion and query operations for the unified segment tree.
+Algorithm~\ref{alg:uadd} shows the tree insert operation.
 
 \begin{algorithm}
 \caption{Add a rectangle to a $D$-dimensional unified tree.}\label{alg:uadd}
@@ -1222,7 +1224,8 @@ We can implement procedures \adddt and \checkdt by using the bitmasks returned b
 \end{algorithmic}
 \end{algorithm}
 
-For \checkdt we use function $\texttt{reverseBits}$, which reverses the bits of a $2^D$-bit input.
+Algorithm~\ref{alg:ucheck} shows the implementation of the query operation.
+It uses function $\texttt{reverseBits}$, which reverses the bits of a $2^D$-bit input.
 For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
 
 \begin{algorithm}
@@ -1294,8 +1297,10 @@ The full algorithm is described below.
 \end{figure}
 
 \begin{algorithm}
-\caption{Clear rectangle $R$ from $D$-dimensional unified segment tree.}\label{alg:segurm}
+\caption{Clear a rectangle from a unified segment tree.}\label{alg:segurm}
 \begin{algorithmic}
+\Require $D$-dimensional hyperrectangle $R$
+\Ensure Modify \hasbits{}{} accordingly.
 \Procedure{\cleardt}{$d,s$}
 	\If{$\rect{s}_d\cap R_d=\emptyset$ or $\neg\hasbits{s}{0}$}
 		\State Return.
