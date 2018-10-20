@@ -1529,12 +1529,14 @@ During the sweep we maintain the intersection between the sweep line and the new
 The intersection consists of non-overlapping intervals, which we store in a binary search tree.
 
 Let \nbsd{r}{d} and \obsd{r}{d} be the neighbor cell and the adjacent obstacles of rectangle $r$ in direction $d$ in \decomp{x}.
-The algorithm below describes the illumination in direction $+y$.
+Algorithm~\ref{alg:light2d} shows the illumination in direction $+y$.
 The sweep in direction $-y$ is identical.
 
-\begin{alg}\label{alg:light2d}
-Compute illuminated rectangles from group $R$ into direction $+y$.
+\begin{algorithm}
+\caption{Compute illuminated rectangles in direction $+y$.}\label{alg:light2d}
 \begin{algorithmic}
+\Require A decomposition of the free space into rectangles and a subset of the rectangles $R$
+\Ensure Rectangles reachable by moving in direction $+y$ from any point in $R$.
 \State $Q\gets\text{Priority queue containing the rectangles of $R$, ordered by the topmost $y$-coordinate}$.
 \State $T\gets\text{Empty binary search tree}$.
 \While{$Q$ is not empty}
@@ -1553,8 +1555,9 @@ Compute illuminated rectangles from group $R$ into direction $+y$.
 		\EndIf
 	\EndFor
 \EndWhile
+\State Return all the rectangles inserted into $Q$.
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 \begin{lem}\label{lem:light2dtime}The running time of Algorithm~\ref{alg:light2d} is $O(m\log m)$ where $m$ is the number of visited rectangles and their neighbor links.\end{lem}
 \begin{proof}
@@ -1566,15 +1569,18 @@ Thus the total time complexity is $O(m\log m)$.
 \end{proof}
 
 The link distance between \spt and \ept can be computed by iteratively performing the illumination sweeps in $+y$ and $-y$ directions until the endpoint is found.
-In the pseudocode below we mark the step when the illumination first reaches each rectangle $r$ as \stepof{r}.
+Algorithm~\ref{alg:minlink2d} shows the staged illumination process.
+In the pseudocode we mark the step when the illumination first reaches each rectangle $r$ as \stepof{r}.
 
-\begin{alg}\label{alg:minlink2d}
-Run staged illumination starting from \spt within free space \fspace such that the first link is horizontal.
+\begin{algorithm}
+\caption{Run staged illumination starting from \spt within free space \fspace such that the first link is horizontal.}\label{alg:minlink2d}
 \begin{algorithmic}
+\Require Set of obstacle faces and points \spt and \ept.
+\Ensure Link distance between \spt and \ept.
 \State Form \decomp{x} for \fspace with Algorithm~\ref{alg:split2d}.
 \State $R\gets\set{r\in\decomp{x} \mid \spt\in r}$
 \State $k\gets 1$
-\While{$R\neq\emptyset$}
+\While{$R\neq\emptyset$ and $\ept\notin R$}
 	\ForAll{$r\in R$}
 		\If{$\stepof{r}$ is not set}
 			\State $\stepof{r}\gets k$
@@ -1588,8 +1594,9 @@ Run staged illumination starting from \spt within free space \fspace such that t
 	\State $H\gets H_{+y}\cup H_{-y}$.
 	\State $k\gets k+1$
 \EndWhile
+\State Return link distance $k$, or nothing if $R=\emptyset$.
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 \begin{theo}Algorithm~\ref{alg:minlink2d} has time complexity $O(n\log n)$ and space complexity $O(n)$.\end{theo}
 \begin{proof}
@@ -1658,8 +1665,8 @@ If multiple \addEs illuminate the same canonical rectangle, only the one inserte
 This reference is used to determine the $z$-range of the \addEs generated during the \obsEs, as well as for tracing back the path from \ept to \spt when the illumination finishes.
 The pseudocode below describes the sweep.
 
-\begin{alg}\label{alg:sweep3d}
-Illuminate by plane sweep in direction $+z$ starting from a provided event set $E$.
+\begin{algorithm}
+\caption{Illuminate by plane sweep in direction $+z$ starting from a provided event set $E$.}\label{alg:sweep3d}
 \begin{algorithmic}
 \State $Q\gets$ Priority queue containing $E$.
 \State $T\gets$ Empty 2D segment tree.
@@ -1683,7 +1690,7 @@ Illuminate by plane sweep in direction $+z$ starting from a provided event set $
 	\EndIf
 \EndWhile
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 We can implement the staged illumination process by iteratively applying the sweep algorithm.
 
