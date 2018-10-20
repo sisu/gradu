@@ -1266,7 +1266,6 @@ The three operations are performed by a recursive function \cleardt that travers
 The function uses two arguments to control the tree traversal: the current subtree root $s$, and the axis where we are moving $d$.
 In each canonical ancestor $s\in\canonpari{R_d}{d}$ we split the contents of the subtree along axis $d$ before proceeding, and recompute the descendant information after finishing clearing the subtree.
 Figure~\ref{fig:uremove} shows an example of the clearing process.
-The full algorithm is described below.
 
 \begin{figure}\centering
 	\begin{subfigure}[t]{0.4\textwidth}\centering
@@ -1295,6 +1294,10 @@ The full algorithm is described below.
 	Finally we fill descendant information into ancestors of the remaining parts of $A$ (Fig.~\ref{fig:urm:recomp}).
 	}\label{fig:uremove}
 \end{figure}
+
+Algorithm~\ref{alg:segurm} shows the pseudocode of the clear algorithm.
+The values are pushed down in the tree by calling a helper function~\pdst defined in Algorithm~\ref{alg:segurm:pdst}.
+In the end we regenerate the bits about values in the successors by using another helper function~\recomp defined in Algorithm~\ref{alg:segurm:recomp}.
 
 \begin{algorithm}
 \caption{Clear a rectangle from a unified segment tree.}\label{alg:segurm}
