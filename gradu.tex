@@ -25,7 +25,6 @@
 \theoremstyle{definition}
 %\newtheorem{def}[theo]{Definition}
 \newtheorem{prob}{Problem}
-\newtheorem{alg}{Algorithm}[section]
 \newtheorem{ex}{Example}
 
 \theoremstyle{remark}
@@ -439,7 +438,7 @@ Figure~\ref{fig:split3d} shows how the 3D decomposition is created using a serie
 		\State $M[t]\gets$ index of $c$ in $R$.
 	\EndFor
 \EndFor
-\State Return $R$.
+\State \Return $R$.
 \end{algorithmic}
 \end{algorithm}
 
@@ -519,7 +518,7 @@ Each time the sweep line arrives into a new rectangle $a\in A$, the tree $T_B$ i
 Similarly for each new rectangle $b\in B$, we query the tree $T_A$ for rectangles touching the bottom line of $b$.
 
 \begin{algorithm}
-\caption{Find all the overlapping pairs of elements in two sets of rectangles.}\label{alg:overlap2d}
+\caption{Find all overlapping pairs of elements in two sets of rectangles.}\label{alg:overlap2d}
 \begin{algorithmic}
 \Require Sets of rectangles $A$ and $B$
 \Ensure All overlapping pairs of elements in $A$ and $B$
@@ -579,7 +578,7 @@ The method is similar to how Algorithm~\ref{alg:split3d} forms the 3D decomposit
 \Require Set $E$ of $(D-1)$-dimensional obstacle faces
 \Ensure Decomposition of the $D$-dimensional region defined by $E$
 \If{$D=2$}
-	\State Compute the decomposition using Algorithm~\ref{alg:split2d} and return.
+	\State \Return Decomposition using Algorithm~\ref{alg:split2d}.
 \EndIf
 \State $Z\gets$ All $D$-coordinates of obstacle vertices.
 \State Sort $Z$ in increasing order.
@@ -599,7 +598,7 @@ The method is similar to how Algorithm~\ref{alg:split3d} forms the 3D decomposit
 		\State $M[t]\gets$ index of $c$ in $R$.
 	\EndFor
 \EndFor
-\State Return $R$.
+\State \Return $R$.
 \end{algorithmic}
 \end{algorithm}
 
@@ -677,7 +676,7 @@ Algorithm~\ref{alg:overlapdd} shows how to find the overlapping pairs in a singl
 \Ensure All overlapping pairs of elements in $A$ and $B$
 \Procedure{\findol}{$D,A,B$}
 	\If{$D=2$}
-		\State Return overlapping pairs computed with Algorithm~\ref{alg:overlap2d}.
+		\State \Return overlapping pairs computed with Algorithm~\ref{alg:overlap2d}.
 	\EndIf
 	\State $E\gets$ List of all hyperrectangles in $A$ and $B$ perpendicular to $D$-axis.
 	\State Sort $E$ by $D$-coordinate.
@@ -698,7 +697,7 @@ Algorithm~\ref{alg:overlapdd} shows how to find the overlapping pairs in a singl
 		\State $P_A\gets P_A\cup S_A$.
 		\State $P_B\gets P_B\cup S_B$.
 	\EndFor
-	\State Return $R$.
+	\State \Return $R$.
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -940,7 +939,7 @@ The exact process is shown in Algorithm~\ref{alg:segrm}.
 \Ensure Clear interval $I$ from the segment tree.
 \Procedure{\cleariv}{$s$}
 	\If{$\inter{s}\cap I=\emptyset$ or (\nodeps{s} and \nodecs{s} are empty)}
-		\State Return.
+		\State \Return
 	\EndIf
 	\If{$\inter{s}\nsubseteq I$}
 		\State Copy \nodecs{s} to \nodecs{\leftc{s}} and to \nodecs{\rightc{s}}.
@@ -1115,7 +1114,7 @@ The nodes $s$ of the innermost tree have dimension 0, and they contain only a si
 		\State $R\gets R$ or $\checkdt(D,\leftc{s})$.
 		\State $R\gets R$ or $\checkdt(D,\rightc{s})$.
 	\EndIf
-	\State Return $R$.
+	\State \Return $R$.
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -1191,7 +1190,7 @@ This mask is used to determine which bits of \hasbita{s} to access when adding a
 			\State $m\gets m | 2^{d-1}$.
 		\EndIf
 	\EndFor
-	\State Return $m$.
+	\State \Return $m$.
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -1245,7 +1244,7 @@ For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
 		\State $R\gets R$ or $\checkdt(d,\leftu{s}{d})$.
 		\State $R\gets R$ or $\checkdt(d,\rightu{s}{d})$.
 	\EndIf
-	\State Return $R$.
+	\State \Return $R$.
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -1306,11 +1305,11 @@ In the end we regenerate the bits about values in the successors by using anothe
 \Ensure Modify \hasbits{}{} accordingly.
 \Procedure{\cleardt}{$d,s$}
 	\If{$\rect{s}_d\cap R_d=\emptyset$ or $\neg\hasbits{s}{0}$}
-		\State Return.
+		\State \Return
 	\EndIf
 	\If{$d=0$}
 		\State $\hasbits{s}{0\dots 2^{D-1}}\gets\texttt{false}$.
-		\State Return.
+		\State \Return
 	\EndIf
 	\If{$\rect{s}_d\nsubseteq R_d$}
 		\State $\pdst(d-1,s,d)$.
@@ -1335,9 +1334,9 @@ In the end we regenerate the bits about values in the successors by using anothe
 	\If{$d=0$}
 		\State $\hasbita{\leftu{s}{a}}\gets \hasbita{\leftu{s}{a}} | \hasbita{s}$.
 		\State $\hasbita{\rightu{s}{a}}\gets \hasbita{\rightu{s}{a}} | \hasbita{s}$.
-		\State Return.
+		\State \Return
 	\ElsIf{$\rect{s}_d\cap R_d=\emptyset$}
-		\State Return.
+		\State \Return
 	\EndIf
 	\State $\pdst(d-1,s,a)$.
 	\If{\leftu{s}{d} and \rightu{s}{d} are defined}
@@ -1354,9 +1353,9 @@ In the end we regenerate the bits about values in the successors by using anothe
 \Procedure{\recomp}{$d,s$}
 	\If{$d=0$}
 		\State $\recompn(s)$.
-		\State Return.
+		\State \Return
 	\ElsIf{$\rect{s}_d\cap R_d=\emptyset$}
-		\State Return.
+		\State \Return
 	\EndIf
 	\State $\recomp(d-1,s)$.
 	\If{\leftu{s}{d} and \rightu{s}{d} are defined}
@@ -1555,7 +1554,7 @@ The sweep in direction $-y$ is identical.
 		\EndIf
 	\EndFor
 \EndWhile
-\State Return all the rectangles inserted into $Q$.
+\State \Return all the rectangles inserted into $Q$.
 \end{algorithmic}
 \end{algorithm}
 
@@ -1594,7 +1593,7 @@ In the pseudocode we mark the step when the illumination first reaches each rect
 	\State $H\gets H_{+y}\cup H_{-y}$.
 	\State $k\gets k+1$
 \EndWhile
-\State Return link distance $k$, or nothing if $R=\emptyset$.
+\State \Return link distance $k$, or nothing if $R=\emptyset$.
 \end{algorithmic}
 \end{algorithm}
 
