@@ -16,7 +16,9 @@
 
 %\floatname{algorithm}{Procedure}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\renewcommand{\algorithmicensure}{\textbf{Effect:}}
+\algnewcommand\algorithmicoutput{\textbf{Output:}}
+\algnewcommand\Output{\item[\algorithmicoutput]}
 
 \newtheorem{theo}{Theorem}
 \newtheorem{lem}{Lemma}[section]
@@ -336,7 +338,7 @@ In both cases the rectangles touching the encountered edge are removed from the 
 \caption{Decompose the free space into \decomp{x}.}\label{alg:split2d}
 \begin{algorithmic}
 \Require Set of obstacle line segments $E$
-\Ensure Decomposition \decomp{x} of the region defined by $E$
+\Output Decomposition \decomp{x} of the region defined by $E$
 \State $T\gets \text{Empty binary search tree}$.
 \State Sort $E$ by the $y$ coordinates of the edges.
 \ForAll{$e\in E$}
@@ -419,7 +421,7 @@ Figure~\ref{fig:split3d} shows how the 3D decomposition is created using a serie
 \caption{Decompose the 3-dimensional free space into cuboids.}\label{alg:split3d}
 \begin{algorithmic}
 \Require Set of rectangular obstacle faces $E$
-\Ensure 3-dimensional decomposition of the volume defined by $E$
+\Output 3-dimensional decomposition of the volume defined by $E$
 \State $Z\gets$ All $z$-coordinates of obstacle vertices.
 \State Sort $Z$ in increasing order.
 \State $R\gets$ Empty list of result cells.
@@ -521,7 +523,7 @@ Similarly for each new rectangle $b\in B$, we query the tree $T_A$ for rectangle
 \caption{Find all overlapping pairs of elements in two sets of rectangles.}\label{alg:overlap2d}
 \begin{algorithmic}
 \Require Sets of rectangles $A$ and $B$
-\Ensure All overlapping pairs of elements in $A$ and $B$
+\Output All overlapping pairs of elements in $A$ and $B$
 \State $E\gets$ All bottom and top edges of rectangles in $A$ and $B$.
 \State Sort $E$ by $y$-coordinates.
 \State $T_A\gets$ Empty binary search tree.
@@ -576,7 +578,7 @@ The method is similar to how Algorithm~\ref{alg:split3d} forms the 3D decomposit
 \label{alg:splitdd}
 \begin{algorithmic}
 \Require Set $E$ of $(D-1)$-dimensional obstacle faces
-\Ensure Decomposition of the $D$-dimensional region defined by $E$
+\Output Decomposition of the $D$-dimensional region defined by $E$
 \If{$D=2$}
 	\State \Return Decomposition using Algorithm~\ref{alg:split2d}.
 \EndIf
@@ -673,7 +675,7 @@ Algorithm~\ref{alg:overlapdd} shows how to find the overlapping pairs in a singl
 \label{alg:overlapdd}
 \begin{algorithmic}
 \Require Sets of $D$-dimensional hyperrectangles $A$ and $B$
-\Ensure All overlapping pairs of elements in $A$ and $B$
+\Output All overlapping pairs of elements in $A$ and $B$
 \Procedure{\findol}{$D,A,B$}
 	\If{$D=2$}
 		\State \Return overlapping pairs computed with Algorithm~\ref{alg:overlap2d}.
@@ -1100,7 +1102,7 @@ The nodes $s$ of the innermost tree have dimension 0, and they contain only a si
 \caption{Query whether a rectangle intersects with any rectangle in a multidimensional segment tree.}\label{alg:rectcheck}
 \begin{algorithmic}
 \Require $D$-dimensional rectangle $R$
-\Ensure Whether \hasrect{s} is true for any node $s$ matching $R$.
+\Output Whether \hasrect{s} is true for any node $s$ matching $R$.
 \Procedure{\checkdt}{$D,s$}
 \Comment{Check subtree rooted at node $s$}
 	\State $R\gets\texttt{false}$.
@@ -1182,7 +1184,7 @@ This mask is used to determine which bits of \hasbita{s} to access when adding a
 \caption{Compute the bitmask representing whether a node is covered by a rectangle in each direction.}\label{alg:maskof}
 \begin{algorithmic}
 \Require $D$-dimensional rectangle $R$ and segment tree node $s$
-\Ensure Bitmask of $D$ bits representing the dimensions where $R$ fully covers $s$
+\Output Bitmask of $D$ bits representing the dimensions where $R$ fully covers $s$
 \Procedure{\maskoff}{$R,s$}
 	\State $m\gets 0$.
 	\ForAll{$d \in 1\dots D$}
@@ -1231,7 +1233,7 @@ For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
 \caption{Query whether a rectangle intersects with any rectangle in the unified tree.}\label{alg:ucheck}
 \begin{algorithmic}
 \Require $D$-dimensional hyperrectangle $R$
-\Ensure Whether \hasbits{s}{b} is set for any node $s$ and bitmask $b$ matching $R$
+\Output Whether \hasbits{s}{b} is set for any node $s$ and bitmask $b$ matching $R$
 \Procedure{\checkdt}{$d,s$}
 \Comment{Check subtree rooted at node $s$}
 	\State $R\gets\texttt{false}$.
@@ -1535,7 +1537,7 @@ The sweep in direction $-y$ is identical.
 \caption{Compute illuminated rectangles in direction $+y$.}\label{alg:light2d}
 \begin{algorithmic}
 \Require A decomposition of the free space into rectangles and a subset of the rectangles $R$
-\Ensure Rectangles reachable by moving in direction $+y$ from any point in $R$.
+\Output Rectangles reachable by moving in direction $+y$ from any point in $R$.
 \State $Q\gets\text{Priority queue containing the rectangles of $R$, ordered by the topmost $y$-coordinate}$.
 \State $T\gets\text{Empty binary search tree}$.
 \While{$Q$ is not empty}
@@ -1575,7 +1577,7 @@ In the pseudocode we mark the step when the illumination first reaches each rect
 \caption{Run staged illumination starting from \spt within free space \fspace such that the first link is horizontal.}\label{alg:minlink2d}
 \begin{algorithmic}
 \Require Set of obstacle faces and points \spt and \ept
-\Ensure Link distance between \spt and \ept
+\Output Link distance between \spt and \ept
 \State Form \decomp{x} for \fspace with Algorithm~\ref{alg:split2d}.
 \State $R\gets\set{r\in\decomp{x} \mid \spt\in r}$
 \State $k\gets 1$
@@ -1699,7 +1701,7 @@ We can implement the staged illumination process by iteratively applying the swe
 \caption{Run staged illumination in a three-dimensional domain.}\label{alg:minlink3d}
 \begin{algorithmic}
 \Require Set of obstacle faces and points \spt and \ept
-\Ensure Link distance between \spt and \ept
+\Output Link distance between \spt and \ept
 \State Compute decomposition of \fspace into cells using Algorithm~\ref{alg:split3d}.
 \ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
 	\State $E_d\gets$ Event set containing \addE at \spt with width and height 0 and \cellE for the cell containing \spt.
@@ -1927,7 +1929,7 @@ We can implement the $D$-dimensional minimum link path computation by using the 
 \label{alg:minlinkdd}
 \begin{algorithmic}
 \Require Set of obstacle faces and points \spt and \ept
-\Ensure Link distance between \spt and \ept
+\Output Link distance between \spt and \ept
 \State Compute decomposition of \fspace into $D$-dimensional cells using Algorithm~\ref{alg:splitdd}.
 \ForAll{$d\in\set{\pm1,\dots,\pm D}$}
 	\State $E_d\gets$ Event set containing \addE at \spt with size 0 and \cellE for the cell containing \spt.
