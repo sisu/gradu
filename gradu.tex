@@ -783,7 +783,11 @@ In this thesis we define \inter{s} to be a half-open real number interval for ea
 
 Each branch node $s$ has two child nodes, \leftc{s} and \rightc{s}.
 The intervals of the children divide the parent interval into two parts:
-$\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
+\begin{align*}
+&\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}} \\
+&\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset
+\end{align*}
+%$\inter{s}=\inter{\leftc{s}}\cup\inter{\rightc{s}}$, $\inter{\leftc{s}}\cap\inter{\rightc{s}}=\emptyset$.
 The root node corresponds to the largest supported interval \range{\epts[1]}{\epts[\segsize]}, and the leaf nodes correspond to the smallest possible intervals \range{\epts[i]}{\epts[i+1]}.
 Figure~\ref{fig:segtree} illustrates the segment tree structure.
 
@@ -893,7 +897,7 @@ At least one of the following is true if and only if $I\cap J\neq\emptyset$.
 \end{lem}
 \begin{proof}
 First suppose that $I\cap J\neq\emptyset$.
-Let $x$ be any leaf node of the segment tree such that $\inter{x}\in I\cap J$.
+Let $x$ be any leaf node of the segment tree such that $\inter{x}\subseteq I\cap J$.
 Let $A$ be the set of ancestors of $x$.
 Since the canonical nodes of an interval cover the whole interval, $A$ intersects both \canon{I} and \canon{J}.
 Let $i$ and $j$ be the nodes where $A$ intersects \canon{I} and \canon{J} respectively.
@@ -1013,7 +1017,7 @@ Let $\canoni{R_i}{i}$ be the canonical rectangles of $R_i$ in the 1-dimensional 
 
 Consider a 2-dimensional segment tree, and two arbitrary nodes of the projected 1-dimensional trees $c_1\in\canoni{R_1}{1}$ and $c_2\in\canoni{R_2}{2}$.
 Let $c_1\times c_2$ be the node of the 2-dimensional tree that is found in position of $c_1$ in the inner tree, and $c_2$ in the outer tree.
-Similarly for $D$-dimensional trees we define product $c_1\times c_2\times\dots\times c_n$ to be the node of a $D$-dimensional segment tree defined by positions of 1-dimensional tree nodes.
+Similarly for $D$-dimensional trees we define product $c_1\times c_2\times\dots\times c_D$ to be the node of a $D$-dimensional segment tree defined by positions of 1-dimensional tree nodes.
 The following lemma shows how the canonical nodes of 1-dimensional projections can be combined to get the canonical nodes of a $D$-dimensional tree.
 
 \begin{lem}\label{lem:canond}
