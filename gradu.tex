@@ -838,7 +838,7 @@ We can iterate over the canonical nodes and their ancestors by using Algorithm~\
 \caption{Visit all the canonical nodes of an interval and their ancestors.}\label{alg:segiter}
 \begin{algorithmic}
 \Require Interval $I$
-\Ensure Call $\visitc$ and $\visitp$ for all the elements in \canon{I} and in \canonpar{I} respectively.
+\Ensure Calls $\visitc$ and $\visitp$ for all the elements in \canon{I} and in \canonpar{I} respectively.
 \Procedure{\iterc}{$s$}
 	\Comment{Visit nodes in the subtree rooted at $s$}
 	\If{$\inter{s}\subseteq I$}
@@ -939,7 +939,7 @@ The exact process is shown in Algorithm~\ref{alg:segrm}.
 \caption{Clear interval $I$ from a segment tree.}\label{alg:segrm}
 \begin{algorithmic}
 \Require Interval $I$
-\Ensure Clear $I$ from the segment tree.
+\Ensure Clears $I$ from the segment tree.
 \Procedure{\cleariv}{$s$}
 	\If{$\inter{s}\cap I=\emptyset$ or (\nodeps{s} and \nodecs{s} are empty)}
 		\State \Return
@@ -1083,7 +1083,7 @@ The nodes $s$ of the innermost tree have dimension 0, and they contain only a si
 \caption{Add a rectangle to a $D$-dimensional segment tree.}\label{alg:rectadd}
 \begin{algorithmic}
 \Require $D$-dimensional rectangle $R$
-\Ensure Set \hasrect{s} for each canonical node $s$ of $R$.
+\Ensure Sets \hasrect{s} for each canonical node $s$ of $R$.
 \Procedure{\adddt}{$D,s$}
 \Comment{Insert to the subtree rooted at node $s$}
 	\If{$D=0$}
@@ -1205,7 +1205,7 @@ Algorithm~\ref{alg:uadd} shows the tree insert operation.
 \caption{Add a rectangle to a $D$-dimensional unified tree.}\label{alg:uadd}
 \begin{algorithmic}
 \Require $D$-dimensional hyperrectangle $R$
-\Ensure Set \hasbits{s}{b} for each node $s$ and bitmask $b$ matching $R$
+\Ensure Sets \hasbits{s}{b} for each node $s$ and bitmask $b$ matching $R$
 \Procedure{\adddt}{$d,s$}
 \Comment{Insert to the subtree rooted at node $s$ by moving along axes $1\dots d$}
 	\If{$d=0$}
@@ -1305,7 +1305,7 @@ In the end we regenerate the bits about values in the successors by using anothe
 \caption{Clear a rectangle from a unified segment tree.}\label{alg:segurm}
 \begin{algorithmic}
 \Require $D$-dimensional hyperrectangle $R$
-\Ensure Modify \hasbits{}{} accordingly.
+\Ensure Modifies \hasbits{}{} accordingly.
 \Procedure{\cleardt}{$d,s$}
 	\If{$\rect{s}_d\cap R_d=\emptyset$ or $\neg\hasbits{s}{0}$}
 		\State \Return
@@ -1671,7 +1671,7 @@ Algorithm~\ref{alg:sweep3d} describes the sweep.
 \caption{Illuminate by a plane sweep in direction $+z$ starting from provided events.}\label{alg:sweep3d}
 \begin{algorithmic}
 \Require Initial event set $E$
-\Ensure Generate \addEs for the next illumination step and mark newly found obstacles as visited.
+\Ensure Generates \addEs for the next illumination step and marks newly found obstacles as visited.
 \State $Q\gets$ Priority queue containing $E$.
 \State $T\gets$ Empty 2D segment tree.
 \While{$Q$ is not empty}
@@ -1899,7 +1899,7 @@ Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination
 \label{alg:sweepdd}
 \begin{algorithmic}
 \Require Initial event set $E$
-\Ensure Generate \addEs for the next illumination step and mark newly found obstacles as visited.
+\Ensure Generates \addEs for the next illumination step and marks newly found obstacles as visited.
 \State $Q\gets$ Priority queue containing $E$.
 \State $T\gets$ Empty $(D-1)$-dimensional unified segment tree.
 \While{$Q$ is not empty}
