@@ -938,7 +938,7 @@ The exact process is shown in Algorithm~\ref{alg:segrm}.
 \caption{Clear interval $I$ from a segment tree.}\label{alg:segrm}
 \begin{algorithmic}
 \Require Interval $I$
-\Ensure Clear interval $I$ from the segment tree.
+\Ensure Clear $I$ from the segment tree.
 \Procedure{\cleariv}{$s$}
 	\If{$\inter{s}\cap I=\emptyset$ or (\nodeps{s} and \nodecs{s} are empty)}
 		\State \Return
@@ -1664,7 +1664,7 @@ Each \addE inserts a new rectangle to the tree.
 Each illuminated canonical node of the tree stores a reference to the event that was used to generate it.
 If multiple \addEs illuminate the same canonical rectangle, only the one inserted first is stored.
 This reference is used to determine the $z$-range of the \addEs generated during the \obsEs, as well as for tracing back the path from \ept to \spt when the illumination finishes.
-The pseudocode below describes the sweep.
+Algorithm~\ref{alg:sweep3d} describes the sweep.
 
 \begin{algorithm}
 \caption{Illuminate by a plane sweep in direction $+z$ starting from provided events.}\label{alg:sweep3d}
@@ -1695,7 +1695,7 @@ The pseudocode below describes the sweep.
 \end{algorithmic}
 \end{algorithm}
 
-We can implement the staged illumination process by iteratively applying the sweep algorithm.
+Algorithm~\ref{alg:minlink3d} implements the staged illumination process by iteratively applying the sweep algorithm.
 
 \begin{algorithm}
 \caption{Run staged illumination in a three-dimensional domain.}\label{alg:minlink3d}
@@ -1890,7 +1890,8 @@ The 2D sweep plane is replaced by a $(D-1)$-dimensional hyperplane, and each eve
 
 We use $D$-dimensional unified segment tree to store the sweep hyperplane state during the sweeps.
 The unified tree and the $D$-dimensional space decomposition allow us to use almost identical algorithm for the high dimensional case as the algorithm for 3D domains.
-We explain the sweep in direction $+D$, the other directions being identical.
+Algorithm~\ref{alg:sweepdd} shows the sweep in direction $+D$, the other directions being identical.
+Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination by using the hyperplane sweep in all directions on each step.
 
 \begin{algorithm}
 \caption{Illuminate by a hyperplane sweep in direction $+D$ starting from provided events.}
@@ -1921,8 +1922,6 @@ We explain the sweep in direction $+D$, the other directions being identical.
 \EndWhile
 \end{algorithmic}
 \end{algorithm}
-
-We can implement the $D$-dimensional minimum link path computation by using the hyperplane sweep in all directions on each step.
 
 \begin{algorithm}
 \caption{Run staged illumination in a $D$-dimensional domain.}
