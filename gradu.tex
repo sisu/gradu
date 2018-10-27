@@ -1575,8 +1575,8 @@ In the pseudocode we mark the step when the illumination first reaches each rect
 \begin{algorithm}
 \caption{Run staged illumination starting from \spt within free space \fspace such that the first link is horizontal.}\label{alg:minlink2d}
 \begin{algorithmic}
-\Require Set of obstacle faces and points \spt and \ept.
-\Ensure Link distance between \spt and \ept.
+\Require Set of obstacle faces and points \spt and \ept
+\Ensure Link distance between \spt and \ept
 \State Form \decomp{x} for \fspace with Algorithm~\ref{alg:split2d}.
 \State $R\gets\set{r\in\decomp{x} \mid \spt\in r}$
 \State $k\gets 1$
@@ -1666,8 +1666,10 @@ This reference is used to determine the $z$-range of the \addEs generated during
 The pseudocode below describes the sweep.
 
 \begin{algorithm}
-\caption{Illuminate by plane sweep in direction $+z$ starting from a provided event set $E$.}\label{alg:sweep3d}
+\caption{Illuminate by a plane sweep in direction $+z$ starting from provided events.}\label{alg:sweep3d}
 \begin{algorithmic}
+\Require Initial event set $E$
+\Ensure Generate \addEs for the next illumination step and mark newly found obstacles as visited.
 \State $Q\gets$ Priority queue containing $E$.
 \State $T\gets$ Empty 2D segment tree.
 \While{$Q$ is not empty}
@@ -1694,9 +1696,11 @@ The pseudocode below describes the sweep.
 
 We can implement the staged illumination process by iteratively applying the sweep algorithm.
 
-\begin{alg}\label{alg:minlink3d}
-Run staged illumination in 3D domain \fspace starting from point \spt.
+\begin{algorithm}
+\caption{Run staged illumination in a three-dimensional domain.}\label{alg:minlink3d}
 \begin{algorithmic}
+\Require Set of obstacle faces and points \spt and \ept
+\Ensure Link distance between \spt and \ept
 \State Compute decomposition of \fspace into cells using Algorithm~\ref{alg:split3d}.
 \ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
 	\State $E_d\gets$ Event set containing \addE at \spt with width and height 0 and \cellE for the cell containing \spt.
@@ -1714,7 +1718,7 @@ Run staged illumination in 3D domain \fspace starting from point \spt.
 	\EndFor
 \EndWhile
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 \subsection{Event generation}\label{sec:evtgen}
 
@@ -1887,9 +1891,12 @@ We use $D$-dimensional unified segment tree to store the sweep hyperplane state 
 The unified tree and the $D$-dimensional space decomposition allow us to use almost identical algorithm for the high dimensional case as the algorithm for 3D domains.
 We explain the sweep in direction $+D$, the other directions being identical.
 
-\begin{alg}\label{alg:sweepdd}
-Illuminate by plane sweep in direction $+D$ starting from a provided event set $E$.
+\begin{algorithm}
+\caption{Illuminate by a hyperplane sweep in direction $+D$ starting from provided events.}
+\label{alg:sweepdd}
 \begin{algorithmic}
+\Require Initial event set $E$
+\Ensure Generate \addEs for the next illumination step and mark newly found obstacles as visited.
 \State $Q\gets$ Priority queue containing $E$.
 \State $T\gets$ Empty $(D-1)$-dimensional unified segment tree.
 \While{$Q$ is not empty}
@@ -1912,13 +1919,16 @@ Illuminate by plane sweep in direction $+D$ starting from a provided event set $
 	\EndIf
 \EndWhile
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 We can implement the $D$-dimensional minimum link path computation by using the hyperplane sweep in all directions on each step.
 
-\begin{alg}\label{alg:minlinkdd}
-Run staged illumination in $D$-dimensional domain \fspace starting from point \spt.
+\begin{algorithm}
+\caption{Run staged illumination in a $D$-dimensional domain.}
+\label{alg:minlinkdd}
 \begin{algorithmic}
+\Require Set of obstacle faces and points \spt and \ept
+\Ensure Link distance between \spt and \ept
 \State Compute decomposition of \fspace into $D$-dimensional cells using Algorithm~\ref{alg:splitdd}.
 \ForAll{$d\in\set{\pm1,\dots,\pm D}$}
 	\State $E_d\gets$ Event set containing \addE at \spt with size 0 and \cellE for the cell containing \spt.
@@ -1936,7 +1946,7 @@ Run staged illumination in $D$-dimensional domain \fspace starting from point \s
 	\EndFor
 \EndWhile
 \end{algorithmic}
-\end{alg}
+\end{algorithm}
 
 We use the same method for avoiding reilluminating as we used in the 3D algorithm.
 For each obstacle $o$ we record when it was first discovered, and only generate \addEs from $o$ until a certain number of steps has passed.
