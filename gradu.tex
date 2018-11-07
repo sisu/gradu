@@ -152,7 +152,7 @@ We focus on the most classical variant, the \emph{rectilinear} minimum link path
 
 We study the rectilinear minimum link path problem in the plane and in the three-dimensional space, as well as in higher dimensional domains.
 We present several new algorithms for solving the problem in domains of varying dimension.
-For the planar case we develop a simple method that has the optimal time complexity $O(n\log n)$.
+For the planar case we develop a simple method that has the optimal $O(n\log n)$ time complexity.
 For three-dimensional domains we present a new algorithm with running time $O(n^2\log^2 n)$, which is an improvement over the best previously known result $O(n^{2.5}\log n)$.
 The algorithm can also be generalized to higher dimensions, leading to an $O(n^{D-1}\log^{D-1} n)$ time algorithm in $D$-dimensional domains.
 
@@ -167,13 +167,13 @@ The region is expanded by a sweep plane method that uses a multidimensional segm
 
 \section{Introduction}
 
-Various kinds of path finding problems are a very common topic in algorithmics~\cite{survey}.
+Various kinds of path finding problems are a common topic in algorithmics~\cite{survey}.
 The regular shortest path problem asks for the shortest path between two nodes in a graph.
 The geometric version of the problem asks for the shortest path in a continuous space, such as a plane with polygonal obstacles.
-The typical goal is to minimize the Euclidean length of the path, but for some applications other distance metrics are also relevant.
-For example a robot might move forward quickly but turn very slowly, so a long simple route is sometimes preferable to a shorter but more complex route.
+The typical goal is to minimize the Euclidean length of the path, but for some applications other distance metrics are more relevant.
+For example a robot might move quickly in a straight line but take a lot of time to turn, so a long but simple route can be preferable to a shorter but more complex path.
 
-The topic of this thesis is finding geometric path that minimize the amount of points where the path takes a turn.
+The topic of this thesis is finding geometric paths that minimize the number of turns.
 Consider a path consisting of a finite number of straight line segments, also called \emph{links}.
 The \emph{link distance} of the path is the number of segments.
 A \emph{minimum link path} between two points is a path that minimizes the link distance.
@@ -185,29 +185,30 @@ Figure~\ref{fig:paths} shows an example of two kinds of minimum link paths as we
 \end{figure}
 
 Finding minimum link paths is a well studied algorithmic problem\cite{dasnar,de1991,de1992,fitch,handbook,restricted,wagner}.
-The basic idea employed by most known algorithms is a simple extension of the breadth-first search:
-First find all the points that have link distance~1 from the starting point, then points with link distance~2, and similarly iterate until the desired endpoint is encountered.
-As the search happens in continuous space, the tricky part of the algorithms is defining the appropriate data structures to store and update the discovered area.
+The basic idea employed by most of the known algorithms is a simple extension of the breadth-first search:
+We first mark all the points that have link distance~1 from the starting point, then points with link distance~2, and continue until the desired end point is marked.
+The path is then formed by tracing back the markings starting from the end point.
+As the search happens in continuous space, the tricky part of the algorithms is defining the appropriate data structures to store and update the marked region.
 
 In this thesis we focus on the \emph{rectilinear} variant of the problem.
-In the rectilinear minimum link path problem the obstacles as well as the links of the paths are restricted to coordinate axes' directions.
-We study both the planar case as well as 3D version of the rectilinear minimum link path problem.
-We present a new algorithm for the 3D case with $O(n^2\log^2n)$ running time, which is a significant improvement over the earlier best known result $O(n^{2.5}\log n)$~\cite{restricted}.
-Finally, we extend the solution to work in any $D$-dimensional rectilinear domain, resulting in an algorithm with time complexity $O(n^{D-1}\log^{D-1}n)$.
+In the rectilinear problem the obstacles as well as the links of the path are restricted to the coordinate axes' directions.
+We study the regular planar version as well as a three-dimensional extension of the problem.
+We present a new $O(n^2\log^2 n)$ time algorithm for the three-dimensional problem, which is a significant improvement over the best previously known result $O(n^{2.5}\log n)$~\cite{restricted}.
+Finally, we extend the solution to work in any $D$-dimensional rectilinear domain, resulting in an algorithm with $O(n^{D-1}\log^{D-1}n)$ time complexity.
 
 \subsection{Background and new results}
 
-Computing rectilinear minimum link paths is an old and well studied problem.
-The problem was presented in 1968 by Mikami and Tabuchi~\cite{mikami}, who also gave an algorithm with $O(n^2)$ running time.
+Computing rectilinear minimum link paths in the plane is an old and well studied problem.
+The problem was first presented in 1968 by Mikami and Tabuchi~\cite{mikami}, who also gave an algorithm with $O(n^2)$ running time.
 Sato, Sakanaka and Ohtsuki~\cite{sato} presented an algorithm with $O(n\log n)$ time and $O(n)$ space.
 A similar result was achieved independently by Das and Narasimhan~\cite{dasnar}.
-These results are asymptotically optimal, as the problem can be shown to be as hard as sorting~\cite{dasnar} and thus having lower bound $O(n\log n)$.
+These algorithms are asymptotically optimal, as the problem can be shown to be as hard as sorting~\cite{dasnar} and thus having lower bound $O(n\log n)$.
 
-Several algorithms have also been developed for the higher dimensional rectilinear minimum link path problem.
-De Berg et al.~\cite{de1992} gave an $O(n^D\log n)$ algorithm for the $D$-dimensional minimum link path problem.
-For the 3D case, an $O(n^3)$ algorithm was developed by Mikami and Tabuchi~\cite{mikami}.
-Fitch, Butler and Rus~\cite{fitch} gave an algorithm which improves the performance in many cases, but still has $O(n^3)$ worst case running time.
-This was further improved by Wagner, Drysdale and Stein~\cite{wagner}, who gave an algorithm with worst case time complexity $O(n^{2.5}\log n)$.
+Several algorithms have also been developed for the higher dimensional rectilinear case.
+De Berg et al.~\cite{de1992} gave an $O(n^D\log n)$ algorithm for computing a minimum link path in a $D$-dimensional domain.
+For the three-dimensional case, an $O(n^3)$ algorithm was developed by Mikami and Tabuchi~\cite{mikami}.
+Fitch, Butler and Rus~\cite{fitch} gave an algorithm which improves the performance in many cases, but has the same $O(n^3)$ worst case running time.
+This was further improved by Wagner, Drysdale and Stein~\cite{wagner}, who gave an algorithm with worst case $O(n^{2.5}\log n)$ time complexity.
 
 In this thesis we focus on new results to the rectilinear minimum link path problem, which are original research of the author.
 The following results have been published in peer-reviewed journals and conferences.
@@ -224,24 +225,24 @@ The main ideas were invented by the author, but many details and proofs of the r
 The following items are new contributions in this thesis.
 
 \begin{itemize}
-\item An algorithm for the minimum link path problem in higher dimensions.
-	We show that the rectilinear minimum link path problem in $D$ dimensions can be solved in $O(n^{D-1}\log^{D-1} n)$ time by a generalization of the 3D algorithm.
-\item Detailed description of the algorithm for the 3D minimum link path problem and the data structures used in the algorithm.
-\item Extension of the space decomposition used in the 3D algorithm to higher dimensions.
-\item Simplification of the 3D minimum link algorithm by using the unified segment tree by Wagner~\cite{unified}.
+\item Detailed description of the algorithm for the three-dimensional minimum link path problem and the data structures used in the algorithm.
+\item Simplification of the three-dimensional minimum link algorithm by using the unified segment tree by Wagner~\cite{unified}.
+\item Extension of the space decomposition used in the algorithms to higher dimensions.
 \item Extension of the unified segment tree to higher than 2 dimensions and a method for clearing a hyperrectangle in the tree.
 	The original paper by Wagner~\cite{unified} mentions the possibility of extending the structure to higher dimensions, but does not provide any details.
+\item An algorithm for the minimum link path problem in higher dimensions.
+	We show that the rectilinear minimum link path problem in $D$ dimensions can be solved in $O(n^{D-1}\log^{D-1} n)$ time by a generalization of the algorithm for the three-dimensional case.
 \end{itemize}
 
 \subsection{Overview of the algorithms}\label{sec:overview}
 
-Majority of the known algorithms for the minimum link path problem use the same basic idea~\cite[Sections 26.4, 27.3]{handbook}:
-Let \fspace be the region not blocked by obstacles, and let $\spt\in\fspace$ and $\ept\in\fspace$ be the starting and the ending point of the path.
+A majority of the known algorithms for the minimum link path problem share a common basic idea~\cite[Sections 26.4, 27.3]{handbook}:
+Let \fspace be the region not blocked by obstacles, and let $\spt\in\fspace$ and $\ept\in\fspace$ be the start point and the end point of the path.
 The region \fspace is also called the \emph{free space}.
 Let $\reach{k}\subseteq\fspace$ be the set of points reachable by at most $k$ links from \spt.
-We start by defining $\reach{0}=\set{\spt}$, and iteratively compute \reach{k+1} from \reach{k}.
+We start by defining $\reach{0}=\set{\spt}$, and iteratively compute \reach{k+1} based on \reach{k}.
 The iteration continues until we find $k$ such that $\ept\in\reach{k}$.
-This iteration is often called \emph{staged illumination}, because the computation of \reach{k+1} can be illustrated as placing light sources on the boundaries of \reach{k}.
+This iteration is often called the \emph{staged illumination}, because the computation of \reach{k+1} can be illustrated as placing light sources on the boundaries of \reach{k} and observing the region that gets lit.
 Figure~\ref{fig:staged} shows an example of the staged illumination process.
 
 \begin{figure}\centering
@@ -259,26 +260,26 @@ The illumination process closely resembles the breadth-first search, though with
 A nontrivial part of the minimum link path algorithms is maintaining the illuminated area in a data structure that allows efficient computation of \reach{k+1} from \reach{k}.
 
 Representing the illuminated area can be simplified by first splitting the free space into rectangles.
-This is analogous to how many problems in computational geometry are solved by first triangulating the input~\cite{handbook}.
-In Section~\ref{sec:decomposition} we present an algorithms for construction a decompositions suitable for the minimum link path computation.
+This is analogous to how various algorithms in computational geometry construct a triangulating the input region as the first step~\cite{handbook}.
+In Section~\ref{sec:decomposition} we present an algorithm to construct a decompositions suitable for the minimum link path algorithms.
 
 Because the possible directions of the links of the path are limited, we can use \emph{sweep line algorithms} to efficiently compute \reach{k+1} from \reach{k}.
 Sweep line algorithms are a generic technique used for a wide range of computational geometry problems~\cite[Section 33.2]{clrs}.
 The idea is to image a line that crosses over the domain and stops at some discrete \emph{events}.
 As the sweep line progresses, we gradually update the solution to take into account the parts of the domain encountered in the events.
-The sweep line method allows us to transform the 2-dimensional illumination problem into a series of easier 1-dimensional problems on the sweep line.
+The sweep line method allows us to transform the 2-dimensional illumination problem into a series of easier 1-dimensional problems.
 
 During the sweeps we need to maintain the relationship between the sweep line and the obstacles as well as the region \reach{k}.
 We want to maintain the intersection of the sweep line with the illuminated area, which requires efficient handling of intervals of real numbers.
-\emph{Segment tree} is a generic data structure for working with intervals.
-It is flexible enough to allow implementing all the operations required by the staged illumination.
+The \emph{segment tree} is a generic data structure for working with intervals.
+It is flexible enough to support all the operations required by the staged illumination.
 Segment trees are described in Section~\ref{sec:segtree}.
 
-We combine the aforementioned concepts into a simple algorithm for finding minimum link paths in Section~\ref{sec:minlink2d}.
+We use the aforementioned concepts to build a simple algorithm for finding minimum link paths in Section~\ref{sec:minlink2d}.
 The ideas of the two-dimensional solution can also be generalized to work in higher dimensions.
 Many details need to be taken care of, but the basic ideas are relatively straightforward to transfer to more than two dimensions.
-The space is decomposed into cuboids instead of rectangles, and the sweep line is replaced by a sweep plane.
-The segment tree can also be generalized into a higher dimensional structure.
+The free space is decomposed into cuboids instead of rectangles, and the sweep line is replaced by a \emph{sweep plane}.
+The segment tree can also be generalized into a multidimensional structure.
 These elements are combined into an algorithm for finding minimum link paths in three and higher dimensional domains in Section~\ref{sec:minlink3d}.
 
 
