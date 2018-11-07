@@ -148,12 +148,18 @@ F.2.2 [Nonnumerical Algorithms and Problems]}}
 \begin{abstract}
 The thesis discusses algorithms for the minimum link path problem, which is a well known geometric path finding problem.
 The goal is to find a path that does the minimum number of turns amidst obstacles in a plane.
-We focus on the rectilinear variant of the problem, where the path and the obstacles are restricted to the directions of the coordinate axes.
+We focus on the most classical variant, the \emph{rectilinear} minimum link path problem, where the path and the obstacles are restricted to the directions of the coordinate axes.
 
-We study the rectilinear minimum link path problem in the plane and in three-dimensional space, as well as in higher dimensional domains.
-We develop new algorithms for the 3D and the high-dimensional case that achieve better asymptotic running times than the previous known methods.
-We present an algorithm for the 3D rectilinear path problem with running time $O(n^2\log^2 n)$ and space complexity $O(n^2)$ in a domain with $n$ obstacle vertices.
-We show that the solution can be generalized to higher dimensions, leading to an algorithm for the $D$-dimensional minimum link path problem with $O(n^{D-1}\log^{D-1} n)$ running time and $O(n^{D-1})$ space complexity.
+We study the rectilinear minimum link path problem in the plane and in the three-dimensional space, as well as in higher dimensional domains.
+We present several new algorithms for solving the problem in domains of varying dimension.
+For the planar case we develop a simple method that has the optimal time complexity $O(n\log n)$.
+For three-dimensional domains we present a new algorithm with running time $O(n^2\log^2 n)$, which is an improvement over the best previously known result $O(n^{2.5}\log n)$.
+The algorithm can also be generalized to higher dimensions, leading to an $O(n^{D-1}\log^{D-1} n)$ time algorithm in $D$-dimensional domains.
+
+We introduce the new algorithms as well as the data structures used.
+The algorithms use the same basic principle as many other search algorithms: maintain a reachable region that is gradually expanded to form the shortest path map from the starting point.
+The reachable region is tracked by using a simple recursive space decomposition.
+The region is expanded by a sweep plane method that uses a multidimensional segment tree, which is a well known geometric data structure.
 \end{abstract}
 
 \mytableofcontents
