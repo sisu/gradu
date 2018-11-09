@@ -192,8 +192,15 @@ As the search happens in continuous space, the tricky part of the algorithms is 
 
 In this thesis we focus on the \emph{rectilinear} variant of the problem.
 In the rectilinear problem the obstacles as well as the links of the path are restricted to the coordinate axes' directions.
-We study the regular planar version as well as a three-dimensional extension of the problem.
-We present a new $O(n^2\log^2 n)$ time algorithm for the three-dimensional problem, which is a significant improvement over the best previously known result $O(n^{2.5}\log n)$~\cite{restricted}.
+The problem can also be defined in a three-dimensional domain as well as higher dimensions.
+
+Following a typical convention, we assume that the input domain is given as a list of $n$ rectangular obstacle faces~\cite{wagner}.
+In the planar case the obstacle faces are line segments, and in $D$-dimensional domain they are $(D-1)$-dimensional hyperrectangles.
+
+We present new algorithms for both the two dimensional case as well as the higher dimensional variants.
+For the planar case we design an algorithm that solves the problem in optimal $O(n\log n)$ time and $O(n)$ space.
+The new algorithm is simpler than the previously known solutions and has the same time and space complexity.
+We also introduce a new $O(n^2\log^2 n)$ time algorithm for the three-dimensional case, which is a significant improvement over the best previously known result $O(n^{2.5}\log n)$~\cite{restricted}.
 Finally, we extend the solution to work in any $D$-dimensional rectilinear domain, resulting in an algorithm with $O(n^{D-1}\log^{D-1}n)$ time complexity.
 
 \subsection{Background and new results}
@@ -287,8 +294,8 @@ These elements are combined into an algorithm for finding minimum link paths in 
 \section{Space decomposition}\label{sec:decomposition}
 
 The first step of many minimum link path algorithms is decomposing the free space into simple primitives~\cite{dasnar,imai86,revisited}.
-The decomposition has two purposes during the staged illumination:
-to track the illuminated area and to guide the sweep line algorithms that illuminate new areas.
+The decomposition has two functions during the staged illumination:
+it is used to track the illuminated area as well as to guide the sweep line algorithms that illuminate new areas.
 
 %The domain of the minimum link path problem is a polygon with smaller polygons as obstacles.
 %The input is given as a list of polygons, and each polygon is described by a list of vertices.
