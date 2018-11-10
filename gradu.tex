@@ -207,12 +207,12 @@ Finally, we extend the solution to work in any $D$-dimensional rectilinear domai
 
 Computing rectilinear minimum link paths in the plane is an old and well studied problem.
 The problem was first presented in 1968 by Mikami and Tabuchi~\cite{mikami}, who also gave an algorithm with $O(n^2)$ running time.
-Sato, Sakanaka and Ohtsuki~\cite{sato} presented an algorithm with $O(n\log n)$ time and $O(n)$ space.
+Sato, Sakanaka and Ohtsuki~\cite{sato} presented an algorithm with $O(n\log n)$ time and $O(n)$ space complexity.
 A similar result was achieved independently by Das and Narasimhan~\cite{dasnar}.
 These algorithms are asymptotically optimal, as the problem can be shown to be as hard as sorting~\cite{dasnar} and thus having lower bound $O(n\log n)$.
 
-Several algorithms have also been developed for the higher dimensional rectilinear case.
-De Berg et al.~\cite{de1992} gave an $O(n^D\log n)$ algorithm for computing a minimum link path in a $D$-dimensional domain.
+Several algorithms have also been developed for the higher dimensional rectilinear problem.
+De Berg et al.~\cite{de1992} gave an $O(n^D\log n)$ time algorithm for computing a minimum link path in a $D$-dimensional domain.
 For the three-dimensional case, an $O(n^3)$ algorithm was developed by Mikami and Tabuchi~\cite{mikami}.
 Fitch, Butler and Rus~\cite{fitch} gave an algorithm which improves the performance in many cases, but has the same $O(n^3)$ worst case running time.
 This was further improved by Wagner, Drysdale and Stein~\cite{wagner}, who gave an algorithm with worst case $O(n^{2.5}\log n)$ time complexity.
@@ -222,9 +222,9 @@ The following results have been published in peer-reviewed journals and conferen
 \begin{itemize}
 \item A simplified $O(n\log n)$ algorithm for the 2-dimensional case~\cite{revisited}.
 The article was written with the co-authors Valentin Polishchuk and Joseph S. B. Mitchell.
-The main ideas of the algorithm were invented by the author, though many details of it were worked out with Polishchuk.
+The main ideas of the algorithm were invented by the author, though many details were worked out with Polishchuk.
 The contribution of Mitchell was mainly for other results not discussed in this thesis, such as the approximation algorithm for the non-rectilinear minimum link path problem.
-\item A new algorithm for the 3D minimum link path problem, improving the running time from the previous best result of $O(n^{2.5}\log n)$ to $O(n^2\log^2 n)$~\cite{restricted}.
+\item A new algorithm for the 3-dimensional minimum link path problem, improving the running time from the previous best result of $O(n^{2.5}\log n)$ to $O(n^2\log^2 n)$~\cite{restricted}.
 The publication was written with the co-author Valentin Polishchuk.
 The main ideas were invented by the author, but many details and proofs of the running time were worked out together with Polishchuk.
 \end{itemize}
@@ -234,11 +234,11 @@ The following items are new contributions in this thesis.
 \begin{itemize}
 \item Detailed description of the algorithm for the three-dimensional minimum link path problem and the data structures used in the algorithm.
 \item Simplification of the three-dimensional minimum link algorithm by using the unified segment tree by Wagner~\cite{unified}.
-\item Extension of the space decomposition used in the algorithms to higher dimensions.
-\item Extension of the unified segment tree to higher than 2 dimensions and a method for clearing a hyperrectangle in the tree.
-	The original paper by Wagner~\cite{unified} mentions the possibility of extending the structure to higher dimensions, but does not provide any details.
+\item Extension of the space decomposition used in the algorithms to higher than three dimensions.
+\item Extension of the unified segment tree to higher than two dimensions and a method for clearing a hyperrectangle in the tree.
+	The original paper by Wagner~\cite{unified} mentions the possibility of extending the structure to higher dimensions but does not provide any details.
 \item An algorithm for the minimum link path problem in higher dimensions.
-	We show that the rectilinear minimum link path problem in $D$ dimensions can be solved in $O(n^{D-1}\log^{D-1} n)$ time by a generalization of the algorithm for the three-dimensional case.
+	We show that the rectilinear minimum link path problem in $D$-dimensional domains can be solved in $O(n^{D-1}\log^{D-1} n)$ time by a generalization of the algorithm for the three-dimensional case.
 \end{itemize}
 
 \subsection{Overview of the algorithms}\label{sec:overview}
@@ -274,10 +274,10 @@ Because the possible directions of the links of the path are limited, we can use
 Sweep line algorithms are a generic technique used for a wide range of computational geometry problems~\cite[Section 33.2]{clrs}.
 The idea is to image a line that crosses over the domain and stops at some discrete \emph{events}.
 As the sweep line progresses, we gradually update the solution to take into account the parts of the domain encountered in the events.
-The sweep line method allows us to transform the 2-dimensional illumination problem into a series of easier 1-dimensional problems.
+The sweep line method allows us to transform the two-dimensional illumination problem into a series of easier one-dimensional problems.
 
 During the sweeps we need to maintain the relationship between the sweep line and the obstacles as well as the region \reach{k}.
-We want to maintain the intersection of the sweep line with the illuminated area, which requires efficient handling of intervals of real numbers.
+We need to maintain the intersection of the sweep line with the illuminated area, which requires efficient handling of intervals of real numbers.
 The \emph{segment tree} is a generic data structure for working with intervals.
 It is flexible enough to support all the operations required by the staged illumination.
 Segment trees are described in Section~\ref{sec:segtree}.
