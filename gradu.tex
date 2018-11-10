@@ -103,7 +103,7 @@
 \newcommand\obsd[2]{\ensuremath{\textsc{obs}_{#2}{(#1)}}\xspace}
 
 \newcommand\decomp[1]{\ensuremath{\textsc{dec}_{#1}}\xspace}
-%\newcommand\decompc[1]{\ensuremath{\textsc{dec}({#1})}\xspace}
+\newcommand\decompa[2]{\ensuremath{\textsc{dec}_{#1}(#2)}\xspace}
 \newcommand\sweep[2]{\ensuremath{\textsc{sweep}_{#2}{(#1)}}\xspace}
 \newcommand\stepof[1]{\ensuremath{\texttt{step}{[#1]}}\xspace}
 \newcommand\proj[2]{\ensuremath{\text{proj}_{#1}(#2)}\xspace}
@@ -194,8 +194,10 @@ In this thesis we focus on the \emph{rectilinear} variant of the problem.
 In the rectilinear problem the obstacles as well as the links of the path are restricted to the coordinate axes' directions.
 The problem can also be defined in a three-dimensional domain as well as higher dimensions.
 
-Following a typical convention, we assume that the input domain is given as a list of $n$ rectangular obstacle faces~\cite{wagner}.
+Following a typical convention, we assume that the domain is given as a list of $n$ rectangular obstacle faces~\cite{wagner}.
 In the planar case the obstacle faces are line segments, and in $D$-dimensional domain they are $(D-1)$-dimensional hyperrectangles.
+We use the terms ``obstacle'' and ``obstacle face'' interchangeably to refer to an obstacle face in the input.
+Each obstacle is also associated with a normal vector that points towards the free space.
 
 We present new algorithms for both the two dimensional case as well as the higher dimensional variants.
 For the planar case we design an algorithm that solves the problem in optimal $O(n\log n)$ time and $O(n)$ space.
@@ -294,24 +296,22 @@ These elements are combined into an algorithm for finding minimum link paths in 
 \section{Space decomposition}\label{sec:decomposition}
 
 The first step of many minimum link path algorithms is decomposing the free space into simple primitives~\cite{dasnar,imai86,revisited}.
-The decomposition has two functions during the staged illumination:
-it is used to track the illuminated area as well as to guide the sweep line algorithms that illuminate new areas.
+The decomposition plays two roles during the staged illumination:
+it is used to track the illuminated area, and to guide the sweep line algorithms that illuminate new areas.
 
-%The domain of the minimum link path problem is a polygon with smaller polygons as obstacles.
-%The input is given as a list of polygons, and each polygon is described by a list of vertices.
-%This form is inconvenient for path planning algorithms, as many simple operations, such as checking whether we can move from a given point to a given direction, require scanning through all the polygons.
+In the rectilinear minimum link path problem the obstacle edges are oriented according to the coordinate axes.
+This allows us to decompose the free space into axis-aligned rectangles, which is a convenient form for finding rectilinear paths.
+The rectangles in the decomposition are also called \emph{cells}.
+We also store a list of links to neighboring cells and obstacle faces for each cell of the decomposition.
+Thus the decomposition can be seen as a graph with cells as vertices and an edge between each pair of adjacent cells.
+Recall that $n$ is the total number of obstacle faces in the input.
+We will present a method that decomposes a two-dimensional rectilinear domain into $O(n)$ cells such the total number of links between cells is $O(n)$.
 
-In the rectilinear minimum link path problem the obstacle edges are oriented according to the coordinate axis.
-This allows us to decompose the free space into axis-aligned rectangles, which is a convenient form for rectilinear path computation.
-For each cell of the decomposition we also construct links to neighboring cells and obstacles.
-In other words, the decomposition can be seen as a graph with rectangles as vertices and an edge between each pair of adjacent rectangles.
-Let $n$ be the total number of vertices in all the obstacles.
-We will present a method that decomposes the space into $O(n)$ cells such the total number of links between cells is $O(n)$.
-
-A similar structure can also be used for computing minimum link paths in 3-dimensional domains.
-In the 3D rectilinear case each obstacle face is an axis-aligned rectangle in 3D space.
-The free space of a 3D domain can be decomposed into a graph with $O(n^2)$ cuboid as vertices and $O(n^2)$ edges.
-This decomposition algorithm can also be extended to higher dimensions: a $D$-dimensional domain can be split into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1})$ links between them.
+A similar structure can also be used for computing minimum link paths in three-dimensional domains.
+In the three-dimensional rectilinear case each obstacle face is an axis-aligned rectangle in the three-dimensional space.
+The free space of a three-dimensional domain can be decomposed into a graph with $O(n^2)$ cuboids as vertices and $O(n^2)$ edges.
+This decomposition algorithm can also be extended to higher dimensions:
+we will show how to decompose a $D$-dimensional domain into $O(n^{D-1})$ hyperrectangles with $O(n^{D-1})$ links between them.
 
 \subsection{Planar decomposition}\label{sec:decomp2d}
 
@@ -325,28 +325,30 @@ We focus on \decomp{x} below, as \decomp{y} has all the same properties with coo
 	\includegraphics[scale=0.6,page=2]{fig/decomp}
 	\hfil
 	\includegraphics[scale=0.6,page=3]{fig/decomp}
-	\caption{Horizontal and vertical decomposition of the same domain. Each cell touches at least one obstacle corner and each obstacle corner touches at most two cells, so both decompositions have size $O(n)$.}\label{fig:decomp}
+	\caption{The horizontal decomposition and the vertical decomposition of the same domain.
+	Each cell touches at least one obstacle corner and each obstacle corner touches at most two cells, so both decompositions have size $O(n)$.}\label{fig:decomp}
 \end{figure}
 
 It is easy to see that each cell of \decomp{x} touches at least one obstacle vertex.
-Since each vertex can be touched by at most two rectangles, the size of the decomposition is $O(n)$.
+Since each vertex can touch at most two rectangles, the size of the decomposition is $O(n)$.
 Each pair of touching rectangles also shares a common obstacle corner, so the number of links is also $O(n)$.
+
+Each rectangle $a$ in the decomposition is defined by its $x$-range \xrange{a} and the $y$-range \yrange{a}, which we assume to be half-open intervals.
+We refer to lower and upper bound of each range $r$ by $r_{start}$ and $r_{end}$.
 
 \decomp{x} can be constructed by a line sweep algorithm~\cite{dasnar}.
 We sweep over the domain by a horizontal line moving from $y$ coordinate $-\infty$ (down) to $\infty$ (up).
 During the sweep we maintain the intersection of the free space \fspace and the sweep line.
-The intersection consists of non-overlapping intervals, which are used as $x$-ranges of the constructed rectangles.
+The intersection consists of non-overlapping intervals, which are used as the $x$-ranges of the constructed rectangles.
 The rectangles touching the sweep line are stored in a binary tree during the sweep.
-Each rectangle $a$ in the binary tree is defined by intervals \xrange{a} and \yrange{a}.
-We refer to lower and upper bound of each range $r$ by $r_{start}$ and $r_{end}$.
-\yranget{a}{end} is initially undefined when a rectangle $a$ is added to the tree, because we don't know how tall the rectangle will be until $a$ is removed from the tree.
+When a rectangle $a$ is added to the tree, \yranget{a}{end} is initially left undefined because we don't know how tall the rectangle will be until $a$ is removed from the tree.
 
 Algorithm~\ref{alg:split2d} shows the sweep line process.
 The sweep stops at each horizontal obstacle edge.
-Each edge is either the bottom or the top of an obstacle.
-If the edge is the bottom of an obstacle, the $x$-range of the edge is fully contained in one of the intervals in the search tree.
-If the edge is the top of an obstacle, the $x$-range does not intersect any intervals in the tree, but the left and right endpoints may touch some intervals.
-In both cases the rectangles touching the encountered edge are removed from the search tree, and $O(1)$ new rectangles are inserted to maintain the sweep line state.
+The normal of the edge points either down or up.
+If the normal points down, the $x$-range of the obstacle is fully contained in one of the $x$-ranges of the rectangles in the search tree.
+If the normal points up, the obstacle range does not intersect any $x$-ranges in the tree, but the left and right endpoints may touch some of the rectangles.
+In both cases the rectangles touching the obstacle edge are removed from the search tree, and $O(1)$ new rectangles are inserted to maintain the sweep line state.
 
 \begin{algorithm}
 \caption{Decompose the free space into \decomp{x}.}\label{alg:split2d}
@@ -488,7 +490,7 @@ Figure~\ref{fig:linkproof} illustrates the case where two adjacent cross section
 \begin{lem}\label{lem:decomp2dch}
 Consider two obstacle sets $A$ and $B$ on 2D plane.
 Let $n$ be the total number of obstacle edges in $A$ and $B$, and $k$ be the number of edges that are present in exactly one of the sets.
-The number of overlapping rectangles in \decomp{x}(A) and \decomp{x}(B) is $O(nk)$.
+The number of overlapping rectangles in \decompa{x}{A} and \decompa{x}{B} is $O(nk)$.
 \end{lem}
 \begin{proof}
 We divide the intersecting rectangle pairs into two sets:
