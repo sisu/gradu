@@ -796,13 +796,15 @@ Algorithm~\ref{alg:splitdd} and Algorithm~\ref{alg:overlapdd} both require $O(n^
 \section{Segment tree}\label{sec:segtree}
 
 Segment tree is a classical data structure that allows storing and querying intervals~\cite{berg2008,wagner}.
-The structure allows performing many operations efficiently.
+The structure allows performing a wide range of operations efficiently.
 For example we can use the segment tree to find all the intervals containing a given number in time $O(\log n)$ from a collection of $n$ intervals.
 We first present the general idea of the tree, and then show how it can be applied to the minimum link path problem.
 
 Segment trees are typically implemented as semi-dynamic data structures.
 This means that the tree can be efficiently modified after it has been build, but we need to specify the set of possible endpoints \epts of intervals in advance.
 This allows implementing most operations in $O(\log\segsize)$ time, and the size of the tree is $O(\segsize)$, where $\segsize=\size{\epts}$.
+The segment tree can also be generalized to create a multidimensional data structure.
+A $D$-dimensional segment tree stores $D$-dimensional hyperrectangles, and many operations can be supported in $O(\log^D \segsize)$ time.
 
 \subsection{Structure of the segment tree}
 
@@ -823,7 +825,7 @@ Figure~\ref{fig:segtree} illustrates the segment tree structure.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.7,page=1]{fig/segtree}
-	\caption{The segment tree is a complete or almost complete binary tree.
+	\caption{The segment tree is a complete or an almost complete binary tree.
 	Each tree node is associated with an interval.
 	The root node represents the total range, and the children of each branch node divide the range of the node into two parts.}\label{fig:segtree}
 \end{figure}
@@ -836,7 +838,7 @@ This representation allows implementing segment tree operations with very low ov
 \subsection{Canonical nodes}
 
 When an interval $I$ is added to a segment tree, it is stored into several tree nodes called the \emph{canonical nodes} of $I$, denoted by \canon{I}.
-The canonical nodes of $I$ are the smallest set of nodes whose intervals cover $I$ but nothing else: $\cup_{c\in\canon{I}} \inter{c}=I$.
+The canonical nodes of $I$ are the smallest set of nodes whose intervals cover $I$ but nothing else: $\bigcup_{c\in\canon{I}} \inter{c}=I$.
 Figure~\ref{fig:canon} shows an example of canonical nodes.
 
 \begin{figure}\centering
@@ -857,7 +859,7 @@ If a set $S$ contains three nodes on the same depth, we can replace the middle o
 Thus $S$ is not a minimal cover of $I$, and can not be \canon{I}.
 \end{proof}
 
-\begin{lem}\label{lem:canonplog}$\size{\canonpar{I}})=O(\log\segsize)$ for any interval $I$.\end{lem}
+\begin{lem}\label{lem:canonplog}$\size{\canonpar{I}}=O(\log\segsize)$ for any interval $I$.\end{lem}
 \begin{proof}
 Similarly to the previous proof we show that \canonpar{I} cannot contain more than two nodes on the same depth.
 
