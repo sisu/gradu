@@ -345,7 +345,7 @@ When a rectangle $a$ is added to the tree, \yranget{a}{end} is initially left un
 
 Algorithm~\ref{alg:split2d} shows the sweep line process.
 The sweep stops at each horizontal obstacle edge.
-The normal of the edge points either down or up.
+The normal of the edge points towards the free space, which is either below or above.
 If the normal points down, the $x$-range of the obstacle is fully contained in one of the $x$-ranges of the rectangles in the search tree.
 If the normal points up, the obstacle range does not intersect any $x$-ranges in the tree, but the left and right endpoints may touch some of the rectangles.
 In both cases the rectangles touching the obstacle edge are removed from the search tree, and $O(1)$ new rectangles are inserted to maintain the sweep line state.
@@ -353,50 +353,54 @@ In both cases the rectangles touching the obstacle edge are removed from the sea
 \begin{algorithm}
 \caption{Decompose the free space into \decomp{x}.}\label{alg:split2d}
 \begin{algorithmic}
-\Require Set of obstacle line segments $E$
-\Output Decomposition \decomp{x} of the region defined by $E$
+\Require Set of obstacle line segments $E$.
+\Output Decomposition \decomp{x} of the region defined by $E$.
 \State $T\gets \text{Empty binary search tree}$.
 \State Sort $E$ by the $y$ coordinates of the edges.
+\State $R\gets$ Empty list of cells.
 \ForAll{$e\in E$}
-	\If{$e$ starts an obstacle}
+	\If{Normal of $e$ points down}
 		\Comment Exactly one $x$-interval in $T$ intersects \xrange{e}.
 		\State $v\gets\text{Lookup $T$ for interval touching \xrange{e}}$.
 		\State Remove $v$ from $T$.
 		\State $\yranget{v}{end}\gets\y{e}$.
+		\State Insert $v$ into $R$.
 		\ForAll{$u\gets \xrange{v}\setminus \xrange{e}$}
 			\Comment Loop over remaining parts of the entry removed from $T$.
 			\State $a\gets$ New rectangle with $x$-range $u$ and starting $y$-coordinate $\y{e}$.
 			\State Insert $a$ into $T$.
 		\EndFor
-	\Else\Comment $e$ starts free space.
+	\Else\Comment Normal of $e$ points up.
 		\State $a\gets$ New rectangle with $x$-range $\xrange{e}$ and starting $y$-coordinate $\y{e}$.
 		\ForAll{$v\in$ lookup $T$ for intervals touching \xrange{e}}
 			\State Remove $v$ from $T$.
 			\State $\yranget{v}{end}\gets\y{e}$.
+			\State Insert $v$ into $R$.
 			\State $\xrange{a}\gets\xrange{a}\cup\xrange{v}$.
 		\EndFor
 		\State Insert $a$ into $T$.
 	\EndIf
 \EndFor
+\State \Return $R$.
 \end{algorithmic}
 \end{algorithm}
 
-In addition to the cells, we also want to compute the links between all adjacent pairs.
+In addition to the cells, we also want to compute the links between all the adjacent pairs.
 It is straightforward to extend Algorithm~\ref{alg:split2d} to compute the links by inserting links between the cells that are removed and inserted in the binary search tree during each event.
 The following lemma gives a bound on the complexity of the algorithm.
 
 \begin{lem}\label{lem:split2dtime}Algorithm~\ref{alg:split2d} works in $O(n\log n)$ time and $O(n)$ space.\end{lem}
 \begin{proof}
 The algorithm sorts all the horizontal edges in $O(n\log n)$ time and iterates over them in $O(n)$ steps.
-On each step we create $O(1)$ new rectangles, and perform $O(1)$ operations to the binary search tree.
+On each step we create $O(1)$ new rectangles and perform $O(1)$ operations in the binary search tree.
 The search tree is a balanced binary tree, so each tree operation is carried out in $O(\log n)$ time.
 Thus the total complexity of the algorithm is $O(n\log n)$ and we only need $O(n)$ storage for the edge list and the binary search tree as well as for storing the output.
 \end{proof}
 
-\subsection{3D cuboid decomposition}\label{sec:split3d}
+\subsection{Three-dimensional cuboid decomposition}\label{sec:split3d}
 
-As a 2D domain can be decomposed into rectangles, a 3D rectilinear domain can be decomposed into cuboids~\cite{restricted,wagner}.
-Decomposition into cuboids is used in the algorithm for 3D minimum link paths in Section~\ref{sec:minlink3d}.
+As a two-dimensional domain can be decomposed into rectangles, a three-dimensional rectilinear domain can be decomposed into cuboids~\cite{restricted,wagner}.
+Decomposition into cuboids is used in the algorithm for three-dimensional minimum link paths in Section~\ref{sec:minlink3d}.
 The running time of the path finding algorithm depends on the size of the decomposition, so it is desirable to find as small decomposition as possible.
 
 We present a simple decomposition algorithm that uses Algorithm~\ref{alg:split2d} as a subroutine~\cite{restricted}.
@@ -409,16 +413,15 @@ During the sweep we maintain the intersection of the sweep plane and the domain~
 The intersection of the domain and a plane is called a \emph{cross section} of the domain.
 
 Algorithm~\ref{alg:split3d} constructs the cells of the decomposition.
-%We discuss the computation of links below.
-In each cross section the algorithm forms a 2D decomposition of the domain with Algorithm~\ref{alg:split2d}, and extends the $xy$-rectangles in $z$-direction so that they fill the whole free space.
+The algorithm forms the planar decomposition of each unique cross section by calling Algorithm~\ref{alg:split2d}, and extends the $xy$-rectangles in $z$-direction so that they fill the whole free space.
 Any common rectangles shared by consecutive cross sections are merged into a single larger cuboid.
 The merging is done by by maintaining a binary search tree of the cells of the previous decomposition.
-Figure~\ref{fig:split3d} shows how the 3D decomposition is created using a series of 2D decompositions.
+Figure~\ref{fig:split3d} shows how the three-dimensional decomposition is created using a series of planar decompositions.
 
 \begin{figure}\centering
 	\begin{subfigure}[t]{0.3\textwidth}\centering
 		\includegraphics[width=0.5\textwidth,page=1]{fig/split3d}
-		\caption{3D domain}
+		\caption{3-dimensional domain}
 	\end{subfigure}
 	\hfil
 	\begin{subfigure}[t]{0.3\textwidth}\centering
@@ -430,14 +433,14 @@ Figure~\ref{fig:split3d} shows how the 3D decomposition is created using a serie
 		\includegraphics[width=0.5\textwidth,page=4]{fig/split3d}
 		\caption{Cross section of the upper level}
 	\end{subfigure}
-	\caption{3D domain is decomposed into cuboids by taking the horizontal decomposition of each cross section. The highlighted cell is shared between the two cross sections, so the cuboids on the two levels are merged.}\label{fig:split3d}
+	\caption{A 3-dimensional domain is decomposed into cuboids by taking the horizontal decomposition of each cross section. The highlighted cell is shared between the two cross sections, so the cuboids on the two levels are merged.}\label{fig:split3d}
 \end{figure}
 
 \begin{algorithm}
 \caption{Decompose the 3-dimensional free space into cuboids.}\label{alg:split3d}
 \begin{algorithmic}
-\Require Set of rectangular obstacle faces $E$
-\Output 3-dimensional decomposition of the volume defined by $E$
+\Require Set of rectangular obstacle faces $E$.
+\Output 3-dimensional decomposition of the volume defined by $E$.
 \State $Z\gets$ All $z$-coordinates of obstacle vertices.
 \State Sort $Z$ in increasing order.
 \State $R\gets$ Empty list of result cells.
