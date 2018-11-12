@@ -933,9 +933,9 @@ Let $x$ be any leaf node of the segment tree such that $\inter{x}\subseteq I\cap
 Let $A$ be the set of ancestors of $x$.
 Since the canonical nodes of an interval cover the whole interval, $A$ intersects both \canon{I} and \canon{J}.
 Let $i$ and $j$ be the nodes where $A$ intersects \canon{I} and \canon{J} respectively.
-Either $i$ and $j$ are the same node, or one of them is an ancestor of the other, which proves the ``if'' part of the claim.
+Either $i$ and $j$ are the same node, or one of them is an ancestor of the other, which proves the ``only if'' part of the claim.
 
-For the ``only if'' part, we look at the three cases separately.
+For the ``if'' part, we look at the three cases separately.
 \begin{enumerate}
 \item If there exists a node $s\in\canon{I}\cap\canon{J}$, then $\inter{s}\subseteq I\cap J$, so $I\cap J\neq\emptyset$.
 \item If there is a node $s\in\canon{I}\cap\canonpar{J}$, then there exists $m\in\canon{J}$ that is a descendant of $s$. $\inter{m}\subseteq J$ and $\inter{m}\subsetneq\inter{s}\subseteq I$, so $I\cap J\neq\emptyset$.
@@ -943,8 +943,8 @@ For the ``only if'' part, we look at the three cases separately.
 \end{enumerate}
 \end{proof}
 
-Lemma~\ref{lem:segintersect} can be used to find intersecting pairs of intervals in a segment tree.
-In each node $s$ of the segment tree, maintain two lists of intervals:
+Lemma~\ref{lem:segintersect} can be used to design an algorithm for detecting intersecting pairs of intervals in a segment tree.
+We maintain two lists of intervals in each segment tree node $s$:
 \begin{itemize}
 \item \nodecs{s}: Intervals $I$ for which $s\in\canon{I}$,
 \item \nodeps{s}: Intervals $I$ for which $s\in\canonpar{I}$.
@@ -953,7 +953,7 @@ When an interval $I$ is added to the segment tree, it is added to \nodecs{s} for
 When we look for intervals intersecting a given interval $J$, we report all the intervals in \nodecs{s} for all $s\in\canonpar{J}$ and in \nodeps{s} for all $s\in\canon{J}$.
 By Lemma~\ref{lem:segintersect} this finds exactly the intervals intersecting $J$ and nothing else.
 Note that some intervals might be found multiple times as they are split into $O(\log n)$ canonical nodes in the tree.
-The structure can be further extended to avoid reporting the duplicates, but for the minimum link paths use case we only need to check whether the intersecting set is empty, so this solution is sufficient.
+The structure can be further extended to avoid reporting the duplicates, but for the minimum link paths use case we only need to check whether the intersecting set is empty or not, so this solution is sufficient.
 
 We also want to support clearing an interval from the tree.
 Clearing an interval $I$ means that each interval $J$ in the tree is replaced by $J\setminus I$, potentially removing $J$ or cutting it into two parts.
@@ -961,12 +961,13 @@ The clear operation is performed in the following three steps:
 \begin{enumerate}
 \item Push down the intervals stored in each $s\in\canonpar{I}$ into \leftc{s} and \rightc{s}.
 \item Clear each subtree rooted in any node $s\in\canon{I}$.
-\item Recompute \nodeps{s} to match the remaining nodes for all nodes $s\in\canonpar{I}$.
+\item Recompute \nodeps{s} to match the remaining intervals for all nodes $s\in\canonpar{I}$.
 \end{enumerate}
 
 All the tree operations can be done in parallel during a single recursive traversal of the tree.
 For nodes $s\in\canonpar{I}$ we push down the intervals in \nodecs{s} to the child nodes before proceeding with the recursion.
 When we arrive in a node $s\in\canon{I}$, the entire subtree rooted at $s$ is cleared.
+The recursion can be stopped early if the current subtree is empty already.
 After the child nodes are cleared, we also need to regenerate the \nodeps{s} list for the nodes $s\in\canonpar{I}$ to remove the intervals that are no longer present in the subtree.
 The regeneration is done by merging the lists in the child nodes of $s$.
 The exact process is shown in Algorithm~\ref{alg:segrm}.
@@ -981,7 +982,9 @@ The exact process is shown in Algorithm~\ref{alg:segrm}.
 		\State \Return
 	\EndIf
 	\If{$\inter{s}\nsubseteq I$}
-		\State Copy \nodecs{s} to \nodecs{\leftc{s}} and to \nodecs{\rightc{s}}.
+		\Comment $s\in\canonpar{I}$
+		\State $\nodecs{\leftc{s}} \gets \nodecs{\leftc{s}} \cup \nodecs{s}$.
+		\State $\nodecs{\rightc{s}} \gets \nodecs{\rightc{s}} \cup \nodecs{s}$.
 	\EndIf
 	\State Clear \nodecs{s}.
 	\State Clear \nodeps{s}.
@@ -990,22 +993,23 @@ The exact process is shown in Algorithm~\ref{alg:segrm}.
 		\State $\cleariv(\rightc{s})$.
 	\EndIf
 	\If{$\inter{s}\nsubseteq I$}
+		\Comment $s\in\canonpar{I}$
 		\State $\nodeps{s}\gets \nodeps{\leftc{s}} \cup \nodeps{\rightc{s}} \cup \nodecs{\leftc{s}} \cup \nodecs{\rightc{s}}$.
 	\EndIf
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-The running time of Algorithm~\ref{alg:segrm} depends on the time taken for copying and merging the intervals stored in the tree nodes.
-If we are only interested in querying whether a given interval overlaps any interval in the tree rather than finding the overlapping intervals, we can replace the interval lists by booleans indicating whether the list is empty.
-We analyze this more simple case.
+The running time of Algorithm~\ref{alg:segrm} depends on the time spent in copying and merging the intervals stored in the tree nodes.
+If we are only interested in querying whether a given interval overlaps any interval in the tree rather than finding the overlapping intervals, we can replace the interval lists by booleans indicating whether the list is non-empty.
+We analyze this more simple case, as it is sufficient for the minimum link path algorithms.
 
 \begin{lem}\label{lem:segrmtime}Suppose that the copying and merging of interval sets in Algorithm~\ref{alg:segrm} can be done in constant time.
 Then the time complexity of clearing range $I$ is $O(\log\segsize + k)$, where $k$ is the number of cleared nodes.\end{lem}
 \begin{proof}
-The function \cleariv traverses through nodes \canon{I}, \canonpar{I}, and the descendants of the canonical nodes, stopping immediately if it ends up in an empty subtree.
+The function \cleariv traverses through nodes \canon{I}, \canonpar{I} and the descendants of the canonical nodes, stopping immediately if it ends up in an empty subtree.
 In each descendant node we either clear the node or return immediately, so we only visit as many descendants as there are cleared nodes.
-The number of canonical nodes and their ancestors is $O(\log\segsize)$, so the total time complexity is $O(\log\segsize + k)$.
+The number of canonical nodes and their ancestors is $O(\log\segsize)$, so the time complexity is $O(\log\segsize + k)$.
 \end{proof}
 
 
