@@ -59,8 +59,8 @@
 %\newcommand\canonp[1]{\ensuremath{\dot{\textsc{c}}(#1)}\xspace}
 %\newcommand\canont[2]{\ensuremath{\textsc{c}(#1,#2)}\xspace}
 \newcommand\canoni[2]{\ensuremath{\textsc{c}_{#2}(#1)}\xspace}
-\newcommand\canonpar[1]{\ensuremath{\textsc{a}_{\textsc{c}}(#1)}\xspace}
-\newcommand\canonpari[2]{\ensuremath{\textsc{a}_{\textsc{c},#2}(#1)}\xspace}
+\newcommand\canonpar[1]{\ensuremath{\textsc{a}(#1)}\xspace}
+\newcommand\canonpari[2]{\ensuremath{\textsc{a}_{#2}(#1)}\xspace}
 \newcommand\epar[1]{\ensuremath{\textsc{p}(#1)}\xspace}
 \newcommand\findol{\ensuremath{\texttt{FindOverlapping}}\xspace}
 \newcommand\iterc{\ensuremath{\texttt{IterCanonical}}\xspace}
@@ -222,7 +222,7 @@ This was further improved by Wagner, Drysdale and Stein~\cite{wagner}, who gave 
 In this thesis we focus on new results to the rectilinear minimum link path problem, which are original research of the author.
 The following results have been published in peer-reviewed journals and conferences.
 \begin{itemize}
-\item A simplified $O(n\log n)$ algorithm for the 2-dimensional case~\cite{revisited}.
+\item A simplified $O(n\log n)$ algorithm for the two-dimensional case~\cite{revisited}.
 The article was written with the co-authors Valentin Polishchuk and Joseph S. B. Mitchell.
 The main ideas of the algorithm were invented by the author, though many details were worked out with Polishchuk.
 The contribution of Mitchell was mainly for other results not discussed in this thesis, such as the approximation algorithm for the non-rectilinear minimum link path problem.
@@ -873,7 +873,7 @@ We can iterate over the canonical nodes and their ancestors by using Algorithm~\
 \begin{algorithm}
 \caption{Visit all the canonical nodes of an interval and their ancestors.}\label{alg:segiter}
 \begin{algorithmic}
-\Require Interval $I$
+\Require Interval $I$.
 \Ensure Calls $\visitc$ and $\visitp$ for all the elements in \canon{I} and in \canonpar{I} respectively.
 \Procedure{\iterc}{$s$}
 	\Comment{Visit nodes in the subtree rooted at $s$}
@@ -975,7 +975,7 @@ The exact process is shown in Algorithm~\ref{alg:segrm}.
 \begin{algorithm}
 \caption{Clear interval $I$ from a segment tree.}\label{alg:segrm}
 \begin{algorithmic}
-\Require Interval $I$
+\Require Interval $I$.
 \Ensure Clears $I$ from the segment tree.
 \Procedure{\cleariv}{$s$}
 	\If{$\inter{s}\cap I=\emptyset$ or (\nodeps{s} and \nodecs{s} are empty)}
@@ -1015,18 +1015,18 @@ The number of canonical nodes and their ancestors is $O(\log\segsize)$, so the t
 
 \subsection{Multidimensional segment tree}
 
-The segment tree can be generalized into two or higher dimensional structure~\cite{highseg}.
+The segment tree can be generalized into a two or higher dimensional structure~\cite{highseg}.
 A two-dimensional segment tree allows storing rectangles and performing efficient queries for rectangular regions.
 Correspondingly a $D$-dimensional segment tree allows performing efficient operations for $D$-dimensional hyperrectangles.
-We use the terms rectangle and hyperrectangle interchangeably to refer to hyperrectangles of any dimension $D$.
+We use the terms rectangle and hyperrectangle interchangeably to refer to a hyperrectangles of any dimension $D$.
 
-A multidimensional segment tree is composed of of nested regular segment trees.
-The shape of a $D$-dimensional segment tree is a 1-dimensional segment tree whose each node stores a $(D-1)$-dimensional segment tree.
+A multidimensional segment tree is composed of nested regular segment trees.
+The shape of a $D$-dimensional segment tree is a one-dimensional segment tree whose each node stores a $(D-1)$-dimensional segment tree.
 
 Each tree dimension represents one of the $D$ coordinate axes.
 Each node $s$ of the innermost segment tree represents a $D$-dimensional hyperrectangle \rect{s}, whose bounds are defined by the position of the node in each of the $D$ tree layers.
-For example the outer tree of a 2-dimensional segment tree represents the $y$ coordinates, and each inner tree represents the $x$ coordinates.
-Each node of the inner tree represents a rectangle whose $x$-bounds are determined by the position of the node in the inner tree, and the $y$-bounds are determined by the node of the outer tree that contains the inner tree.
+For example we can define the outer tree of a two-dimensional segment tree to represent the $y$ coordinates, and each inner tree to represent the $x$ coordinates.
+Then each node of the inner tree represents a rectangle whose $x$-range is determined by the position of the node in the inner tree, and the $y$-range is determined by the node of the outer tree that contains the inner tree.
 
 The concept of canonical nodes can also be extended to higher dimensions.
 The canonical nodes \canon{R} of a $D$-dimensional rectangle $R$ are the smallest set of nodes that fully cover $R$ but nothing else.
@@ -1042,19 +1042,19 @@ Figure~\ref{fig:canon2d} illustrates the structure of a 2D segment tree and the 
 		\includegraphics[width=\textwidth,page=1]{fig/segtree2d}
 		\caption{The canonical nodes of $R$ in a 2D segment tree}\label{fig:canon2d:tree}
 	\end{subfigure}
-	\caption{Each node of the outer tree defines a range of $y$-coordinates and an inner segment tree built on $x$-coordinates.
+	\caption{Each node of the outer tree defines a range of $y$-coordinates and an inner segment tree built on the $x$-coordinates.
 	Each node of the inner trees is a rectangle that combines the $y$ and the $x$ ranges.
 	The canonical nodes of a rectangle $R$ (Fig.~\ref{fig:canon2d:r}) are the smallest set of nodes of the inner trees that cover exactly $R$ (Fig.~\ref{fig:canon2d:tree}).}\label{fig:canon2d}
 \end{figure}
 
 In order to compute the canonical nodes we look into each axis separately.
 Let interval $R_i$ be the projection of rectangle $R$ into $i$-axis.
-Let $\canoni{R_i}{i}$ be the canonical rectangles of $R_i$ in the 1-dimensional segment tree built for $i$-coordinates.
+Let $\canoni{R_i}{i}$ be the canonical nodes of $R_i$ in the ordinary segment tree built for $i$-coordinates.
 
-Consider a 2-dimensional segment tree, and two arbitrary nodes of the projected 1-dimensional trees $c_1\in\canoni{R_1}{1}$ and $c_2\in\canoni{R_2}{2}$.
-Let $c_1\times c_2$ be the node of the 2-dimensional tree that is found in position of $c_1$ in the inner tree, and $c_2$ in the outer tree.
-Similarly for $D$-dimensional trees we define product $c_1\times c_2\times\dots\times c_D$ to be the node of a $D$-dimensional segment tree defined by positions of 1-dimensional tree nodes.
-The following lemma shows how the canonical nodes of 1-dimensional projections can be combined to get the canonical nodes of a $D$-dimensional tree.
+Consider a two-dimensional segment tree and two arbitrary nodes of the projected trees $c_1\in\canoni{R_1}{1}$ and $c_2\in\canoni{R_2}{2}$.
+Let $c_1\times c_2$ be the node of the two-dimensional tree that is found in position of $c_1$ in the inner tree, and $c_2$ in the outer tree.
+Similarly for $D$-dimensional trees we define product $c_1\times c_2\times\dots\times c_D$ to be the node of a $D$-dimensional segment tree defined by positions of the one-dimensional tree nodes.
+The following lemma shows how the canonical nodes of the projections can be combined to find the canonical nodes in a $D$-dimensional tree.
 
 \begin{lem}\label{lem:canond}
 For any $D$-dimensional rectangle $R$
@@ -1074,7 +1074,7 @@ To cover also axis $D$, it is optimal to select the nodes $\canoni{R_D}{D}$, and
 
 Combination of Lemma~\ref{lem:canond} and Lemma~\ref{lem:canonlog} gives a bound for the number of canonical nodes.
 
-\begin{cor}\label{cor:canondcount}$\size{\canon{R}}=O(\log^D\segsize)$ for any $D$-dimensional rectangle $R$.\end{cor}
+\begin{cor}\label{cor:canondcount}$\size{\canon{R}}=O(\log^D\segsize)$ for any $D$-dimensional rectangle $R$, where $n$ is an upper bound for the number of supported endpoints in any of the dimensions.\end{cor}
 \begin{proof}
 $$
 \size{\canon{R}} = \size{\bigtimes_{i=1}^D \canoni{R_i}{i}}
@@ -1084,7 +1084,7 @@ $$
 $$
 \end{proof}
 
-For 1-dimensional segment trees there is a clear connection between the parent-child hierarchy and interval overlap.
+For regular segment trees there is a clear connection between the parent-child hierarchy and interval overlap.
 For any two tree nodes $a$ and $b$, $\inter{a}\subseteq\inter{b}$ holds if and only if $b$ is an ancestor of $a$ in the tree.
 In multidimensional case it also applies that if $b$ is an ancestor of $a$, then $\rect{a}\subseteq\rect{b}$.
 However the reverse is not true; $\rect{a}\subseteq\rect{b}$ does not imply that $b$ is an ancestor of $a$ because $b$ can be in a different subtree in some of the outer trees.
@@ -1122,7 +1122,7 @@ The nodes $s$ of the innermost tree have dimension 0, and they contain only a si
 \begin{algorithm}
 \caption{Add a rectangle to a $D$-dimensional segment tree.}\label{alg:rectadd}
 \begin{algorithmic}
-\Require $D$-dimensional rectangle $R$
+\Require $D$-dimensional rectangle $R$.
 \Ensure Sets \hasrect{s} for each canonical node $s$ of $R$.
 \Procedure{\adddt}{$D,s$}
 \Comment{Insert to the subtree rooted at node $s$}
@@ -1142,22 +1142,20 @@ The nodes $s$ of the innermost tree have dimension 0, and they contain only a si
 \begin{algorithm}
 \caption{Query whether a rectangle intersects with any rectangle in a multidimensional segment tree.}\label{alg:rectcheck}
 \begin{algorithmic}
-\Require $D$-dimensional rectangle $R$
+\Require $D$-dimensional rectangle $R$.
 \Output Whether \hasrect{s} is true for any node $s$ matching $R$.
 \Procedure{\checkdt}{$D,s$}
 \Comment{Check subtree rooted at node $s$}
-	\State $R\gets\texttt{false}$.
 	\If{$D=0$}
-		\State $R\gets\hasrect{s}$.
+		\State \Return $\hasrect{s}$.
 	\ElsIf{$\inter{s}\subseteq R_D$}
-		\State $R\gets \checkdt(D-1,\subtree{s})$.
-		\State $R\gets R$ or $\checkdt(D-1,\subtreep{s})$.
+		\State \Return $\checkdt(D-1,\subtree{s})$ \\
+		\hspace{20mm} or $\checkdt(D-1,\subtreep{s})$.
 	\ElsIf{$\inter{s}\cap R_D\neq\emptyset$}
-		\State $R\gets \checkdt(D-1,\subtree{s})$.
-		\State $R\gets R$ or $\checkdt(D,\leftc{s})$.
-		\State $R\gets R$ or $\checkdt(D,\rightc{s})$.
+		\State \Return $\checkdt(D-1,\subtree{s})$ \\
+		\hspace{20mm} or $\checkdt(D,\leftc{s})$ \\
+		\hspace{20mm} or $\checkdt(D,\rightc{s})$.
 	\EndIf
-	\State \Return $R$.
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -1165,18 +1163,18 @@ The nodes $s$ of the innermost tree have dimension 0, and they contain only a si
 \begin{lem}\adddt and \checkdt both have time complexity $O(\log^D\segsize)$.\end{lem}
 \begin{proof}
 Proof by induction on $D$.
-For the base case $D=0$ both algorithm finishes in constant time.
+For the base case $D=0$ both algorithm finish in constant time.
 For $D\ge 1$, algorithms iterate over the canonical nodes and their ancestors in the outer tree, making $\log\segsize$ calls to the inner trees.
-By induction the inner tree operations are done in $O(\log^{D-1}\segsize)$ time, so the total time complexity is $O(\log^D\segsize)$.
+By induction the inner tree operations are done in $O(\log^{D-1}\segsize)$ time, so the time complexity is $O(\log^D\segsize)$.
 \end{proof}
 
 Note that \subtree{} and \subtreep{} are used in opposite ways in the two operations.
 In \adddt{} we recurse down to \subtree{} for canonical nodes, and to \subtreep{} for their ancestors, whereas in \checkdt{} we recurse to \subtree{} in the ancestor nodes, and to both of the trees in the canonical nodes.
-This allows us to ensure that \adddt{} and \checkdt{} arrive in the same node exactly in the case where the conditions of Lemma~\ref{lem:rectintersect} are fulfilled.
+This allows us to ensure that \adddt{} and \checkdt{} arrive in the same node if and only if the conditions of Lemma~\ref{lem:rectintersect} are fulfilled.
 
-Suppose we first add rectangle $A$ and then query for rectangle $B$ in the tree.
+Suppose we first add a rectangle $A$ and then query for a rectangle $B$ in the tree.
 The \checkdt operation returns true if the two operations end up in any common dimension~0 node.
-The only way the two operations end up in a common node is if in each dimension $d$ we are in a canonical node of at least one of $A_d$ and $B_d$, and in either a canonical node or in an ancestor of a canonical node for the other rectangle.
+The only way for the two operations to end up in a common node is if in each dimension $d$ we are in a canonical node of at least one of $A_d$ and $B_d$, and in either a canonical node or in an ancestor of a canonical node for the other rectangle.
 
 Thus we can efficiently support inserting and querying for $D$-dimensional rectangles by a nested structure consisting of multiple levels of segment trees.
 However clearing a rectangle in this structure is a more complex operation.
