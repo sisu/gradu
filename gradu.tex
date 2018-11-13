@@ -71,7 +71,7 @@
 \newcommand\cleariv{\ensuremath{\texttt{ClearInterval}}\xspace}
 \newcommand\maskoff{\ensuremath{\texttt{NodeMask}}\xspace}
 \newcommand\maskof[1]{\ensuremath{\texttt{NodeMask}(#1)}\xspace}
-\newcommand\cleardt{\ensuremath{\texttt{ClearFromTree}}\xspace}
+\newcommand\cleardt{\ensuremath{\texttt{ClearRectangle}}\xspace}
 \newcommand\clearst{\ensuremath{\texttt{ClearSubtree}}\xspace}
 \newcommand\pdst{\ensuremath{\texttt{PushDownSubtree}}\xspace}
 \newcommand\recomp{\ensuremath{\texttt{ComputeSubtreeData}}\xspace}
@@ -1182,53 +1182,54 @@ To make the clear operation more simple, we turn into another variant of the mul
 
 \subsection{Unified segment tree}\label{sec:unifiedtree}
 
-The structure of a multidimensional segment tree depends on how we order the coordinate axes.
-For example a two-dimensional segment tree can have either the outer tree represent $y$-coordinates and each inner tree represent $x$-coordinates, or the other way round.
-The structure and the parent-child relationships are different in the two cases, but the set of rectangles represented by the nodes of all the inner trees is exactly the same regardless of the order.
+The structure of a multidimensional segment tree depends on the order of the coordinate axes.
+For example a two-dimensional segment tree can either have the outer tree represent $y$-coordinates and each inner tree represent $x$-coordinates, or the other way round.
+The structure and the parent-child relationships are different in each case, but the set of rectangles representable in the tree is exactly the same regardless of the order.
 
 The \emph{unified segment tree}, developed by Wagner~\cite{unified}, combines the parent-child links of the different multidimensional segment trees into a single structure.
-The unified segment tree is actually not a tree, but a directed graph.
+The unified segment tree is actually not a tree but a directed graph, but we use the word tree because of the close resemblance to the segment tree.
 Each node $s$ of the graph represents a $D$-dimensional hyperrectangle.
-For each axis $i$ where \rect{s} is not minimal, $s$ has links to two child nodes that divide \rect{s} into two parts along hyperplane perpendicular to $i$-axis.
+For each axis $i$ where \rect{s} is not minimal, $s$ has links to two child nodes that divide \rect{s} into two parts along a hyperplane perpendicular to the $i$-axis.
 Thus each node has between 0 and $2D$ links to child nodes.
-The children splitting the node $s$ along axis $i$ are denoted by \leftu{s}{i} and \rightu{s}{i}.
-Figure~\ref{fig:unified} illustrates the structure of the unified segment tree in 2-dimensional case.
+The children splitting the node $s$ along axis $i$ are denoted \leftu{s}{i} and \rightu{s}{i}.
+Figure~\ref{fig:unified} illustrates the structure of the unified segment tree in two-dimensional case.
 
 For our purposes, the main advantage of the unified segment tree over a regular multidimensional segment tree is that clearing a rectangle from the tree is more straightforward.
 The basic idea of clearing a hyperrectangle is similar to Algorithm~\ref{alg:segrm} for clearing an interval.
-However in the multidimensional case we need to be able to split partially cleared large rectangles into child rectangles along multiple axes.
-The regular segment tree structure is not well suited for this task, but in the unified segment tree the splitting is trivial.
+In the multidimensional case we need to split partially cleared large rectangles into child rectangles along multiple axes.
+The segment tree structure is not well suited for this task, but in the unified segment tree the splitting is easy.
 
 \begin{figure}\centering
 	\includegraphics[width=0.5\textwidth]{fig/unified}
-	\caption{The nodes of the unified segment tree form a directed acyclic graph.
+	\caption{The nodes of a unified segment tree form a directed acyclic graph.
 	Each node can be split along any of the coordinate axes as long as the node is not minimal in that direction.}\label{fig:unified}
 \end{figure}
 
 Note that in the unified tree there is no distinction between outer and inner tree.
-In the regular multidimensional segment tree the nodes of nested tree represent ranges in one of the coordinate axes, and the innermost nodes represent their Cartesian product.
+In the multidimensional segment tree the nodes of a nested tree represent ranges in one of the coordinate axes, and the innermost nodes represent the Cartesian products of the ranges.
 In the unified tree there is no concept of outer and inner nodes, and each node represents a $D$-dimensional rectangle.
 
-The operations \adddt and \checkdt for the unified tree are largely similar to the algorithms for the regular multidimensional tree.
-We consider again checking whether the query rectangle intersects with any of the rectangles in the tree.
+The operations \adddt and \checkdt for the unified tree are similar to the algorithms for the regular multidimensional tree.
+We consider again querying whether a rectangle intersects with any of the rectangles in the tree.
 Each tree node stores $2^D$ bits of information about the rectangles stored in the subtree.
 The bit array stored in node $s$ is denoted \hasbita{s}.
-When a rectangle $R$ is added to node $s$, the bits are used to define whether $s$ represents a canonical node or an ancestor of a canonical node along each coordinate axis.
+Initially none of the bits are set.
+When a rectangle $R$ is added to a node $s$, the bits are used to define whether $s$ represents a canonical node or an ancestor of a canonical node along each coordinate axis.
 The $2^D$ bits allow us to detect when the conditions of Lemma~\ref{lem:rectintersect} become fulfilled when querying for intersecting rectangles.
 
-Algorithm~\ref{alg:maskof} defines function~\maskof{} that computes a bitmask of $s$ bits for a rectangle and a tree node.
+Algorithm~\ref{alg:maskof} defines function~\maskof{} that computes a bitmask of $D$ bits for a rectangle and a tree node.
 This mask is used to determine which bits of \hasbita{s} to access when adding a rectangle or querying the tree.
 
 \begin{algorithm}
 \caption{Compute the bitmask representing whether a node is covered by a rectangle in each direction.}\label{alg:maskof}
 \begin{algorithmic}
-\Require $D$-dimensional rectangle $R$ and segment tree node $s$
-\Output Bitmask of $D$ bits representing the dimensions where $R$ fully covers $s$
+\Require $D$-dimensional rectangle $R$ and segment tree node $s$.
+\Output Bitmask of $D$ bits representing the dimensions where $R$ fully covers $s$.
 \Procedure{\maskoff}{$R,s$}
 	\State $m\gets 0$.
 	\ForAll{$d \in 1\dots D$}
 		\If{$\rect{s}_d\subseteq R_d$}
-			\State $m\gets m | 2^{d-1}$.
+			\State $m\gets m\ |\ 2^{d-1}$.
 		\EndIf
 	\EndFor
 	\State \Return $m$.
@@ -1236,14 +1237,14 @@ This mask is used to determine which bits of \hasbita{s} to access when adding a
 \end{algorithmic}
 \end{algorithm}
 
-We can use the \maskoff function to implement insertion and query operations for the unified segment tree.
+We can use the \maskoff function to implement the insert and query operations for the unified segment tree.
 Algorithm~\ref{alg:uadd} shows the tree insert operation.
 
 \begin{algorithm}
 \caption{Add a rectangle to a $D$-dimensional unified tree.}\label{alg:uadd}
 \begin{algorithmic}
-\Require $D$-dimensional hyperrectangle $R$
-\Ensure Sets \hasbits{s}{b} for each node $s$ and bitmask $b$ matching $R$
+\Require $D$-dimensional hyperrectangle $R$.
+\Ensure Sets \hasbits{s}{b} for each node $s$ and bitmask $b$ matching $R$.
 \Procedure{\adddt}{$d,s$}
 \Comment{Insert to the subtree rooted at node $s$ by moving along axes $1\dots d$}
 	\If{$d=0$}
@@ -1265,41 +1266,39 @@ Algorithm~\ref{alg:uadd} shows the tree insert operation.
 \end{algorithm}
 
 Algorithm~\ref{alg:ucheck} shows the implementation of the query operation.
-It uses function $\texttt{reverseBits}$, which reverses the bits of a $2^D$-bit input.
-For example if $D=2$ then $\texttt{reverseBits}(0111_2)=1000_2$.
+It uses function $\texttt{invertBits}$, which reverses the bits of a $D$-bit input.
+For example if $D=4$ then $\texttt{invertBits}(0111_2)=1000_2$.
 
 \begin{algorithm}
 \caption{Query whether a rectangle intersects with any rectangle in the unified tree.}\label{alg:ucheck}
 \begin{algorithmic}
-\Require $D$-dimensional hyperrectangle $R$
-\Output Whether \hasbits{s}{b} is set for any node $s$ and bitmask $b$ matching $R$
+\Require $D$-dimensional hyperrectangle $R$.
+\Output Whether \hasbits{s}{b} is set for any node $s$ and bitmask $b$ matching $R$.
 \Procedure{\checkdt}{$d,s$}
 \Comment{Check subtree rooted at node $s$}
-	\State $R\gets\texttt{false}$.
 	\If{$d=0$}
-		\State $R\gets\hasbits{s}{\texttt{reverseBits}(\maskof{R,s})}$.
+		\State \Return $\hasbits{s}{\texttt{invertBits}(\maskof{R,s})}$.
 	\ElsIf{$\rect{s}_d\subseteq R_d$}
-		\State $R\gets\checkdt(d-1,s)$.
+		\State \Return $\checkdt(d-1,s)$.
 	\ElsIf{$\rect{s}_d\cap R_d\neq\emptyset$}
-		\State $R\gets\checkdt(d-1,s)$.
-		\State $R\gets R$ or $\checkdt(d,\leftu{s}{d})$.
-		\State $R\gets R$ or $\checkdt(d,\rightu{s}{d})$.
+		\State \Return $\checkdt(d-1,s)$ \\
+		\hspace{20mm} or $\checkdt(d,\leftu{s}{d})$ \\
+		\hspace{20mm} or $\checkdt(d,\rightu{s}{d})$.
 	\EndIf
-	\State \Return $R$.
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
 Both \adddt and \checkdt iterate over the canonical nodes of the input rectangle as well as their ancestors, and access \hasbita{s} for each such node $s$.
-When adding a rectangle $A$, we set $\hasbits{s}{b}$ for each bitmask $b$ whose bits are contained in $\maskof{A,s}$.
-To query for a rectangle $B$, we check the bit $\hasbits{s}{\texttt{reverseBits}(\maskof{B,s})}$ for the accessed nodes $s$.
+When adding a rectangle $A$, we set $\hasbits{s}{b}$ for each bitmask $b$ whose bits are covered by $\maskof{A,s}$.
+To query for a rectangle $B$, we check the bit $\hasbits{s}{\texttt{invertBits}(\maskof{B,s})}$ for each accessed node $s$.
 This expression detects $A$ if $\maskof{A,s}|\maskof{B,s}=2^D-1$, where $x|y$ represents the bitwise OR operation of $x$ and $y$.
-This is equivalent to condition that $\rect{s}_d$ is the range of a canonical node of either $R_d$ or $A_d$ or both in each dimension $d$.
+This is equivalent to the condition that $\rect{s}_d$ is the range of a canonical node of either $A_d$ or $B_d$ or both in each dimension $d$.
 This matches the conditions of Lemma~\ref{lem:rectintersect} for rectangle intersection, so the match is returned if and only if $A$ and $B$ intersect.
 
 Next we consider clearing a rectangle from the unified tree.
 Clearing a rectangle $R$ means that all the rectangles in the tree are cut such that the region of $R$ becomes empty.
-The clear operation is implemented using the same three operations as we used for the 1-dimensional tree in Section~\ref{sec:treeops}:
+The clear operation is implemented using the same three operations as we used for the segment tree clearing in Section~\ref{sec:treeops}:
 push down any intervals in the ancestors, clear the subtrees of the canonical nodes, and finally recompute the information about rectangles stored in the descendants.
 
 The three operations are performed by a recursive function \cleardt that traverses through the tree.
@@ -1315,7 +1314,7 @@ Figure~\ref{fig:uremove} shows an example of the clearing process.
 	\hfil
 	\begin{subfigure}[t]{0.4\textwidth}\centering
 		\includegraphics[width=\textwidth,page=3]{fig/uremove}
-		\caption{Canonical nodes of $A$ in dark grey and their ancestors in light grey in the unified segment tree.}\label{fig:urm:canon}
+		\caption{The only canonical node of $A$ in dark grey and its ancestors in light grey in the unified segment tree.}\label{fig:urm:canon}
 	\end{subfigure}
 	\hfil
 	\begin{subfigure}[t]{0.4\textwidth}\centering
@@ -1328,22 +1327,22 @@ Figure~\ref{fig:uremove} shows an example of the clearing process.
 		\caption{\recomp visits all the ancestors of the remaining nodes, marking information about the descendants into the light-grey nodes.}\label{fig:urm:recomp}
 	\end{subfigure}
 	\caption{
-	Example of clearing a rectangle in unified segment tree with Algorithm~\ref{alg:segurm}.
+	Example of clearing a rectangle in a unified segment tree with Algorithm~\ref{alg:segurm}.
 	The rectangle $A$ (Fig.~\ref{fig:urm:rects}) is stored in a single canonical node and two ancestors (Fig.~\ref{fig:urm:canon}).
-	To clear rectangle $B$, we first push $A$ down into descendants from nodes touched by $B$ (Fig.~\ref{fig:urm:push}).
-	Finally we fill descendant information into ancestors of the remaining parts of $A$ (Fig.~\ref{fig:urm:recomp}).
+	To clear the rectangle $B$, we first push $A$ down into descendants from nodes touched by $B$ (Fig.~\ref{fig:urm:push}).
+	After clearing we fill descendant information into ancestors of the remaining parts of $A$ (Fig.~\ref{fig:urm:recomp}).
 	}\label{fig:uremove}
 \end{figure}
 
 Algorithm~\ref{alg:segurm} shows the pseudocode of the clear algorithm.
 The values are pushed down in the tree by calling a helper function~\pdst defined in Algorithm~\ref{alg:segurm:pdst}.
-In the end we regenerate the bits about values in the successors by using another helper function~\recomp defined in Algorithm~\ref{alg:segurm:recomp}.
+In the end we regenerate the bits describing the values in the descendants by using another helper function~\recomp defined in Algorithm~\ref{alg:segurm:recomp}.
 
 \begin{algorithm}
 \caption{Clear a rectangle from a unified segment tree.}\label{alg:segurm}
 \begin{algorithmic}
-\Require $D$-dimensional hyperrectangle $R$
-\Ensure Modifies \hasbits{}{} accordingly.
+\Require $D$-dimensional hyperrectangle $R$.
+\Ensure Modifies \hasbita{} arrays so that the region of $R$ becomes empty.
 \Procedure{\cleardt}{$d,s$}
 	\If{$\rect{s}_d\cap R_d=\emptyset$ or $\neg\hasbits{s}{0}$}
 		\State \Return
@@ -1353,6 +1352,7 @@ In the end we regenerate the bits about values in the successors by using anothe
 		\State \Return
 	\EndIf
 	\If{$\rect{s}_d\nsubseteq R_d$}
+		\Comment $s_i\in\canonpar{R_d}$
 		\State $\pdst(d-1,s,d)$.
 	\EndIf
 	\State $\cleardt(d-1,s)$.
@@ -1361,6 +1361,7 @@ In the end we regenerate the bits about values in the successors by using anothe
 		\State $\cleardt(d,\rightu{s}{d})$.
 	\EndIf
 	\If{$\rect{s}_d\nsubseteq R_d$}
+		\Comment $s_i\in\canonpar{R_d}$
 		\State $\recomp(d,s)$.
 	\EndIf
 \EndProcedure
@@ -1370,8 +1371,9 @@ In the end we regenerate the bits about values in the successors by using anothe
 \begin{algorithm}
 \caption{Helper procedure for \cleardt: Push down values in a subtree.}\label{alg:segurm:pdst}
 \begin{algorithmic}
+\Require Rectangle $R$ (global), unified tree node $s$, current axis $d$ and split axis $a$.
+\Ensure Copy \hasbita{t} to \hasbita{\leftu{t}{a}} and to \hasbita{\rightu{t}{a}} for all nodes $t$ that can be accessed from $s$ by moving along axes $1\dots d$.
 \Procedure{\pdst}{$d,s,a$}
-	\Comment Pushes down values in subtree $s$ along axis $a$.
 	\If{$d=0$}
 		\State $\hasbita{\leftu{s}{a}}\gets \hasbita{\leftu{s}{a}} | \hasbita{s}$.
 		\State $\hasbita{\rightu{s}{a}}\gets \hasbita{\rightu{s}{a}} | \hasbita{s}$.
@@ -1390,7 +1392,9 @@ In the end we regenerate the bits about values in the successors by using anothe
 
 \begin{algorithm}
 \begin{algorithmic}
-\caption{Helper procedure for \cleardt: Recompute data about rectangles stored in successor nodes subtree.}\label{alg:segurm:recomp}
+\caption{Helper procedure for \cleardt: Recompute data about the rectangles stored in the descendant nodes.}\label{alg:segurm:recomp}
+\Require Rectangle $R$ (global), unified tree node $s$ and current axis $d$.
+\Ensure Generate \hasbita{t} based on the descendants of $t$ for all nodes $t$ that can be accessed from $s$ by moving along axes $1\dots d$.
 \Procedure{\recomp}{$d,s$}
 	\If{$d=0$}
 		\State $\recompn(s)$.
@@ -1406,17 +1410,17 @@ In the end we regenerate the bits about values in the successors by using anothe
 \EndProcedure
 
 \Procedure{\recompn}{$s$}
-	\State $\hasbita{s}\gets\texttt{false}$.
+	\State $\hasbits{s}{0\dots 2^{D-1}}\gets\texttt{false}$.
 	\State $m\gets\maskof{R,s}$.
 	\ForAll{$a \in 1\dots D$}
 		\If{$\rect{s}_a \subseteq R_a$}
-			\State Continue.
+			\State $\mathtt{Continue}$.
 		\EndIf
 		\State $c_1\gets\leftu{s}{a}$.
 		\State $c_2\gets\rightu{s}{a}$.
 		\ForAll{$b \in 0 \dots 2^D-1$}
 			\If{$b$ does not have bit $a$ set}
-				\State $\hasbits{s}{b}\gets \hasbits{s}{b}$ or $\hasbits{c_1}{b}$ or $\hasbits{c_2}{b}$.
+				\State $\hasbits{s}{b}\gets \hasbits{s}{b}\ |\ \hasbits{c_1}{b}\ |\ \hasbits{c_2}{b}$.
 			\EndIf
 		\EndFor
 	\EndFor
@@ -1424,7 +1428,7 @@ In the end we regenerate the bits about values in the successors by using anothe
 \end{algorithmic}
 \end{algorithm}
 
-\begin{lem}\label{lem:segurmtime}Algorithm~\ref{alg:segurm} has running time $O(\segsize^{D-1}\log\segsize + k)$, where $k$ is the number of cleared canonical nodes.\end{lem}
+\begin{lem}\label{lem:segurmtime}Algorithm~\ref{alg:segurm} has running time $O(\segsize^{D-1}\log\segsize + k)$, where $k$ is the number of cleared nodes.\end{lem}
 \begin{proof}
 We start by proving that \pdst and \recomp have running time $O(\segsize^d)$ by induction on the argument $d$.
 Clearly both functions perform $O(1)$ work when $d=0$, which proves the base case.
@@ -1439,7 +1443,7 @@ Thus the base case $d=1$ is proven by Lemma~\ref{lem:segrmtime}.
 In case $d\ge 2$ we iterate over the descendants in direction $d$.
 We call \pdst and \recomp with argument $d-1$ for every node in \canonpari{R_d}{d}.
 We also make $O(\segsize)$ calls to \cleardt with argument $d-1$.
-The size of \canonpari{R_d}{d} is $O(\log\segsize)$, so by induction the total time complexity is $O((\log\segsize)\segsize^{d-1} + \segsize(\segsize^{d-2}\log\segsize))=O(\segsize^{d-1}\log\segsize)$.
+The size of \canonpari{R_d}{d} is $O(\log\segsize)$, so by induction the time complexity is $O((\log\segsize)\segsize^{d-1} + \segsize(\segsize^{d-2}\log\segsize) + k)=O(\segsize^{d-1}\log\segsize + k)$.
 \end{proof}
 
 
@@ -1447,8 +1451,8 @@ The size of \canonpari{R_d}{d} is $O(\log\segsize)$, so by induction the total t
 \section{Minimum link paths in the plane}\label{sec:minlink2d}
 
 In this section we study the rectilinear minimum link path problem in the plane.
-We present a simple algorithm with time complexity $O(n\log n)$ and space complexity $O(n)$~\cite{revisited}.
-The ideas developed for the planar case are later generalized to solve the more difficult 3D and higher dimensional minimum link path problems in Section~\ref{sec:minlink3d}.
+We present a simple algorithm that runs in $O(n\log n)$ time and $O(n)$ space~\cite{revisited}.
+The ideas developed for the planar case are later generalized to solve the more difficult three and higher dimensional minimum link path problems in Section~\ref{sec:minlink3d}.
 
 \subsection{Intersection graph}
 
