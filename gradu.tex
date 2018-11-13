@@ -87,7 +87,7 @@
 
 \newcommand\rect[1]{\ensuremath{\textsc{rect}(#1)}\xspace}
 
-\newcommand\pop[1]{\ensuremath{\textsc{pop}(#1)}\xspace}
+\newcommand\pop[1]{\ensuremath{\texttt{pop}(#1)}\xspace}
 
 \newcommand\y[1]{\ensuremath{{#1}_y}\xspace}
 \newcommand\x[1]{\ensuremath{{#1}_x}\xspace}
@@ -1414,7 +1414,7 @@ In the end we regenerate the bits describing the values in the descendants by us
 	\State $m\gets\maskof{R,s}$.
 	\ForAll{$a \in 1\dots D$}
 		\If{$\rect{s}_a \subseteq R_a$}
-			\State $\mathtt{Continue}$.
+			\State $\texttt{Continue}$.
 		\EndIf
 		\State $c_1\gets\leftu{s}{a}$.
 		\State $c_2\gets\rightu{s}{a}$.
@@ -1462,7 +1462,7 @@ The iteration is continued until we find the endpoint~\ept.
 
 Clearly any minimum link path consists of alternation between horizontal and vertical links.
 We split the problem into two subproblems, based on whether the first link is horizontal or vertical.
-The minimum link path can be found by solving both subproblems and choosing the shorter of the two solutions.
+The minimum link path can be found by solving both subproblems and choosing the shorter of the two paths.
 
 Consider the case with the first link horizontal.
 It is easy to see that \reach{k+1} consists of points that can be reached by starting from \reach{k} and moving either horizontally or vertically, depending on the parity of $k$.
@@ -1474,7 +1474,8 @@ For odd $k\ge 3$ the same applies for \decomp{y}.
 \end{lem}
 \begin{proof}
 Let $k\ge 2$ be even.
-The region \reach{k} is formed by illuminating in vertical direction from \reach{k-1}.
+The region \reach{k+1} is formed by illuminating in horizontal direction from \reach{k}.
+%The region \reach{k} is formed by illuminating in vertical direction from \reach{k-1}.
 
 Let $h$ be any rectangle in $\decomp{x}$ that is at least partially illuminated in \reach{k}.
 Since \reach{k} is formed by illuminating vertically from \reach{k-1}, there must be a vertical line passing through $h$ that is contained in \reach{k}.
@@ -1492,22 +1493,22 @@ For odd $k\ge 3$ we form \reach{k+1} by illuminating in vertical direction from 
 \end{figure}
 
 For a set of geometric objects (such as rectangles) $G$, the \emph{intersection graph} of $G$ is a graph whose nodes are the elements of $G$, and there is an edge between each pair of intersecting objects.
-Figure~\ref{fig:inter} shows an example of the intersection graph.
+Figure~\ref{fig:inter} shows an example of an intersection graph.
 Consider the intersection graph of $\decomp{x}\cup\decomp{y}$.
 This graph has rectangles as nodes, and intersecting rectangles between \decomp{x} and \decomp{y} are joined by an edge.
-Let $k$ be an even number and $r\in\decomp{x}$ contained in \reach{k}.
+Let $k$ be an even number and $r\in\decomp{y}$ contained in \reach{k}.
 Then for each neighbor $b$ of $r$ in the intersection graph applies $b\subseteq\reach{k+1}$ by Lemma~\ref{lem:illum2d}.
-In other words, the staged illumination finds the rectangles in the same order as breadth-first search in the intersection graph.
+This shows that the staged illumination finds the rectangles in the same order as breadth-first search in the intersection graph.
 
 The rectilinear minimum link path problem can thus be solved by forming the intersection graph and searching for the shortest path using breadth-first search~\cite{dasnar}.
-However the intersection graph has quadratic size, so building it takes at least quadratic time as well.
-The goal is thus to run breadth-first search in the intersection graph without explicitly constructing the graph.
+The intersection graph has quadratic size so building it takes at least quadratic time as well.
+The goal is thus to run the breadth-first search in the intersection graph without explicitly constructing the graph.
 
 \subsection{Searching the intersection graph}
 
 We consider again the case where the first link of the path is horizontal.
 We start by constructing the horizontal decomposition with Algorithm~\ref{alg:split2d}.
-The vertical decomposition is used implicitly in the analysis, but there is no need to construct it explicitly.
+We are implicitly searching through the intersection graph of \decomp{x} and \decomp{y}, but there is no need to actually compute the vertical decomposition.
 
 \reach{0} contains the starting point~\spt, and \reach{1} is the horizontal line segment passing through \spt.
 The path finding algorithm works by alternating between two phases~\cite{revisited}:
@@ -1515,7 +1516,7 @@ The path finding algorithm works by alternating between two phases~\cite{revisit
 \begin{enumerate}
 \item For odd $k$, \reach{k} consists of a set of rectangles $R_k\subseteq\decomp{x}$ when $k\ge 3$.
 	In the special case $k=1$, \reach{k} is a horizontal line through a single rectangle of \decomp{x}.
-	We inspect which obstacles can be reached by a vertical line starting from any point in \reach{k}, and form $\hat{R}_{k+1}=\set{r \mid r\in\decomp{x}, r\cap\reach{k+1}\neq\emptyset}$.
+	We inspect which rectangles can be reached by a vertical line starting from any point in \reach{k}, and form $\hat{R}_{k+1}=\set{r \mid r\in\decomp{x}, r\cap\reach{k+1}\neq\emptyset}$.
 \item For even $k\ge 2$ we set $R_{k+1}=\hat{R}_k$.
 	Then $\reach{k+1}=\bigcup_{r\in R_{k+1}}r$ by Lemma~\ref{lem:illum2d}.
 \end{enumerate}
@@ -1557,20 +1558,20 @@ The path finding algorithm works by alternating between two phases~\cite{revisit
 \end{figure}
 
 We keep iterating the two phases until the endpoint~\ept is reached in either phase.
-Figure~\ref{fig:light2d} illustrates the illumination process.
+Figure~\ref{fig:light2d} illustrates this process.
 
-For performance, it is important to ensure that we don't reilluminate the same parts of the domain many times.
+For performance, it is important to ensure that we don't reilluminate the same parts of the domain too many times.
 We avoid the reillumination by treating cells of \decomp{x} as obstacles if they have been found on some previous illumination step.
-If rectangle $r$ is discovered on step $k$, then it is fully illuminated in \reach{k+1}, and each point visible from $r$ is illuminated in \reach{k+2}.
-After this there is no longer any need to illuminate through $r$, so we can mark $r$ as an obstacle when 2 steps have passed since the illumination first reached $k$.
+If a rectangle $r$ is discovered on step $k$, then it is fully illuminated in \reach{k+1}, and each point visible from $r$ is illuminated in \reach{k+2}.
+After this there is no longer need to illuminate through $r$, so we can mark $r$ as an obstacle when 2 steps have passed since the illumination first reached $k$.
 This ensures that each rectangle is illuminated only a constant number of times.
 
-Next we show how to implement illumination in $y$-direction starting from \reach{k}, which is represented as a set of rectangles $R\in\subseteq\decomp{x}$.
-The illuminated area is computed with two line sweeps, one in direction $+y$ and the other in direction $-y$.
+Next we show how to implement illumination in $y$-direction starting from \reach{k}, which is represented as a set of rectangles $R\subseteq\decomp{x}$.
+The illuminated area is computed by two line sweeps, one in direction $+y$ and the other in direction $-y$.
 
 The sweep line stops at each rectangle to be illuminated.
 During the sweep we maintain the intersection between the sweep line and the newly illuminated region \reach{k+1}.
-The intersection consists of non-overlapping intervals, which we store in a binary search tree.
+The intersection consists of non-overlapping intervals, which are stored in a binary search tree.
 
 Let \nbsd{r}{d} and \obsd{r}{d} be the neighbor cell and the adjacent obstacles of rectangle $r$ in direction $d$ in \decomp{x}.
 Algorithm~\ref{alg:light2d} shows the illumination in direction $+y$.
@@ -1579,7 +1580,7 @@ The sweep in direction $-y$ is identical.
 \begin{algorithm}
 \caption{Compute illuminated rectangles in direction $+y$.}\label{alg:light2d}
 \begin{algorithmic}
-\Require A decomposition of the free space into rectangles and a subset of the rectangles $R$
+\Require A decomposition of the free space into rectangles and a subset of the rectangles $R$.
 \Output Rectangles reachable by moving in direction $+y$ from any point in $R$.
 \State $Q\gets\text{Priority queue containing the rectangles of $R$, ordered by the topmost $y$-coordinate}$.
 \State $T\gets\text{Empty binary search tree}$.
@@ -1606,7 +1607,7 @@ The sweep in direction $-y$ is identical.
 \begin{lem}\label{lem:light2dtime}The running time of Algorithm~\ref{alg:light2d} is $O(m\log m)$ where $m$ is the number of visited rectangles and their neighbor links.\end{lem}
 \begin{proof}
 The outermost loop processes a different rectangle $r$ each time, so it is executed $O(m)$ times.
-For each obstacle adjacent to $r$, we cut of all the parts of ranges touching the obstacle from the binary search tree.
+For each obstacle $o$ adjacent to $r$, we cut of all the parts of the ranges touching $o$ from the binary search tree.
 The cutting takes $O(\log m + k)$ time, where $k$ is the number of removed ranges.
 For each rectangle adjacent to $r$, we perform a single binary tree operation and possibly a single insertion to the priority queue, which can both be done in $O(\log m)$ time.
 Thus the total time complexity is $O(m\log m)$.
@@ -1617,11 +1618,11 @@ Algorithm~\ref{alg:minlink2d} shows the staged illumination process.
 In the pseudocode we mark the step when the illumination first reaches each rectangle $r$ as \stepof{r}.
 
 \begin{algorithm}
-\caption{Run staged illumination starting from \spt within free space \fspace such that the first link is horizontal.}\label{alg:minlink2d}
+\caption{Run staged illumination with the first link horizontal.}\label{alg:minlink2d}
 \begin{algorithmic}
-\Require Set of obstacle faces and points \spt and \ept
-\Output Link distance between \spt and \ept
-\State Form \decomp{x} for \fspace with Algorithm~\ref{alg:split2d}.
+\Require Set of obstacle faces $O$ and points \spt and \ept.
+\Output Link distance between \spt and \ept.
+\State Form \decomp{x} from $O$ with Algorithm~\ref{alg:split2d}.
 \State $R\gets\set{r\in\decomp{x} \mid \spt\in r}$
 \State $k\gets 1$
 \While{$R\neq\emptyset$ and $\ept\notin R$}
