@@ -1630,14 +1630,17 @@ In the pseudocode we mark the step when the illumination first reaches each rect
 		\If{$\stepof{r}$ is not set}
 			\State $\stepof{r}\gets k$
 		\ElsIf{$\stepof{r} \le k-2$}
-			\State Mark $r$ to be treated as obstacle during the sweeps.
+			\State Mark $r$ to be treated as an obstacle during the sweeps.
 			\State Remove $r$ from $R$.
 		\EndIf
 	\EndFor
 	\State $H_{+y}\gets H$ illuminated in direction $+y$ by Algorithm~\ref{alg:light2d}.
 	\State $H_{-y}\gets H$ illuminated in direction $-y$ by Algorithm~\ref{alg:light2d}.
+	\If{$\ept$ found during any of the sweeps}
+		\State \Return $k+1$.
+	\EndIf
 	\State $H\gets H_{+y}\cup H_{-y}$.
-	\State $k\gets k+1$
+	\State $k\gets k+2$
 \EndWhile
 \State \Return link distance $k$, or nothing if $R=\emptyset$.
 \end{algorithmic}
@@ -1647,18 +1650,18 @@ In the pseudocode we mark the step when the illumination first reaches each rect
 \begin{proof}
 \decomp{x} is formed in $O(n\log n)$ time by Lemma~\ref{lem:split2dtime}.
 \decomp{x} has $O(n)$ cells and links between cells.
-Each cell is marked as an obstacle 2 steps after it has been found.
-On each iteration of the main loop we perform two sweeps, so each cell can be visited at most four times by the sweeps.
+Each cell is turned into an obstacle 2 steps after it has been found.
+On each iteration of the main loop we perform two sweeps, so each cell is visited at most four times by the sweeps.
 The time complexity of a single sweep is $O(m\log m)$ by Lemma~\ref{lem:light2dtime}, where $m$ is the number of visited rectangles.
-Since each rectangle is visited $O(1)$ times, the total time complexity of all the sweeps is $O(n\log n)$.
+Each rectangle is visited $O(1)$ times, so the total time taken by all the sweeps is $O(n\log n)$.
 
-The decomposition is created in linear space by Lemma~\ref{lem:split2dtime}, and the sweeps only use simple binary search tree and binary heap structures taking linear space, so the whole algorithm runs in $O(n)$ space.
+The decomposition is created in linear space by Lemma~\ref{lem:split2dtime}, and the sweeps only use binary search trees and binary heaps that both take linear space, so the whole algorithm runs in $O(n)$ space.
 \end{proof}
 
-The link distance between \spt and a target point \ept can be found by stopping the illumination process as soon as \ept becomes illuminated.
+The illumination finds the link distance between \spt and the target point \ept by stopping as soon as \ept becomes illuminated.
 \epts can become illuminated either during a vertical sweep or the implicit horizontal sweep that happens when we assign $H_{+y}\cup H_{-y}$ into $H$.
-The path can then be constructed similar to regular shortest path computation in a graph:
-augment the algorithm such that we store into each rectangle how it was initially illuminated, and trace back the path when \ept gets illuminated.
+The path can then be constructed similarly to regular shortest path computation in a graph:
+augment the algorithm such that we store into each rectangle how it was initially illuminated, and trace back the path from \ept.
 
 
 
