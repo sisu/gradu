@@ -120,9 +120,9 @@
 \newcommand\obsEs{\ensuremath{\mathtt{ObstacleEvent}}s\xspace}
 \newcommand\addE{\ensuremath{\mathtt{AddRangeEvent}}\xspace}
 \newcommand\addEs{\ensuremath{\mathtt{AddRangeEvent}}s\xspace}
-\newcommand\cellof[1]{\ensuremath{\text{cell}(#1)}\xspace}
-\newcommand\rectof[1]{\ensuremath{\text{rect}(#1)}\xspace}
-\newcommand\hrectof[1]{\ensuremath{\text{rect}(#1)}\xspace}
+\newcommand\cellof[1]{\ensuremath{\mathtt{cell}(#1)}\xspace}
+\newcommand\rectof[1]{\ensuremath{\mathtt{rect}(#1)}\xspace}
+\newcommand\hrectof[1]{\ensuremath{\mathtt{rect}(#1)}\xspace}
 
 
 \title{Rectilinear minimum link paths in two and higher dimensions}
@@ -1372,7 +1372,7 @@ In the end we regenerate the bits describing the values in the descendants by us
 \caption{Helper procedure for \cleardt: Push down values in a subtree.}\label{alg:segurm:pdst}
 \begin{algorithmic}
 \Require Rectangle $R$ (global), unified tree node $s$, current axis $d$ and split axis $a$.
-\Ensure Copy \hasbita{t} to \hasbita{\leftu{t}{a}} and to \hasbita{\rightu{t}{a}} for all nodes $t$ that can be accessed from $s$ by moving along axes $1\dots d$.
+\Ensure Copies \hasbita{t} to \hasbita{\leftu{t}{a}} and to \hasbita{\rightu{t}{a}} for all nodes $t$ that can be accessed from $s$ by moving along axes $1\dots d$.
 \Procedure{\pdst}{$d,s,a$}
 	\If{$d=0$}
 		\State $\hasbita{\leftu{s}{a}}\gets \hasbita{\leftu{s}{a}} | \hasbita{s}$.
@@ -1394,7 +1394,7 @@ In the end we regenerate the bits describing the values in the descendants by us
 \begin{algorithmic}
 \caption{Helper procedure for \cleardt: Recompute data about the rectangles stored in the descendant nodes.}\label{alg:segurm:recomp}
 \Require Rectangle $R$ (global), unified tree node $s$ and current axis $d$.
-\Ensure Generate \hasbita{t} based on the descendants of $t$ for all nodes $t$ that can be accessed from $s$ by moving along axes $1\dots d$.
+\Ensure Generates \hasbita{t} based on the descendants of $t$ for all nodes $t$ that can be accessed from $s$ by moving along axes $1\dots d$.
 \Procedure{\recomp}{$d,s$}
 	\If{$d=0$}
 		\State $\recompn(s)$.
@@ -1667,59 +1667,60 @@ augment the algorithm such that we store into each rectangle how it was initiall
 
 \section{Paths in three and higher dimensions}\label{sec:minlink3d}
 
-In this section we study the rectilinear minimum link path problem in 3D domains.
-We present an algorithm that has time complexity $O(n^2\log^2 n)$ and space complexity $O(n^2)$~\cite{restricted}.
+In this section we study the rectilinear minimum link path problem in three-dimensional domains.
+We present an algorithm with $O(n^2\log^2 n)$ time and $O(n^2)$~\cite{restricted} space complexity.
 We also extend the algorithm to higher dimensions.
 For any constant $D\ge 2$, the presented algorithm works in $O(n^{D-1}\log^{D-1}n)$ time and $O(n^{D-1})$ space.
 
-Some of the basic ideas of the 2D minimum link path algorithm can also be applied to the 3D case.
-The path is computed using the staged illumination paradigm, and on each step we construct \reach{k+1} from \reach{k} by using a sweep plane algorithm in all the coordinate axis directions.
-However in 3D case the representation of the illuminated region is more complicated, and the sweep algorithm requires more sophisticated logic.
+Some of the basic ideas of the planar minimum link path algorithm can also be applied to the three-dimensional case.
+The path is computed using the staged illumination paradigm, and on each step we construct \reach{k+1} from \reach{k} by applying a sweep plane algorithm in all the coordinate axis directions.
+However in the three-dimensional case the representation of the illuminated region is more complicated, and the sweep algorithm requires more sophisticated data structures.
 
 We use the decomposition presented in Section~\ref{sec:split3d} to maintain the illuminated region and to guide the illumination during the sweeps.
-Unlike the 2D case, the algorithm does not use any specific properties of the decomposition but can be used with any space decomposition.
-The running time of the algorithm depends on the number of cells and links between them, and the decomposition we use has the advantage of having a small number of both of them.
+Unlike the planar case, the algorithm does not depend on the any specific decomposition but can be used with any space decomposition.
+The running time of the algorithm depends on the number of cells and links between them, and the selected decomposition has the advantage of having a small number of both of them.
 
-The decomposition is used to implement plane sweep algorithm for computing \reach{k+1} from \reach{k}.
-On each step we run 6 sweeps, one in each of the directions $\pm x$, $\pm y$ and $\pm z$.
+The decomposition is used to implement the plane sweep algorithm for computing \reach{k+1} from \reach{k}.
+On each step we run six sweeps, one in each of the directions $\pm x$, $\pm y$ and $\pm z$.
 Combination of the results of the sweeps in each direction gives the whole region \reach{k+1}.
-Next we discuss how the sweep plane algorithm is implemented, and then show how the minimum link path algorithm is built around it.
+Next we discuss how the sweep plane algorithm is implemented, and then show how the minimum link path algorithm is built on top of it.
 
 \subsection{Illumination by plane sweep}
 
-We use a sweep plane algorithm to compute \reach{k+1} from \reach{k}~\cite{restricted}.
+We use a sweep plane algorithm to compute \reach{k+1} based on \reach{k}~\cite{restricted}.
 The sweep performs two functions: it discovers which cells can be illuminated from \reach{k}, and it constructs the boundary of the illuminated region.
 The boundary is used on the next step to compute \reach{k+2} from \reach{k+1}.
 
 During the sweep we maintain the intersection of the sweep plane with the newly illuminated region, and a priority queue of events.
-Each event has one of the following types:
+Each event belongs to one of the following types:
 
 \begin{description}
 \item[\addE] where a previously illuminated region is added to the sweep plane.
 \item[\cellE] which occurs when the sweep plane reaches the end of a cell that potentially intersects with the illuminated region.
-\item[\obsE] which occurs when the sweep plane encounters an obstacle face with normal opposite of the sweep direction.
+\item[\obsE] which occurs when the sweep plane encounters an obstacle face with normal opposite to the sweep direction.
 \end{description}
 
-Suppose that we are performing the sweep in direction $+z$.
-In \cellE we first check whether the reached cell $c$ is truly illuminated.
+Consider the sweep in direction $+z$.
+In a \cellE we first check whether any part of the reached cell $c$ is illuminated.
 If yes, we create a \cellE for each neighbor of $c$ in direction $+z$, and an \obsE for each obstacle adjacent to $c$ in direction $+z$.
-In \obsE the projection of the encountered obstacle is cleared from the sweep plane.
+In an \obsE the projection of the encountered obstacle is cleared from the sweep plane.
 Additionally the cleared rectangles are used to construct new \addEs on the boundary of the illuminated region to be used on the next illumination step.
 
-During the sweep, the intersection of the illuminated region with the sweep plane is stored in the unified 2D segment tree presented in Section~\ref{sec:unifiedtree}.
+During the sweep, the intersection of the illuminated region with the sweep plane is stored in a two-dimensional unified segment tree.
 Each \addE inserts a new rectangle to the tree.
 Each illuminated canonical node of the tree stores a reference to the event that was used to generate it.
-If multiple \addEs illuminate the same canonical rectangle, only the one inserted first is stored.
+If multiple \addEs illuminate the same canonical node, only the one inserted first is stored.
 This reference is used to determine the $z$-range of the \addEs generated during the \obsEs, as well as for tracing back the path from \ept to \spt when the illumination finishes.
-Algorithm~\ref{alg:sweep3d} describes the sweep.
+Algorithm~\ref{alg:sweep3d} describes the sweep in $+z$ direction.
+The sweeps in the other directions are identical.
 
 \begin{algorithm}
 \caption{Illuminate by a plane sweep in direction $+z$ starting from provided events.}\label{alg:sweep3d}
 \begin{algorithmic}
-\Require Initial event set $E$
+\Require Initial event set $E$.
 \Ensure Generates \addEs for the next illumination step and marks newly found obstacles as visited.
 \State $Q\gets$ Priority queue containing $E$.
-\State $T\gets$ Empty 2D segment tree.
+\State $T\gets$ Empty two-dimensional unified segment tree.
 \While{$Q$ is not empty}
 	\State $e\gets\pop{Q}$.
 	\If{$e$ is \addE}
@@ -1736,7 +1737,7 @@ Algorithm~\ref{alg:sweep3d} describes the sweep.
 		\EndIf
 	\ElsIf{$e$ is \obsE}
 		\State Clear \rectof{e} from $T$.
-		\State Generate \addEs for the cleared canonical rectangles.
+		\State Generate \addEs for the cleared canonical rectangles (Section~\ref{sec:evtgen}).
 	\EndIf
 \EndWhile
 \end{algorithmic}
