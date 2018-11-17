@@ -1883,10 +1883,12 @@ There are three cases for how an event might be generated on plane $P$ that is n
 \begin{enumerate}
 \item During a sweep in direction $+z$ we hit the obstacle $o$.
 	We generate \addEs in directions $\pm x$ and $\pm y$ that are bounded by $P$.
-	From these \addEs we create events on plane $P$ on the following illumination step.
+	During the sweeps of the following step these events cause us to add rectangles to the unified tree.
+	When these sweeps hit an \obsE, we may then generate events in direction $+z$ on plane $P$.
 \item During a sweep in direction $\pm x$ or $\pm y$ the obstacle face $o$ cuts a rectangle in the tree such that the remaining part has boundary on $P$.
+	Then when the sweep processes another \obsE, we generate an \addE in direction $+z$ on plane $P$.
 \item If on the previous step we created $\addE$ on plane $P$, then we also created events in directions $\pm x$ or $\pm y$ that have plane $P$ as one of the sides.
-	From those events we create more $+z$ events on plane $P$ in the following illumination step.
+	From those events we again add rectangles with $P$ as one of the sides to the unified tree, leading to creation of \addEs on $P$ during an \obsE.
 \end{enumerate}
 
 First let us consider the first two types of events.
