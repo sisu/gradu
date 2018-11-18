@@ -1777,10 +1777,10 @@ The \addEs for the next illumination step are generated during the processing of
 We explain again only the $+z$ sweep, the other directions being identical.
 The goal is to generate \addEs on the boundary of the space illuminated during illumination of \reach{k} such that the sweeps on the following step correctly generate \reach{k+1}.
 
-During the $+z$ sweep we generate \addEs in directions $\pm x$ and $\pm y$.
+During a $+z$ sweep we generate \addEs in directions $\pm x$ and $\pm y$.
 On an \obsE we perform a clear operation on the unified tree containing the sweep plane status.
-The clear operation operations removes some of the tree nodes.
-As a first step in even generation, we create an \addE on each side of every cleared canonical rectangle.
+This clears some of the tree nodes.
+As a first step in the event generation, we create an \addE on each side of every cleared canonical rectangle.
 This can create an unnecessarily large amount of events, because rectangles added to the tree may be split to up to $(\log^2 n)$ canonical rectangles.
 
 To reduce the number of generated events we perform \emph{filtering}, which consists of the following two steps:
@@ -1789,7 +1789,7 @@ To reduce the number of generated events we perform \emph{filtering}, which cons
 \item Merge all sequences of aligned \addEs into a single \addE.
 \end{enumerate}
 
-The aligned \addEs in direction $+x$ are the ones that occur on the same $x$ coordinate and have the same bounds in direction $z$, and the bounds in $y$-direction touch each other at endpoints.
+The aligned \addEs in direction $+x$ are the ones that occur on the same $x$ coordinate and have the same $z$-ranges and the $y$-ranges have a common endpoint.
 The definition is similar in the other directions.
 The aligned \addEs are searched for the events in all directions separately.
 The filtering allow us to bound the number of \addEs generated during the illumination.
@@ -1805,16 +1805,16 @@ Figure~\ref{fig:filter} shows the generated \addEs on an obstacle before and aft
 		\includegraphics[width=\textwidth,page=3]{fig/filter}
 		\caption{\addEs after filtering}
 	\end{subfigure}
-	\caption{Initially we can create a large number of \addEs because of the segment tree structured, but the filtering clears the redundant ones.}\label{fig:filter}
+	\caption{Initially we can create a large number of \addEs because of the segment tree structure, but the filtering clears the redundant ones.}\label{fig:filter}
 \end{figure}
 
-Filtering can be done in linear time with respect to the number of unfiltered rectangles.
+Filtering can be done in linear time with respect to the number of unfiltered rectangles, provided that we have preallocated an array of $O(n^2)$ empty lists.
 To see why, notice that there are only $O(n^2)$ possible coordinates that a corner of a rectangle can have.
 We can group the rectangles by their corners into an array of size $O(n^2)$ and use the array to find matching pairs of rectangles to remove or merge.
 
 To make the minimum link path computation efficient, we want to avoid reilluminating the same cells multiple times.
 In the 2D algorithm this was done by turning cells into obstacles once enough steps have passed since the cell was first discovered.
-This approach works also for 3D, but since there are $O(n^2)$ cells and clearing a rectangle from the unified tree requires $O(n\log n)$ steps, having to do the clear operation for each of the cells would increase the time complexity significantly.
+This approach works also for 3D, but since there are $O(n^2)$ cells and clearing a rectangle from the unified tree requires $O(n\log n)$ steps, generating \obsEs for each of the cells would increase the time complexity significantly.
 
 To overcome this problem, instead of limiting the reachable cells we limit the creation of \addEs.
 We create \addEs for the next step when the sweep plane hits an obstacle.
