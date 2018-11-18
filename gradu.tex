@@ -1646,7 +1646,7 @@ In the pseudocode we mark the step when the illumination first reaches each rect
 \end{algorithmic}
 \end{algorithm}
 
-\begin{theo}Algorithm~\ref{alg:minlink2d} has time complexity $O(n\log n)$ and space complexity $O(n)$.\end{theo}
+\begin{theo}\label{theo:minlink2d}Algorithm~\ref{alg:minlink2d} has time complexity $O(n\log n)$ and space complexity $O(n)$.\end{theo}
 \begin{proof}
 \decomp{x} is formed in $O(n\log n)$ time by Lemma~\ref{lem:split2dtime}.
 \decomp{x} has $O(n)$ cells and links between cells.
@@ -1748,8 +1748,8 @@ Algorithm~\ref{alg:minlink3d} implements the staged illumination method by itera
 \begin{algorithm}
 \caption{Run staged illumination in a three-dimensional domain.}\label{alg:minlink3d}
 \begin{algorithmic}
-\Require Set of obstacle faces and points \spt and \ept
-\Output Link distance between \spt and \ept
+\Require Set of obstacle faces and points \spt and \ept.
+\Output Link distance between \spt and \ept.
 \State Compute decomposition of \fspace into cells using Algorithm~\ref{alg:split3d}.
 \ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
 	\State $E_d\gets$ Event set containing \addE at \spt with width and height 0 and \cellE for the cell containing \spt.
@@ -1827,7 +1827,7 @@ Thus we can stop creating \addEs for an obstacle $o$ that was first found more t
 
 We now prove the time and space complexity of the minimum link path algorithm~\cite{restricted}.
 
-\begin{lem}\label{lem:obse3}For each obstacle we generate \obsE on at most 9 steps of the illumination.\end{lem}
+\begin{lem}\label{lem:obse3}For each obstacle we generate an \obsE on at most 9 steps of the illumination.\end{lem}
 \begin{proof}
 Recall that we stop generating \addEs on an obstacle when 3 steps have passed since the obstacle was discovered.
 Suppose that we first generate \obsE for an obstacle $o$ on step $k$.
@@ -1836,7 +1836,7 @@ After step $k+4$ we have discovered each obstacle $h$ such that the illumination
 We won't generate any \addEs for such obstacle $h$ after step $k+7$, so the last time a sweep can reach $o$ is on step $k+8$.
 \end{proof}
 
-\begin{lem}\label{lem:celle3}For each cell we generate \cellE on at most 9 steps of the illumination.\end{lem}
+\begin{lem}\label{lem:celle3}For each cell we generate a \cellE on at most 9 steps of the illumination.\end{lem}
 \begin{proof}
 The proof is very similar to Lemma~\ref{lem:obse3}.
 If we discover a cell $c$ on step $k$ then all the points visible from $c$ are illuminated after step $k+3$, so no more sweeps can reach $c$ after step $k+8$.
@@ -1886,9 +1886,9 @@ There are three cases for how an event might be generated on the plane $P$ that 
 \begin{enumerate}
 \item During a sweep in direction $+z$ we hit the obstacle $o$.
 	We generate \addEs in directions $\pm x$ and $\pm y$ that are bounded by $P$.
-	During the sweeps of the following step these events cause us to add rectangles to the unified tree.
+	During the sweeps of the following step we add the rectangles of these events to the unified tree.
 	When these sweeps hit an \obsE, we may then generate events in direction $+z$ on the plane $P$.
-\item During a sweep in direction $\pm x$ or $\pm y$ the obstacle face $o$ cuts a rectangle in the tree such that the remaining part has boundary on $P$.
+\item During a sweep in direction $\pm x$ or $\pm y$ the obstacle face $o$ cuts a rectangle in the tree such that the remaining part has a boundary on $P$.
 	Then when the sweep processes another \obsE, we generate an \addE in direction $+z$ on the plane $P$.
 \item If on step $k$ we created $\addE$ for step $k+1$ on the plane $P$, then we also created events in directions $\pm x$ or $\pm y$ whose $z$-ranges are bounded by $P$.
 	Those rectangles are added to the unified tree during a sweep of step $k+1$.
@@ -1898,8 +1898,8 @@ There are three cases for how an event might be generated on the plane $P$ that 
 First let us consider the first two types of events.
 They only occur through sweeps touching the surface of obstacle $o$.
 By Lemma~\ref{lem:obse3} and Lemma~\ref{lem:celle3} such sweeps occur only on $O(1)$ steps.
-On a single sweep, the number of events created on $P$ is bounded by the number of canonical rectangles that have $P$ as one of their sides.
-There are $O(n)$ such rectangles, so the number of events is $O(n)$.
+On a single sweep, the number of events created on $P$ is bounded by the number of canonical nodes that have $P$ as one of their sides.
+There are $O(n)$ such nodes, so the number of events is $O(n)$.
 
 The following observation allows us to bound the number of type~3 events:
 After the illumination has reached the obstacle $o$, the illumination on $P$ proceeds exactly like the two-dimensional staged illumination in the cross section of $P$.
@@ -1940,23 +1940,23 @@ The size of the decomposition as well as the unified segment tree used during th
 
 \subsection{Higher dimensional paths}
 
-The 3D minimum link path algorithm can be generalized to higher dimensions.
+The minimum link path algorithm for three-dimensional domains can be generalized to higher dimensions.
 We now assume that \fspace is a $D$-dimensional rectilinear region for an arbitrary constant $D\ge 2$.
-We develop a generalization of Algorithm~\ref{alg:minlink3d} that computes the rectilinear minimum link path in $D$-dimensional space in $O(n^{D-1}\log^{D-1}n)$ time and $O(n^{D-1})$ space.
+We develop a generalization of Algorithm~\ref{alg:minlink3d} that computes a rectilinear minimum link path in a $D$-dimensional domain in $O(n^{D-1}\log^{D-1}n)$ time and $O(n^{D-1})$ space.
 
-The illumination in the $D$-dimensional space is done using the same kinds of events as were used in the 3D case.
-The 2D sweep plane is replaced by a $(D-1)$-dimensional hyperplane, and each event $e$ defines a $(D-1)$-dimensional hyperrectangle \hrectof{e}.
+The illumination in the $D$-dimensional space is done using the same kinds of events as were used in the three-dimensional case.
+The sweep plane is replaced by a $(D-1)$-dimensional hyperplane, and each event $e$ defines a $(D-1)$-dimensional hyperrectangle \hrectof{e}.
 
-We use $D$-dimensional unified segment tree to store the sweep hyperplane state during the sweeps.
-The unified tree and the $D$-dimensional space decomposition allow us to use almost identical algorithm for the high dimensional case as the algorithm for 3D domains.
+We use a $D$-dimensional unified segment tree to store the sweep hyperplane state during the sweeps.
+The unified tree and the $D$-dimensional space decomposition allow us to use almost identical algorithm for the high dimensional case as the algorithm for three-dimensional domains.
 Algorithm~\ref{alg:sweepdd} shows the sweep in direction $+D$, the other directions being identical.
-Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination by using the hyperplane sweep in all directions on each step.
+Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination by performing the hyperplane sweep in all the directions on each step.
 
 \begin{algorithm}
 \caption{Illuminate by a hyperplane sweep in direction $+D$ starting from provided events.}
 \label{alg:sweepdd}
 \begin{algorithmic}
-\Require Initial event set $E$
+\Require Initial event set $E$.
 \Ensure Generates \addEs for the next illumination step and marks newly found obstacles as visited.
 \State $Q\gets$ Priority queue containing $E$.
 \State $T\gets$ Empty $(D-1)$-dimensional unified segment tree.
@@ -1986,8 +1986,8 @@ Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination
 \caption{Run staged illumination in a $D$-dimensional domain.}
 \label{alg:minlinkdd}
 \begin{algorithmic}
-\Require Set of obstacle faces and points \spt and \ept
-\Output Link distance between \spt and \ept
+\Require Set of obstacle faces and points \spt and \ept.
+\Output Link distance between \spt and \ept.
 \State Compute decomposition of \fspace into $D$-dimensional cells using Algorithm~\ref{alg:splitdd}.
 \ForAll{$d\in\set{\pm1,\dots,\pm D}$}
 	\State $E_d\gets$ Event set containing \addE at \spt with size 0 and \cellE for the cell containing \spt.
@@ -2007,75 +2007,86 @@ Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination
 \end{algorithmic}
 \end{algorithm}
 
-We use the same method for avoiding reilluminating as we used in the 3D algorithm.
+We use the same method for avoiding reilluminating as in the three-dimensional case.
 For each obstacle $o$ we record when it was first discovered, and only generate \addEs from $o$ until a certain number of steps has passed.
 If $o$ is reached first on step $k$, then at the end of step $k+D$ all the points visible from $o$ are illuminated, so we can stop creating \addEs from $o$ starting from step $k+D+1$.
 
 We also need to perform the filtering described in Section~\ref{sec:evtgen} to avoid generating a large number of \addEs because of the unified tree structure.
-The filtering rules are exactly the same as the ones used in the 3D algorithm, except that we are new working with $(D-1)$-dimensional hyperrectangles.
-The operations below are performed to \addEs produced by the sweep in direction $+D$.
+The filtering rules are the same as the ones used in the three-dimensional algorithm, except that we are new working with $(D-1)$-dimensional hyperrectangles.
+The operations below are performed for the \addEs produced by the sweep in direction $+D$.
 \begin{enumerate}
-\item Remove all the pairs of \addEs with the same position but opposite direction.
+\item Remove all pairs of \addEs with the same position but opposite direction.
 \item Merge all sequences of aligned \addEs into a single \addE.
 \end{enumerate}
 
-A pair of \addEs are aligned if they are identical in all but a single direction $a$, and their ranges in direction $a$ are next to each other.
-We check for aligned rectangles in each direction $a$ separately.
+Two \addEs are aligned if they are identical in all but a single direction $d$, and their ranges in direction $d$ are next to each other.
+We check for aligned rectangles in each direction $d$ separately.
 The filtering process can again be done in linear time by indexing the rectangles by their corners into an array of size $O(n^{D-1})$.
 
-\begin{lem}\label{lem:obsed}For each obstacle we generate \obsE on at most $2D+3$ steps of the illumination.\end{lem}
+Next we prove the running time of the algorithm.
+
+\begin{lem}\label{lem:obsed}For each obstacle we generate an \obsE on at most $2D+3$ steps of the illumination.\end{lem}
 \begin{proof}
-The proof is similar to Lemma~\ref{lem:obse3} for the 3D case.
-We stop generating \addEs from obstacles when $D$ steps have passed since that obstacle was discovered.
-Suppose the illumination first reaches obstacle $o$ on step $k$.
+The proof is similar to Lemma~\ref{lem:obse3} for the three-dimensional case.
+We stop generating \addEs from an obstacle when $D$ steps have passed since that obstacle was discovered.
+Suppose the illumination first reaches an obstacle $o$ on step $k$.
 After step $k+D$ all the points visible from $o$ are illuminated.
 After step $k+D+1$ we have discovered each obstacle $h$ such that the illumination reaching $h$ could generate an \addE that illuminates $o$.
 We won't generate any \addEs for such obstacle $h$ after step $k+2D+1$, so the last time a sweep can reach $o$ is on step $k+2D+2$.
 \end{proof}
 
-\begin{lem}\label{lem:celled}For each cell we generate \cellE on at most $2D+3$ steps of the illumination.\end{lem}
+\begin{lem}\label{lem:celled}For each cell we generate a \cellE on at most $2D+3$ steps of the illumination.\end{lem}
 \begin{proof}
 The proof is very similar to Lemma~\ref{lem:obsed}.
 If we discover a cell $c$ on step $k$ then all the points visible from $c$ are illuminated after step $k+D$, so no more sweeps can reach $c$ after step $k+2D+2$.
 \end{proof}
 
-\begin{lem}\label{lem:added}The number of \addEs generated during the illumination after after the filtering is $O(n^{D-1})$.\end{lem}
+\begin{lem}\label{lem:added}The number of \addEs generated during the illumination after the filtering is $O(n^{D-1})$.\end{lem}
 \begin{proof}
 The proof is similar to Lemma~\ref{lem:adde3}.
 We only count the \addEs in direction $+D$ occurring on a hyperplane $P$ defined by a $(D-1)$-dimensional obstacle face $o$.
 To simplify the counting we again assume that the obstacle $D$-coordinates are unique, so $o$ is the only obstacle face on $P$.
+We show that the number of events generated on $P$ is $O(n^{D-2})$, which proves the claim.
 
-We classify the events remaining after the filtering similarly to the 3D case:
+We classify the events remaining after the filtering similarly to the three-dimensional case:
 \begin{enumerate}
 \item During a sweep in direction $+D$ we hit the obstacle $o$.
 	We generate \addEs in directions other than $\pm D$ that are bounded by $P$.
-	From these \addEs we create events on plane $P$ on the following illumination step.
-\item During a sweep in direction other than $\pm D$ the obstacle face $o$ cuts a hyperrectangle in the tree such that the remaining part has boundary on $P$.
-\item If on the previous step we created $\addE$ on plane $P$, then we also created events in directions other than $\pm D$ that have plane $P$ as one of the sides.
-	From those events we create more $+D$ events on plane $P$ on the following step.
+	During the sweeps of the following step we add the rectangles of these events to the unified tree.
+	When these sweeps hit an \obsE, we may then generate events in direction $+D$ on the plane $P$.
+\item During a sweep in a direction other than $\pm D$ the obstacle face $o$ cuts a hyperrectangle in the tree such that the remaining part has a boundary on $P$.
+	Then when the sweep processes another \obsE, we generate an \addE in direction $+D$ on the plane $P$.
+\item If on step $k$ we created $\addE$ on plane $P$, then we also created events in directions other than $\pm D$ whose $D$-ranges are bounded by $P$.
+	Those rectangles are added to the unified tree during a sweep of step $k+1$.
+	We then create \addEs on $P$ for step $k+2$ when the sweep processes an \obsE.
 \end{enumerate}
 
-Similar to the 3D case, a single sweep can only produce as many events on $P$ as the number of canonical hyperrectangles bounded by $P$, which in the $(D-1)$-dimensional unified tree is $O(n^{D-2})$.
+Similar to the three-dimensional case, a single sweep can only produce as many events on $P$ as the number of canonical nodes whose hyperrectangles are bounded by $P$.
+In a $(D-1)$-dimensional unified tree the number of such nodes is $O(n^{D-2})$.
 By Lemma~\ref{lem:obsed} and Lemma~\ref{lem:celled} the illumination can only touch $o$ on $O(1)$ steps, so the number of type 1 and 2 events on $P$ is $O(n^{D-2})$.
 
 We use induction on $D$ to prove the number of type~3 events.
-The base case $D=2$ is proven by Lemma~\ref{lem:adde3}.
+In the base case $D=2$ the obstacle $o$ is a line segment and $P$ is the line passing through the segment.
+In this case events on $P$ can only be generated if the sweep touches $o$.
+This happens only $O(1)$ times so the number of events on $P$ is $O(1)$.
 
-For $D\ge 3$ notice that again the illumination on the boundary of $P$ advances exactly like the $(D-1)$-dimensional illumination in the cross section of $P$.
+For $D\ge 3$ notice again that the illumination on the boundary of $P$ advances exactly like the $(D-1)$-dimensional illumination in the cross section of $P$.
 By induction the $(D-1)$-dimensional illumination creates $O(n^{D-2})$ events.
 Multiplying this by the number of times any cell can be visited gives an upper bound for the $D$-dimensional illumination on $P$.
-Since there is only a constant factor overhead compared to the $(D-1)$-dimensional illumination, the number of type~3 events is $O(n^{D-2})$.
+Since there is only a constant factor overhead compared to the $(D-1)$-dimensional illumination, the number of type~3 events on $P$ is $O(n^{D-2})$.
 
 The number of events on the hyperplane of each obstacle is $O(n^{D-2})$, so the total number of events is $O(n^{D-1})$.
 \end{proof}
 
 We are now ready to state the final result.
 
-\begin{theo}Algorithm~\ref{alg:minlinkdd} computes $D$-dimensional minimum link path in $O(n^{D-1}\log^{D-1}n)$ time and $O(n^{D-1})$ space.\end{theo}
+\begin{theo}A rectilinear minimum link path in a $D$-dimensional rectilinear domain can be computed in $O(n^{D-1}\log^{D-1}n)$ time and $O(n^{D-1})$ space for any constant $D\ge 2$.\end{theo}
 \begin{proof}
+A minimum link path can be computed by running the staged illumination of Algorithm~\ref{alg:minlinkdd} and tracing back the path when the illumination reaches the endpoint.
+
 By Lemma~\ref{lem:celled} each cell is visited $O(1)$ times during the illumination.
 On each \cellE we perform a single lookup to the unified tree in $O(\log^{D-1} n)$ time, and iterate over the neighbors of the cell.
-Since the decomposition has $O(n^{D-1})$ cells and $O(n^{D-1})$ links between cells, the total time taken in processing \cellEs is $O(n^{D-1}\log^{D-1} n)$.
+Since the decomposition has $O(n^{D-1})$ cells and $O(n^{D-1})$ links, the total time taken in processing \cellEs is $O(n^{D-1}\log^{D-1} n)$.
 
 On each \addE we insert a new rectangle to the unified tree in $O(\log^{D-1} n)$ time.
 By Lemma~\ref{lem:added} the number of \addEs is $O(n^{D-1})$, so the events are processed in $O(n^{D-1}\log^{D-1} n)$ time.
@@ -2089,7 +2100,8 @@ There are $O(n)$ \obsEs by Lemma~\ref{lem:obsed}, so the total time taken in \ob
 
 All parts of the algorithm are done in $O(n^{D-1}\log^{D-1} n)$ time, so the total time complexity is $O(n^{D-1}\log^{D-1} n)$.
 
-The decomposition and the unified segment tree both require $O(n^{D-1})$ memory, so the space complexity is $O(n^{D-1})$.
+For the space complexity notice that we may create at most as many \addEs during a single \obsE as there are nodes in the unified tree, so only $O(n^{D-1})$ events need to be stored in the memory.
+The decomposition and the unified segment tree both require $O(n^{D-1})$ space, so the space complexity is $O(n^{D-1})$.
 \end{proof}
 
 
