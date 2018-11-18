@@ -444,10 +444,10 @@ Figure~\ref{fig:split3d} shows how the three-dimensional decomposition is create
 \State $Z\gets$ All $z$-coordinates of the obstacles in $E$.
 \State Sort $Z$ in increasing order.
 \State $R\gets$ Empty list of result cells.
-\State $M\gets$ Empty binary search tree mapping 2D rectangles to indices in $R$.
+\State $M\gets$ Empty binary search tree mapping rectangles to indices in $R$.
 \ForAll{$z\in Z$}
 	\State $E_z\gets\set{e \mid e\in E, \zrange{e}\ni z}$.
-	\State $T\gets$ 2D decomposition for $E_z$ using Algorithm~\ref{alg:split2d}.
+	\State $T\gets$ planar decomposition for $E_z$ using Algorithm~\ref{alg:split2d}.
 	\ForAll{$m\in M\setminus T$}
 		\State $c\gets R[M[m]]$.
 		\State $\zranget{c}{end}\gets z$.
@@ -466,7 +466,7 @@ Figure~\ref{fig:split3d} shows how the three-dimensional decomposition is create
 \begin{lem}\label{lem:split3dtime}Algorithm~\ref{alg:split3d} has running time $O(n^2\log n)$.\end{lem}
 \begin{proof}
 We loop through $O(n)$ unique $z$-coordinates.
-For each $z$ we construct a set of obstacles in $O(n)$ time and a 2D decomposition in $O(n\log n)$ time.
+For each $z$ we construct a set of obstacles in $O(n)$ time and a planar decomposition in $O(n\log n)$ time.
 The map $M$ is implemented as a binary search tree, so each update and lookup can be performed in $O(\log n)$ time.
 For each $z$ we perform $O(n)$ map updates, so the total time complexity is $O(n^2\log n)$.
 \end{proof}
@@ -523,7 +523,7 @@ Since the total number of obstacles is $n$, the sum of $k_z$ values over all $z$
 By Lemma~\ref{lem:decomp2dch} the number of links between two adjacent layers is $O(nk_z)$, so the total number of $z$-links is $\sum_z O(nk_z)=O(n^2)$.
 \end{proof}
 
-To generate the links, notice that the links in $x$ and $y$ directions can be simply extracted from the 2D decompositions of each cross section.
+To generate the links, notice that the links in $x$ and $y$ directions can be simply extracted from the planar decompositions of each cross section.
 Some links may be generated multiple times but the number of generated links is still $O(n^2)$, so we can find and remove the duplicates by sorting the links in $O(n^2\log n)$ time.
 What remains is computing the links in $z$ direction.
 We compute the links between each pair of adjacent cross sections separately.
@@ -1030,7 +1030,7 @@ Then each node of the inner tree represents a rectangle whose $x$-range is deter
 
 The concept of canonical nodes can also be extended to higher dimensions.
 The canonical nodes \canon{R} of a $D$-dimensional rectangle $R$ are the smallest set of nodes that fully cover $R$ but nothing else.
-Figure~\ref{fig:canon2d} illustrates the structure of a 2D segment tree and the canonical nodes.
+Figure~\ref{fig:canon2d} illustrates the structure of a two-dimensional segment tree and the canonical nodes.
 
 \begin{figure}\centering
 	\begin{subfigure}[t]{0.15\textwidth}\centering
@@ -1040,7 +1040,7 @@ Figure~\ref{fig:canon2d} illustrates the structure of a 2D segment tree and the 
 	\hfil
 	\begin{subfigure}[t]{0.75\textwidth}\centering
 		\includegraphics[width=\textwidth,page=1]{fig/segtree2d}
-		\caption{The canonical nodes of $R$ in a 2D segment tree}\label{fig:canon2d:tree}
+		\caption{The canonical nodes of $R$ in a two-dimensional segment tree}\label{fig:canon2d:tree}
 	\end{subfigure}
 	\caption{Each node of the outer tree defines a range of $y$-coordinates and an inner segment tree built on the $x$-coordinates.
 	Each node of the inner trees is a rectangle that combines the $y$ and the $x$ ranges.
