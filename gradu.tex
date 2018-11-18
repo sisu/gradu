@@ -226,7 +226,7 @@ The following results have been published in peer-reviewed journals and conferen
 The article was written with the co-authors Valentin Polishchuk and Joseph S. B. Mitchell.
 The main ideas of the algorithm were invented by the author, though many details were worked out with Polishchuk.
 The contribution of Mitchell was mainly for other results not discussed in this thesis, such as the approximation algorithm for the non-rectilinear minimum link path problem.
-\item A new algorithm for the 3-dimensional minimum link path problem, improving the running time from the previous best result of $O(n^{2.5}\log n)$ to $O(n^2\log^2 n)$~\cite{restricted}.
+\item A new algorithm for the three-dimensional minimum link path problem, improving the running time from the previous best result of $O(n^{2.5}\log n)$ to $O(n^2\log^2 n)$~\cite{restricted}.
 The publication was written with the co-author Valentin Polishchuk.
 The main ideas were invented by the author, but many details and proofs of the running time were worked out together with Polishchuk.
 \end{itemize}
@@ -421,7 +421,7 @@ Figure~\ref{fig:split3d} shows how the three-dimensional decomposition is create
 \begin{figure}\centering
 	\begin{subfigure}[t]{0.3\textwidth}\centering
 		\includegraphics[width=0.5\textwidth,page=1]{fig/split3d}
-		\caption{3-dimensional domain}
+		\caption{Three-dimensional domain}
 	\end{subfigure}
 	\hfil
 	\begin{subfigure}[t]{0.3\textwidth}\centering
@@ -529,7 +529,7 @@ What remains is computing the links in $z$ direction.
 We compute the links between each pair of adjacent cross sections separately.
 
 Let $A$ and $B$ be the sets of rectangles that are different on the horizontal decompositions of two adjacent cross sections.
-Finding the $z$-links in the 3-dimensional decomposition is equivalent to finding the set of overlapping pairs between $A$ and $B$.
+Finding the $z$-links in the three-dimensional decomposition is equivalent to finding the set of overlapping pairs between $A$ and $B$.
 The pairs are found by running \emph{another} line sweep algorithm after both $A$ and $B$ have been created by Algorithm~\ref{alg:split2d}.
 
 Algorithm~\ref{alg:overlap2d} shows the computation of the overlapping pairs.
@@ -2109,12 +2109,12 @@ The decomposition and the unified segment tree both require $O(n^{D-1})$ space, 
 \section{Conclusions}\label{sec:conclusions}
 
 We studied the rectilinear minimum link path problem in two, three and higher dimensions.
-We presented new algorithms for the problem with lower asymptotic running times than the previous known solutions.
+We presented new algorithms for the problem with lower asymptotic running times than the previously known solutions.
 The results are interesting since computing rectilinear minimum link paths is an old and well studied problem~\cite{restricted,wagner}.
 
 We gave a simple algorithm for the planar rectilinear minimum link path problem with running time $O(n\log n)$~\cite{revisited}.
-The algorithm has the same asymptotic complexity as older results~\cite{dasnar,sato}, but it uses simpler data structures.
-We also provided a new algorithm for the 3-dimensional variant of the problem with running time $O(n^2\log^2 n)~\cite{restricted}$.
+The algorithm has the same asymptotic complexity as the older results~\cite{dasnar,sato}, but it uses simpler data structures.
+We also provided a new algorithm for the three-dimensional variant of the problem with running time $O(n^2\log^2 n)~\cite{restricted}$.
 Finally, we showed that the algorithm can be generalized to work in any dimension $D$ with running time $O(n^{D-1}\log^{D-1}n)$.
 The new algorithms provide significant improvements over the previous best known results $O(n^{2.5}\log n)$~\cite{wagner} and $O(n^D\log n)$~\cite{de1992}.
 
