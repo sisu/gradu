@@ -45,6 +45,7 @@
 \newcommand\spt{\ensuremath{\textbf{s}}\xspace}
 \newcommand\ept{\ensuremath{\textbf{t}}\xspace}
 \newcommand\fspace{\ensuremath{\mathcal{A}}\xspace}
+\newcommand\fspaceb{\ensuremath{\mathcal{B}}\xspace}
 \newcommand\dirs{\ensuremath{\mathcal{C}}\xspace}
 
 \newcommand\epts{\ensuremath{P}\xspace}
@@ -1902,10 +1903,11 @@ On a single sweep, the number of events created on $P$ is bounded by the number 
 There are $O(n)$ such nodes, so the number of events is $O(n)$.
 
 The following observation allows us to bound the number of type~3 events:
-After the illumination has reached the obstacle $o$, the illumination on $P$ proceeds exactly like the two-dimensional staged illumination in the cross section of $P$.
-The two-dimensional illumination illuminates only maximal rectangles of \decomp{x} and \decomp{y}, producing a total of $O(n)$ illuminated rectangles.
-There is some overhead because of reilluminating the same parts multiple times, but by Lemma~\ref{lem:celle3} each part of the domain can be illuminated only $O(1)$ times.
-Thus the event count is within a constant factor of the event count of the two-dimensional staged illumination.
+Let \fspaceb be the cross section of the free space \fspace with the plane $P$.
+After the illumination has reached the obstacle $o$, the illumination through the events bounded on one side by $P$ proceeds exactly like the two-dimensional staged illumination in \fspaceb.
+The two-dimensional illumination illuminates only maximal rectangles of \decomp{x} and \decomp{y}, producing a total of $O(n)$ illuminated rectangles according to Theorem~\ref{theo:minlink2d}.
+There is some overhead because we may reilluminate the same parts multiple times, but by Lemma~\ref{lem:celle3} each part of the domain can be illuminated only $O(1)$ times.
+Thus the number of type~3 events is within a constant factor of the event count of the two-dimensional staged illumination.
 
 The number of events on the plane of each obstacle face is $O(n)$, so the total number of events is $O(n^2)$.
 \end{proof}
@@ -2070,7 +2072,8 @@ In the base case $D=2$ the obstacle $o$ is a line segment and $P$ is the line pa
 In this case events on $P$ can only be generated if the sweep touches $o$.
 This happens only $O(1)$ times so the number of events on $P$ is $O(1)$.
 
-For $D\ge 3$ notice again that the illumination on the boundary of $P$ advances exactly like the $(D-1)$-dimensional illumination in the cross section of $P$.
+For $D\ge 3$ let \fspaceb be the cross section of the free space \fspace with the plane $P$.
+We notice again that the illumination through the events bounded by $P$ advances exactly like the $(D-1)$-dimensional illumination in \fspaceb.
 By induction the $(D-1)$-dimensional illumination creates $O(n^{D-2})$ events.
 Multiplying this by the number of times any cell can be visited gives an upper bound for the $D$-dimensional illumination on $P$.
 Since there is only a constant factor overhead compared to the $(D-1)$-dimensional illumination, the number of type~3 events on $P$ is $O(n^{D-2})$.
