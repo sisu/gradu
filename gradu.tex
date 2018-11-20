@@ -1689,10 +1689,12 @@ Next we discuss how the sweep plane algorithm is implemented, and then show how 
 \subsection{Illumination by plane sweep}
 
 We use a sweep plane algorithm to compute \reach{k+1} based on \reach{k}~\cite{restricted}.
+The new region is computed by applying the sweep in each coordinate axis direction $\pm x$, $\pm y$ and $\pm z$.
 The sweep performs two functions: it discovers which cells can be illuminated from \reach{k}, and it constructs the boundary of the illuminated region.
 The boundary is used on the next step to compute \reach{k+2} from \reach{k+1}.
+Note that while the region \reach{k} plays a central role in the design of the algorithm, we don't explicitly maintain this region.
 
-During the sweep we maintain the intersection of the sweep plane with the newly illuminated region, and a priority queue of events.
+During each of the six sweeps we maintain the intersection of the sweep plane with the newly illuminated region, and a priority queue of events.
 Each event belongs to one of the following types:
 
 \begin{description}
@@ -1701,7 +1703,7 @@ Each event belongs to one of the following types:
 \item[\obsE] which occurs when the sweep plane encounters an obstacle face with normal opposite to the sweep direction.
 \end{description}
 
-Consider the sweep in direction $+z$.
+Consider a sweep in direction $+z$.
 In a \cellE we first check whether any part of the reached cell $c$ is illuminated.
 If yes, we create a \cellE for each neighbor of $c$ in direction $+z$, and an \obsE for each obstacle adjacent to $c$ in direction $+z$.
 In an \obsE the projection of the encountered obstacle is cleared from the sweep plane.
@@ -1758,7 +1760,7 @@ Algorithm~\ref{alg:minlink3d} implements the staged illumination method by itera
 \ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
 	\State $E_d\gets$ Event set containing \addE at \spt with width and height 0 and \cellE for the cell containing \spt.
 \EndFor
-\While{$E_d$ is not empty for some $d$}
+\While{$E_d$ is not empty for some $d$}\Comment $E_d$-sets define the boundary of $\reach{k}$.
 	\ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
 		\State $E_d'\gets$ Empty event set.
 	\EndFor
