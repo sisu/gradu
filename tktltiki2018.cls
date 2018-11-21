@@ -225,7 +225,7 @@
         \@mkboth{\uppercase{\refname}}{\uppercase{\refname}}
         \addcontentsline{toc}{section}{\refname}}%
       \list{\@biblabel{\arabic{enumiv}}}%
-           {\settowidth\labelwidth{\makebox[1em]{}}%
+           {\settowidth\labelwidth{\makebox[2em]{}}%
             \leftmargin\labelwidth
             \advance\leftmargin\labelsep
             \usecounter{enumiv}%
