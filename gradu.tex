@@ -10,10 +10,11 @@
 \usepackage{algpseudocode}
 %\usepackage{algorithm}
 \usepackage[section]{algorithm}
-\usepackage[square,sort,comma,numbers]{natbib}
+%\usepackage[square,sort,comma,numbers]{natbib}
 \begin{document}
 \onehalfspacing
 \sloppy
+%\setcitestyle{square}
 
 %\floatname{algorithm}{Procedure}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
@@ -197,7 +198,7 @@ In this thesis we focus on the \emph{rectilinear} variant of the problem.
 In the rectilinear problem the obstacles as well as the links of the path are restricted to the coordinate axes' directions.
 The problem can also be defined in a three-dimensional domain as well as higher dimensions.
 
-Following a typical convention, we assume that the domain is given as a list of $n$ rectangular obstacle faces~\cite{wagner}.
+Following a typical convention, we assume that the domain is given as a list of $n$ rectangular obstacle faces~\cite{wagnerphd}.
 In the planar case the obstacle faces are line segments, and in $D$-dimensional domain they are $(D-1)$-dimensional hyperrectangles.
 We use the terms ``obstacle'' and ``obstacle face'' interchangeably to refer to an obstacle face in the input.
 Each obstacle is also associated with a normal vector that points towards the free space.
