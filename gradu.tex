@@ -10,7 +10,7 @@
 \usepackage{algpseudocode}
 %\usepackage{algorithm}
 \usepackage[section]{algorithm}
-%\usepackage{natbib}
+\usepackage[square,sort,comma,numbers]{natbib}
 \begin{document}
 \onehalfspacing
 \sloppy
@@ -809,7 +809,7 @@ This allows implementing most operations in $O(\log\segsize)$ time, and the size
 The segment tree can also be generalized to create a multidimensional data structure.
 A $D$-dimensional segment tree stores $D$-dimensional hyperrectangles, and many operations can be supported in $O(\log^D \segsize)$ time.
 
-\subsection{Structure of the segment tree}
+\subsection{Segment tree structure}
 
 A segment tree is a binary tree where each node $s$ corresponds to a fixed interval $\inter{s}$~\cite{berg2008}.
 The child nodes of each branch node divide the interval into smaller parts.
@@ -1507,7 +1507,7 @@ The rectilinear minimum link path problem can thus be solved by forming the inte
 The intersection graph has quadratic size so building it takes at least quadratic time as well.
 The goal is thus to run the breadth-first search in the intersection graph without explicitly constructing the graph.
 
-\subsection{Searching the intersection graph}
+\subsection{Search in an intersection graph}
 
 We consider again the case where the first link of the path is horizontal.
 We start by constructing the horizontal decomposition with Algorithm~\ref{alg:split2d}.
