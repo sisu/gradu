@@ -159,9 +159,9 @@ For the planar case we develop a simple method that has the optimal $O(n\log n)$
 For three-dimensional domains we present a new algorithm with running time $O(n^2\log^2 n)$, which is an improvement over the best previously known result $O(n^{2.5}\log n)$.
 The algorithm can also be generalized to higher dimensions, leading to an $O(n^{D-1}\log^{D-1} n)$ time algorithm in $D$-dimensional domains.
 
-We introduce the new algorithms as well as the data structures used.
-The algorithms work by maintaining a reachable region that is gradually expanded to form a shortest path path from the starting point.
-Two data structures play a key role in the algorithms: a space decomposition and the segment tree.
+We describe the new algorithms as well as the data structures used.
+The algorithms work by maintaining a reachable region that is gradually expanded to form a shortest path map from the starting point.
+The algorithms rely on several efficient data structures.
 The reachable region is tracked by using a simple recursive space decomposition.
 The region is expanded by a sweep plane method that uses a multidimensional segment tree.
 \end{abstract}
