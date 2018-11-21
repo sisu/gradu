@@ -237,7 +237,8 @@
      {\def\@noitemerr
        {\@latex@warning{Empty `thebibliography' environment}}%
       \endlist}
-\def\@biblabel#1{#1}
+\def\@biblabel#1{[#1]}
+%\def\@biblabel#1{#1}
 \def\datefinnish{%
   \def\today{\number\day.\number\month.\number\year}}
 \newcommand{\level}[1]{\gdef\@level{#1}}
