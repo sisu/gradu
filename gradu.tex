@@ -161,9 +161,8 @@ The algorithm can also be generalized to higher dimensions, leading to an $O(n^{
 
 We describe the new algorithms as well as the data structures used.
 The algorithms work by maintaining a reachable region that is gradually expanded to form a shortest path map from the starting point.
-The algorithms rely on several efficient data structures.
-The reachable region is tracked by using a simple recursive space decomposition.
-The region is expanded by a sweep plane method that uses a multidimensional segment tree.
+The algorithms rely on several efficient data structures:
+The reachable region is tracked by using a simple recursive space decomposition, and the region is expanded by a sweep plane method that uses a multidimensional segment tree.
 \end{abstract}
 
 \mytableofcontents
@@ -489,7 +488,7 @@ Figure~\ref{fig:linkproof} illustrates the case where two adjacent cross section
 		\includegraphics[width=0.5\textwidth,page=2]{fig/linkproof}
 		\caption{Domain after adding an obstacle}
 	\end{subfigure}
-	\caption{Adding or removing a single obstacle can change all $O(n)$ cells of the horizontal decomposition.
+	\caption{Adding or removing a single obstacle can change all $O(n)$ cells of a horizontal decomposition.
 	However the intersection of the domain with any horizontal line is changed at only $O(1)$ points.
 	Because there are $O(n)$ unique cross sections, the number of overlapping pairs of rectangles in the old and the new domain is $O(n)$.}\label{fig:linkproof}
 \end{figure}
@@ -1493,7 +1492,7 @@ For odd $k\ge 3$ we form \reach{k+1} by illuminating in vertical direction from 
 	\includegraphics[scale=0.7,page=1]{fig/inter}
 	\hfil
 	\includegraphics[scale=0.7,page=2]{fig/inter}
-	\caption{Group of four rectangles and their intersection graph. Each pair of overlapping objects has an edge between them in the intersection graph.}\label{fig:inter}
+	\caption{A group of four rectangles and their intersection graph. Each pair of overlapping objects has an edge between them in the intersection graph.}\label{fig:inter}
 \end{figure}
 
 For a set of geometric objects (such as rectangles) $G$, the \emph{intersection graph} of $G$ is a graph whose nodes are the elements of $G$, and there is an edge between each pair of intersecting objects.
