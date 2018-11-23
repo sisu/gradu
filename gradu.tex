@@ -1586,8 +1586,8 @@ The sweep in direction $-y$ is identical.
 \begin{algorithmic}
 \Require A decomposition of the free space into rectangles and a subset of the rectangles $R$.
 \Output Rectangles reachable by moving in direction $+y$ from any point in $R$.
-\State $Q\gets\text{Priority queue containing the rectangles of $R$, ordered by the topmost $y$-coordinate}$.
-\State $T\gets\text{Empty binary search tree}$.
+\State $Q\gets$ Priority queue containing the rectangles of $R$ ordered by the topmost $y$-coordinate.
+\State $T\gets$ Empty binary search tree.
 \While{$Q$ is not empty}
 	\State $r\gets\pop{Q}$.
 	\If{$r\in R$}
