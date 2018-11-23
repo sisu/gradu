@@ -1628,6 +1628,9 @@ In the pseudocode we mark the step when the illumination first reaches each rect
 \Output Link distance between \spt and \ept.
 \State Form \decomp{x} from $O$ with Algorithm~\ref{alg:split2d}.
 \State $R\gets\set{r\in\decomp{x} \mid \spt\in r}$
+\If{$\ept\in R$}
+	\State \Return 1 if $\spt_y=\ept_y$, 2 otherwise.
+\EndIf
 \State $k\gets 1$
 \While{$R\neq\emptyset$ and $\ept\notin R$}
 	\ForAll{$r\in R$}
