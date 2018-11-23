@@ -284,7 +284,7 @@ The sweep line method allows us to transform the two-dimensional illumination pr
 
 During the sweeps we need to maintain the relationship between the sweep line and the obstacles as well as the region \reach{k}.
 We need to maintain the intersection of the sweep line with the illuminated area, which requires efficient handling of intervals of real numbers.
-The \emph{segment tree} is a generic data structure for working with intervals.
+A \emph{segment tree} is a generic data structure for working with intervals.
 It is flexible enough to support all the operations required by the staged illumination.
 Segment trees are described in Section~\ref{sec:segtree}.
 
@@ -1190,7 +1190,7 @@ The structure of a multidimensional segment tree depends on the order of the coo
 For example a two-dimensional segment tree can either have the outer tree represent $y$-coordinates and each inner tree represent $x$-coordinates, or the other way round.
 The structure and the parent-child relationships are different in each case, but the set of rectangles representable in the tree is exactly the same regardless of the order.
 
-The \emph{unified segment tree}, developed by Wagner~\cite{unified}, combines the parent-child links of the different multidimensional segment trees into a single structure.
+The \emph{unified segment tree} (also just \emph{unified tree}), developed by Wagner~\cite{unified}, combines the parent-child links of the different multidimensional segment trees into a single structure.
 The unified segment tree is actually not a tree but a directed graph, but we use the word tree because of the close resemblance to the segment tree.
 Each node $s$ of the graph represents a $D$-dimensional hyperrectangle.
 For each axis $i$ where \rect{s} is not minimal, $s$ has links to two child nodes that divide \rect{s} into two parts along a hyperplane perpendicular to the $i$-axis.
