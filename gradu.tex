@@ -828,7 +828,7 @@ Figure~\ref{fig:segtree} illustrates the segment tree structure.
 
 \begin{figure}\centering
 	\includegraphics[scale=0.7,page=1]{fig/segtree}
-	\caption{The segment tree is a complete or an almost complete binary tree.
+	\caption{A segment tree is a complete or an almost complete binary tree.
 	Each tree node is associated with an interval.
 	The root node represents the total range, and the children of each branch node divide the range of the node into two parts.}\label{fig:segtree}
 \end{figure}
@@ -1045,7 +1045,8 @@ Figure~\ref{fig:canon2d} illustrates the structure of a two-dimensional segment 
 		\includegraphics[width=\textwidth,page=1]{fig/segtree2d}
 		\caption{The canonical nodes of $R$ in a two-dimensional segment tree}\label{fig:canon2d:tree}
 	\end{subfigure}
-	\caption{Each node of the outer tree defines a range of $y$-coordinates and an inner segment tree built on the $x$-coordinates.
+	\caption{A rectangle is split to canonical nodes in a two-dimensional segment tree.
+	Each node of the outer tree defines a range of $y$-coordinates and an inner segment tree built on the $x$-coordinates.
 	Each node of the inner trees is a rectangle that combines the $y$ and the $x$ ranges.
 	The canonical nodes of a rectangle $R$ (Fig.~\ref{fig:canon2d:r}) are the smallest set of nodes of the inner trees that cover exactly $R$ (Fig.~\ref{fig:canon2d:tree}).}\label{fig:canon2d}
 \end{figure}
@@ -1330,7 +1331,7 @@ Figure~\ref{fig:uremove} shows an example of the clearing process.
 		\caption{\recomp visits all the ancestors of the remaining nodes, marking information about the descendants into the light-grey nodes.}\label{fig:urm:recomp}
 	\end{subfigure}
 	\caption{
-	Example of clearing a rectangle in a unified segment tree with Algorithm~\ref{alg:segurm}.
+	Example of clearing a rectangle in a unified segment tree using Algorithm~\ref{alg:segurm}.
 	The rectangle $A$ (Fig.~\ref{fig:urm:rects}) is stored in a single canonical node and two ancestors (Fig.~\ref{fig:urm:canon}).
 	To clear the rectangle $B$, we first push $A$ down into descendants from nodes touched by $B$ (Fig.~\ref{fig:urm:push}).
 	After clearing we fill descendant information into ancestors of the remaining parts of $A$ (Fig.~\ref{fig:urm:recomp}).
@@ -1554,7 +1555,7 @@ The path finding algorithm works by alternating between two phases~\cite{revisit
 		\includegraphics[width=\textwidth,page=7]{fig/light2d}
 		\caption{Select rectangles found by the sweeps}\label{fig:light2d:sel2}
 	\end{subfigure}
-	\caption{The staged illumination proceeds from starting state (Fig.~\ref{fig:light2d:start}) by iterating two phases:
+	\caption{The staged illumination proceeds from a starting state (Fig.~\ref{fig:light2d:start}) by iterating two phases:
 	1. Illuminate up and down (Fig.~\ref{fig:light2d:up},~\ref{fig:light2d:down},~\ref{fig:light2d:updown}).
 	2. Select the illuminated rectangles (Fig.~\ref{fig:light2d:sel1},~\ref{fig:light2d:sel2}).
 	}\label{fig:light2d}
