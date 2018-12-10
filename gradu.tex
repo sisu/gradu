@@ -150,7 +150,7 @@ Theory of computation $\rightarrow$ Randomness, geometry and discrete structures
 
 \begin{abstract}
 The thesis discusses algorithms for the minimum link path problem, which is a well known geometric path finding problem.
-The goal is to find a path that does the minimum number of turns amidst obstacles in a plane.
+The goal is to find a path that does the minimum number of turns amidst obstacles in a continuous space.
 We focus on the most classical variant, the \emph{rectilinear} minimum link path problem, where the path and the obstacles are restricted to the directions of the coordinate axes.
 
 We study the rectilinear minimum link path problem in the plane and in the three-dimensional space, as well as in higher dimensional domains.
@@ -162,7 +162,7 @@ The algorithm can also be generalized to higher dimensions, leading to an $O(n^{
 We describe the new algorithms as well as the data structures used.
 The algorithms work by maintaining a reachable region that is gradually expanded to form a shortest path map from the starting point.
 The algorithms rely on several efficient data structures:
-The reachable region is tracked by using a simple recursive space decomposition, and the region is expanded by a sweep plane method that uses a multidimensional segment tree.
+the reachable region is tracked by using a simple recursive space decomposition, and the region is expanded by a sweep plane method that uses a multidimensional segment tree.
 \end{abstract}
 
 \mytableofcontents
@@ -188,7 +188,7 @@ Figure~\ref{fig:paths} shows an example of two kinds of minimum link paths as we
 \end{figure}
 
 Finding minimum link paths is a well studied algorithmic problem\cite{dasnar,de1991,de1992,fitch,handbook,restricted,wagner}.
-The basic idea employed by most of the known algorithms is a simple extension of the breadth-first search:
+The basic idea employed by most of the known algorithms is a simple extension of breadth-first search:
 We first mark all the points that have link distance~1 from the starting point, then points with link distance~2, and continue until the desired end point is marked.
 The path is then formed by tracing back the markings starting from the end point.
 As the search happens in continuous space, the tricky part of the algorithms is defining the appropriate data structures to store and update the marked region.
@@ -198,7 +198,7 @@ In the rectilinear problem the obstacles as well as the links of the path are re
 The problem can also be defined in a three-dimensional domain as well as higher dimensions.
 
 Following a typical convention, we assume that the domain is given as a list of $n$ rectangular obstacle faces~\cite{wagnerphd}.
-In the planar case the obstacle faces are line segments, and in $D$-dimensional domain they are $(D-1)$-dimensional hyperrectangles.
+In the planar case the obstacle faces are line segments, and in a $D$-dimensional domain they are $(D-1)$-dimensional hyperrectangles.
 We use the terms ``obstacle'' and ``obstacle face'' interchangeably to refer to an obstacle face in the input.
 Each obstacle is also associated with a normal vector that points towards the free space.
 
@@ -268,12 +268,12 @@ Figure~\ref{fig:staged} shows an example of the staged illumination process.
 	\caption{Four steps of staged illumination from a single starting point. The new areas are illuminated through the red boundaries on each step.}\label{fig:staged}
 \end{figure}
 
-The illumination process closely resembles the breadth-first search, though with a key difference that the search is done in a continuous space rather than in a graph.
+The illumination process closely resembles breadth-first search, though with a key difference that the search is done in a continuous space rather than in a graph.
 A nontrivial part of the minimum link path algorithms is maintaining the illuminated area in a data structure that allows efficient computation of \reach{k+1} from \reach{k}.
 
 Representing the illuminated area can be simplified by first splitting the free space into rectangles.
 This is analogous to how various algorithms in computational geometry construct a triangulating the input region as the first step~\cite{handbook}.
-In Section~\ref{sec:decomposition} we present an algorithm to construct a decompositions suitable for the minimum link path algorithms.
+In Section~\ref{sec:decomposition} we present an algorithm to construct a decomposition suitable for the minimum link path algorithms.
 
 Because the possible directions of the links of the path are limited, we can use \emph{sweep line algorithms} to efficiently compute \reach{k+1} from \reach{k}.
 Sweep line algorithms are a generic technique used for a wide range of computational geometry problems~\cite[Section 33.2]{clrs}.
@@ -321,7 +321,7 @@ we will show how to decompose a $D$-dimensional domain into $O(n^{D-1})$ hyperre
 A rectilinear domain can be decomposed into rectangles by extending each horizontal obstacle edge in both directions until the sides hit a vertical obstacle edge~\cite{imai86}.
 This defines the \emph{horizontal decomposition} of the domain, denoted \decomp{x}.
 The \emph{vertical decomposition} \decomp{y} is defined correspondingly by extending all the vertical edges until they hit a horizontal obstacle.
-Figure~\ref{fig:decomp} shows an example of the two two decompositions.
+Figure~\ref{fig:decomp} shows an example of the two decompositions.
 We focus on \decomp{x} below, as \decomp{y} has all the same properties with coordinate axes swapped.
 
 \begin{figure}\centering
@@ -402,13 +402,13 @@ Thus the total complexity of the algorithm is $O(n\log n)$ and we only need $O(n
 
 \subsection{Three-dimensional cuboid decomposition}\label{sec:split3d}
 
-As a two-dimensional domain can be decomposed into rectangles, a three-dimensional rectilinear domain can be decomposed into cuboids~\cite{restricted,wagner}.
+Like a two-dimensional domain can be decomposed into rectangles, a three-dimensional rectilinear domain can be decomposed into cuboids~\cite{restricted,wagner}.
 Decomposition into cuboids is used in the algorithm for three-dimensional minimum link paths in Section~\ref{sec:minlink3d}.
-The running time of the path finding algorithm depends on the size of the decomposition, so it is desirable to find as small decomposition as possible.
+The running time of the path finding algorithm depends on the size of the decomposition, so it is desirable to find as small a decomposition as possible.
 
 We present a simple decomposition algorithm that uses Algorithm~\ref{alg:split2d} as a subroutine~\cite{restricted}.
 The algorithm produces a decomposition with $O(n^2)$ cells and $O(n^2)$ links, where $n$ is the number of obstacle rectangles.
-Earlier work on minimum link path has used binary space partitioning to reduce the number of cells to $O(n^{1.5})$~\cite{bsp,wagner}.
+Earlier work on minimum link path algorithms has used binary space partitioning to reduce the number of cells to $O(n^{1.5})$~\cite{bsp,wagner}.
 However the number of links in a binary space partitioning based decomposition can be as high as $O(n^{2.5})$, so we opt for a higher number of cells to reduce the number of links.
 
 The decomposition is created by a sweep plane algorithm, which sweeps through the domain with a plane perpendicular to $z$-axis.
@@ -418,7 +418,7 @@ The intersection of the domain and a plane is called a \emph{cross section} of t
 Algorithm~\ref{alg:split3d} constructs the cells of the decomposition.
 The algorithm forms the planar decomposition of each unique cross section by calling Algorithm~\ref{alg:split2d}, and extends the $xy$-rectangles in $z$-direction so that they fill the whole free space.
 Any common rectangles shared by consecutive cross sections are merged into a single larger cuboid.
-The merging is done by by maintaining a binary search tree of the cells of the previous decomposition.
+The merging is done by maintaining a binary search tree of the cells of the previous decomposition.
 Figure~\ref{fig:split3d} shows how the three-dimensional decomposition is created using a series of planar decompositions.
 
 \begin{figure}\centering
@@ -600,8 +600,8 @@ Algorithm~\ref{alg:split3d} and Algorithm~\ref{alg:overlap2d} both only require 
 \subsection{Higher dimensional decomposition}\label{sec:splitdd}
 
 The ideas of the three-dimensional decomposition can be generalized to allow also decomposing higher dimensional rectilinear domains into hyperrectangles.
-A $D$-dimensional domains is defined by a set of $(D-1)$-dimensional hyperrectangle obstacle faces.
-The construction is done recursively so that the $D$-dimensional decomposition is created by solving a sequence of $(D-1)$-dimensional sub-problems.
+A $D$-dimensional domain is defined by a set of $(D-1)$-dimensional hyperrectangle obstacle faces.
+The construction is done recursively so that the $D$-dimensional decomposition is created by solving a sequence of $(D-1)$-dimensional subproblems.
 The method is similar to how Algorithm~\ref{alg:split3d} forms the three-dimensional decomposition from a series of planar decompositions.
 
 \begin{algorithm}
@@ -652,8 +652,8 @@ The combination of the $n$ cross sections has total size $O(n^{D-2}n)=O(n^{D-1})
 Proof by induction on $D$.
 Since we use Algorithm~\ref{alg:split2d} if $D=2$, Lemma~\ref{lem:split2dtime} proves the base case $D=2$.
 
-For $D\ge 3$ we solve $O(n)$ sub-problems, each of which can be done in $O(n^{D-2}\log n)$ time by induction.
-The total time of solving all the sub-problems is thus $O(n^{D-1}\log n)$.
+For $D\ge 3$ we solve $O(n)$ subproblems, each of which can be done in $O(n^{D-2}\log n)$ time by induction.
+The total time of solving all the subproblems is thus $O(n^{D-1}\log n)$.
 
 We also maintain a mapping from $(D-1)$-dimensional hyperrectangles to result indices.
 The size of the mapping is bounded by the size of the $(D-1)$-dimensional decompositions, which have size $O(n^{D-2})$ by Lemma~\ref{lem:splitddcells}.
@@ -697,7 +697,7 @@ The total number of obstacle changes during the sweep is $O(n)$, so the total nu
 
 We compute the links by an approach that roughly follows the proof of Lemma~\ref{lem:splitddcount}.
 As in the proof, we consider separately the links in direction $D$ and in the other directions.
-The links in directions other than $D$ can be obtained recursively from the solutions of the sub-problems.
+The links in directions other than $D$ can be obtained recursively from the solutions of the subproblems.
 The links in direction $D$ are computed by performing an additional sweep between each pair of adjacent cross sections and using a recursive method similar to the proof above.
 We may again generate some links multiple times, but the total number of generated links is still $O(n^{D-1})$ so the duplicates can be removed in $O(n^{D-1}\log n)$ time.
 
@@ -762,7 +762,7 @@ Since we have shown that each pair is found at most once, this completes the pro
 \end{proof}
 
 To prove the running time of the link computation in a three-dimensional domain, we showed that Algorithm~\ref{alg:overlap2d} works in time $O(n\log n+k)$ for any input of size $n$.
-For Algorithm~\ref{alg:overlapdd} we cannot make as generic statement, because for an arbitrary input there is no guarantee that the subproblems are significantly smaller than the original problem.
+For Algorithm~\ref{alg:overlapdd} we cannot make such a generic statement, because for an arbitrary input there is no guarantee that the subproblems are significantly smaller than the original problem.
 Instead we prove a less generic bound by using the properties of the $D$-dimensional decomposition.
 
 \begin{lem}\label{lem:overlapddtime}
@@ -800,7 +800,7 @@ Algorithm~\ref{alg:splitdd} and Algorithm~\ref{alg:overlapdd} both require $O(n^
 
 A segment tree is a classical data structure that allows storing and querying intervals~\cite{berg2008,wagner}.
 The structure allows performing a wide range of operations efficiently.
-For example we can use a segment tree to find all the intervals containing a given number in time $O(\log n)$ from a collection of $n$ intervals.
+For example we can use a segment tree to find all the intervals containing a given point in time $O(\log n)$ from a collection of $n$ intervals.
 We first present the general idea of the tree, and then show how it can be applied to the minimum link path problem.
 
 Segment trees are typically implemented as semi-dynamic data structures.
@@ -1057,7 +1057,7 @@ Let $\canoni{R_i}{i}$ be the canonical nodes of $R_i$ in the ordinary segment tr
 
 Consider a two-dimensional segment tree and two arbitrary nodes of the projected trees $c_1\in\canoni{R_1}{1}$ and $c_2\in\canoni{R_2}{2}$.
 Let $c_1\times c_2$ be the node of the two-dimensional tree that is found in position of $c_1$ in the inner tree, and $c_2$ in the outer tree.
-Similarly for $D$-dimensional trees we define product $c_1\times c_2\times\dots\times c_D$ to be the node of a $D$-dimensional segment tree defined by positions of the one-dimensional tree nodes.
+Similarly for a $D$-dimensional tree we define the product $c_1\times c_2\times\dots\times c_D$ to be the tree node indicated by positions of the one-dimensional tree nodes.
 The following lemma shows how the canonical nodes of the projections can be combined to find the canonical nodes in a $D$-dimensional tree.
 
 \begin{lem}\label{lem:canond}
@@ -1090,7 +1090,7 @@ $$
 
 For regular segment trees there is a clear connection between the parent-child hierarchy and interval overlap.
 For any two tree nodes $a$ and $b$, $\inter{a}\subseteq\inter{b}$ holds if and only if $b$ is an ancestor of $a$ in the tree.
-In multidimensional case it also applies that if $b$ is an ancestor of $a$, then $\rect{a}\subseteq\rect{b}$.
+In a multidimensional case it also applies that if $b$ is an ancestor of $a$, then $\rect{a}\subseteq\rect{b}$.
 However the reverse is not true; $\rect{a}\subseteq\rect{b}$ does not imply that $b$ is an ancestor of $a$ because $b$ can be in a different subtree in some of the outer trees.
 
 Instead of looking for parent-child relationships directly in the tree, we can look at them separately on each coordinate axis.
@@ -1167,8 +1167,8 @@ The nodes $s$ of the innermost tree have dimension 0, and they contain only a si
 \begin{lem}\adddt and \checkdt both have time complexity $O(\log^D\segsize)$.\end{lem}
 \begin{proof}
 Proof by induction on $D$.
-For the base case $D=0$ both algorithm finish in constant time.
-For $D\ge 1$, algorithms iterate over the canonical nodes and their ancestors in the outer tree, making $\log\segsize$ calls to the inner trees.
+For the base case $D=0$ both algorithms finish in constant time.
+For $D\ge 1$, the algorithms iterate over the canonical nodes and their ancestors in the outer tree, making $\log\segsize$ calls to the inner trees.
 By induction the inner tree operations are done in $O(\log^{D-1}\segsize)$ time, so the time complexity is $O(\log^D\segsize)$.
 \end{proof}
 
@@ -1182,7 +1182,7 @@ The only way for the two operations to end up in a common node is if in each dim
 
 Thus we can efficiently support inserting and querying for $D$-dimensional rectangles by a nested structure consisting of multiple levels of segment trees.
 However clearing a rectangle in this structure is a more complex operation.
-To make the clear operation more simple, we turn into another variant of the multidimensional segment tree, the unified segment tree.
+To make the clear operation simpler, we turn into another variant of the multidimensional segment tree, the unified segment tree.
 
 \subsection{Unified segment tree}\label{sec:unifiedtree}
 
@@ -1270,7 +1270,7 @@ Algorithm~\ref{alg:uadd} shows the tree insert operation.
 \end{algorithm}
 
 Algorithm~\ref{alg:ucheck} shows the implementation of the query operation.
-It uses function $\texttt{invertBits}$, which reverses the bits of a $D$-bit input.
+The function $\texttt{invertBits}$ reverses the bits of a $D$-bit input.
 For example if $D=4$ then $\texttt{invertBits}(0111_2)=1000_2$.
 
 \begin{algorithm}
@@ -1440,7 +1440,7 @@ If $d\ge 1$, both functions recursively iterate over the descendants in directio
 By induction the recursive calls are done in $O(\segsize^{d-1})$ time, so the time complexity of both \pdst and \recomp is $O(\segsize^d)$.
 
 Next we prove the running time of \cleardt by induction on argument $d$.
-When called with argument $d$, function \cleardt calls functions \pdst and \recomp with argument $d-1$.
+When called with argument $d$, the function \cleardt calls functions \pdst and \recomp with argument $d-1$.
 If $d=1$ the calls to \pdst and \recomp perform $O(1)$ work, and the algorithm is equivalent to Algorithm~\ref{alg:segrm} for 1-dimensional segment tree removal.
 Thus the base case $d=1$ is proven by Lemma~\ref{lem:segrmtime}.
 
@@ -1684,7 +1684,7 @@ The path is computed using the staged illumination paradigm, and on each step we
 However in the three-dimensional case the representation of the illuminated region is more complicated, and the sweep algorithm requires more sophisticated data structures.
 
 We use the decomposition presented in Section~\ref{sec:split3d} to maintain the illuminated region and to guide the illumination during the sweeps.
-Unlike the planar case, the algorithm does not depend on the any specific decomposition but can be used with any space decomposition.
+Unlike the planar case, the algorithm does not depend on any specific decomposition but can be used with any space decomposition.
 The running time of the algorithm depends on the number of cells and links between them, and the selected decomposition has the advantage of having a small number of both of them.
 
 The decomposition is used to implement the plane sweep algorithm for computing \reach{k+1} from \reach{k}.
@@ -1711,7 +1711,8 @@ Each event belongs to one of the following types:
 
 Consider a sweep in direction $+z$.
 In a \cellE we first check whether any part of the reached cell $c$ is illuminated.
-If yes, we create a \cellE for each neighbor of $c$ in direction $+z$, and an \obsE for each obstacle adjacent to $c$ in direction $+z$.
+If the cell is not illuminated, we discard the event.
+Otherwise we create a \cellE for each neighbor of $c$ in direction $+z$, and an \obsE for each obstacle adjacent to $c$ in direction $+z$.
 In an \obsE the projection of the encountered obstacle is cleared from the sweep plane.
 Additionally the cleared rectangles are used to construct new \addEs on the boundary of the illuminated region to be used on the next illumination step.
 
@@ -1795,7 +1796,7 @@ During a $+z$ sweep we generate \addEs in directions $\pm x$ and $\pm y$.
 On an \obsE we perform a clear operation on the unified tree containing the sweep plane status.
 This clears some of the tree nodes.
 As a first step in the event generation, we create an \addE on each side of every cleared canonical rectangle.
-This can create an unnecessarily large amount of events, because rectangles added to the tree may be split to up to $(\log^2 n)$ canonical rectangles.
+This can create an unnecessarily large amount of events, because each rectangle added to the tree is split into $O(\log^2 n)$ canonical rectangles.
 
 To reduce the number of generated events we perform \emph{filtering}, which consists of the following two steps:
 \begin{enumerate}
@@ -1806,7 +1807,7 @@ To reduce the number of generated events we perform \emph{filtering}, which cons
 The aligned \addEs in direction $+x$ are the ones that occur on the same $x$ coordinate and have the same $z$-ranges and the $y$-ranges have a common endpoint.
 The definition is similar in the other directions.
 The aligned \addEs are searched for the events in all the directions separately.
-The filtering allow us to bound the number of \addEs generated during the illumination.
+The filtering allows us to bound the number of \addEs generated during the illumination.
 Figure~\ref{fig:filter} shows the generated \addEs on an obstacle before and after the filtering.
 
 \begin{figure}\centering
@@ -1859,7 +1860,7 @@ If we discover a cell $c$ on step $k$ then all the points visible from $c$ are i
 We only count the \addEs in direction $+z$.
 The other directions are identical, and there is only a constant number of directions.
 Each \addE lies on a common plane with some obstacle face whose normal points to direction $-z$.
-For the purpose of deriving an upper bound, we assume that each obstacle face has unique $z$-coordinate.
+For the purpose of deriving an upper bound, we assume that each obstacle face has a unique $z$-coordinate.
 We may overcount the number of \addEs this way by counting the some events multiple times, but we only need to prove an upper bound.
 
 Consider the \obsEs of an obstacle $o$ on a plane $P$.
@@ -1961,7 +1962,7 @@ The illumination in the $D$-dimensional space is done using the same kinds of ev
 The sweep plane is replaced by a $(D-1)$-dimensional hyperplane, and each event $e$ defines a $(D-1)$-dimensional hyperrectangle \hrectof{e}.
 
 We use a $D$-dimensional unified segment tree to store the sweep hyperplane state during the sweeps.
-The unified tree and the $D$-dimensional space decomposition allow us to use almost identical algorithm for the high dimensional case as the algorithm for three-dimensional domains.
+The unified tree and the $D$-dimensional space decomposition allow us to use an almost identical algorithm for the high dimensional case as the algorithm for three-dimensional domains.
 Algorithm~\ref{alg:sweepdd} shows the sweep in direction $+D$, the other directions being identical.
 Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination by performing the hyperplane sweep in all the directions on each step.
 
@@ -2028,7 +2029,7 @@ For each obstacle $o$ we record when it was first discovered, and only generate 
 If $o$ is reached first on step $k$, then at the end of step $k+D$ all the points visible from $o$ are illuminated, so we can stop creating \addEs from $o$ starting from step $k+D+1$.
 
 We also need to perform the filtering described in Section~\ref{sec:evtgen} to avoid generating a large number of \addEs because of the unified tree structure.
-The filtering rules are the same as the ones used in the three-dimensional algorithm, except that we are new working with $(D-1)$-dimensional hyperrectangles.
+The filtering rules are the same as the ones used in the three-dimensional algorithm, except that we are now working with $(D-1)$-dimensional hyperrectangles.
 The operations below are performed for the \addEs produced by the sweep in direction $+D$.
 \begin{enumerate}
 \item Remove all pairs of \addEs with the same position but opposite direction.
@@ -2138,16 +2139,16 @@ The new algorithms provide significant improvements over the previous best known
 The key techniques for achieving the new results were the recursive space decomposition (Section~\ref{sec:decomposition}) and the multidimensional segment tree (Section~\ref{sec:segtree}).
 The algorithms are relatively simple, which is demonstrated by the implementation linked in Appendix~\apxsrc.
 
-A natural follow up question is whether the result could be improved further.
+A natural follow up question is whether the results could be improved further.
 The planar problem was shown to be as difficult as sorting the input~\cite{dasnar}, so the known algorithms are asymptotically optimal.
 For the higher dimensional versions no other lower bound is known besides the $O(n\log n)$ bound.
-The planar minimum link path problem without orientation restriction was shown to be 3SUM hard-hard by Mitchell, Polishchuk and Sysikaski~\cite{revisited}, but there is no known way to extend this result to the rectilinear case.
+The planar minimum link path problem without orientation restriction was shown to be 3SUM-hard by Mitchell, Polishchuk and Sysikaski~\cite{revisited}, but there is no known way to extend this result to the rectilinear case.
 
 One of the main bottlenecks of the $D$-dimensional minimum link path algorithm are operations on the unified segment tree.
 A potential way to speed up the algorithm would be to develop a faster data structure for hyperrectangle intersection testing.
 Fractional cascading is a technique that allows speeding up operations in some $D$-dimensional data structures from $O(\log^D n)$ to $O(\log^{D-1} n)$~\cite{fractional,ortho}.
-Wagner~\cite{unified} suggest that this technique might be applicable also for the unified segment tree.
-However the idea has not been explored further, so developing a faster multidimensional segment tree varient remains as a future challenge.
+Wagner~\cite{unified} suggests that this technique might be applicable also for the unified segment tree.
+However the idea has not been explored further, so developing a faster multidimensional segment tree variant remains as a future challenge.
 
 
 
@@ -2166,7 +2167,7 @@ However the idea has not been explored further, so developing a faster multidime
 An implementation of the $D$-dimensional rectilinear minimum link path algorithm presented in the thesis is available in the following URL: \\
 \url{https://github.com/sisu/gradu/tree/master/code}
 
-The code implements the minimum link path computation in time $O(n^{D-1}\log^{D-1}n)$ for a any constant $D$ defined at compile time.
+The code implements the minimum link path computation in time $O(n^{D-1}\log^{D-1}n)$ for any constant $D$ defined at compile time.
 The code is written in C++ using the C++14 standard.
 The implementation does not depend on any libraries besides the C++ standard library, but the associated unit tests are written using the Google Test framework.
 
