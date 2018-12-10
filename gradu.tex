@@ -188,7 +188,7 @@ Figure~\ref{fig:paths} shows an example of two kinds of minimum link paths as we
 	\caption{There are many variants of the geometric path finding problem, producing different kinds of paths.}\label{fig:paths}
 \end{figure}
 
-Finding minimum link paths is a well studied algorithmic problem\cite{dasnar,de1991,de1992,fitch,handbook,restricted,wagner}.
+Finding minimum link paths is a well studied algorithmic problem~\cite{dasnar,de1991,de1992,fitch,handbook,restricted,wagner}.
 The basic idea employed by most of the known algorithms is a simple extension of breadth-first search:
 We first mark all the points that have link distance~1 from the starting point, then points with link distance~2, and continue until the desired end point is marked.
 The path is then formed by tracing back the markings starting from the end point.
@@ -203,7 +203,7 @@ In the planar case the obstacle faces are line segments, and in a $D$-dimensiona
 We use the terms ``obstacle'' and ``obstacle face'' interchangeably to refer to an obstacle face in the input.
 Each obstacle is also associated with a normal vector that points towards the free space.
 
-We present new algorithms for both the two dimensional case as well as the higher dimensional variants.
+We present new algorithms for both the two dimensional case and the higher dimensional variants.
 For the planar case we design an algorithm that solves the problem in optimal $O(n\log n)$ time and $O(n)$ space.
 The new algorithm is simpler than the previously known solutions and has the same time and space complexity.
 We also introduce a new $O(n^2\log^2 n)$ time algorithm for the three-dimensional case, which is a significant improvement over the best previously known result $O(n^{2.5}\log n)$~\cite{restricted}.
@@ -223,7 +223,7 @@ For the three-dimensional case, an $O(n^3)$ algorithm was developed by Mikami an
 Fitch, Butler and Rus~\cite{fitch} gave an algorithm which improves the performance in many cases, but has the same $O(n^3)$ worst case running time.
 This was further improved by Wagner, Drysdale and Stein~\cite{wagner}, who gave an algorithm with worst case $O(n^{2.5}\log n)$ time complexity.
 
-In this thesis we focus on new results to the rectilinear minimum link path problem, which are original research of the author.
+In this thesis we focus on new results for the rectilinear minimum link path problem, which are original research of the author.
 The following results have been published in peer-reviewed journals and conferences.
 \begin{itemize}
 \item A simplified $O(n\log n)$ algorithm for the two-dimensional case~\cite{revisited}.
@@ -273,12 +273,12 @@ The illumination process closely resembles breadth-first search, though with a k
 A nontrivial part of the minimum link path algorithms is maintaining the illuminated area in a data structure that allows efficient computation of \reach{k+1} from \reach{k}.
 
 Representing the illuminated area can be simplified by first splitting the free space into rectangles.
-This is analogous to how various algorithms in computational geometry construct a triangulating the input region as the first step~\cite{handbook}.
+This is analogous to how various algorithms in computational geometry construct a triangulation of the input region as the first step~\cite{handbook}.
 In Section~\ref{sec:decomposition} we present an algorithm to construct a decomposition suitable for the minimum link path algorithms.
 
 Because the possible directions of the links of the path are limited, we can use \emph{sweep line algorithms} to efficiently compute \reach{k+1} from \reach{k}.
 Sweep line algorithms are a generic technique used for a wide range of computational geometry problems~\cite[Section~33.2]{clrs}.
-The idea is to image a line that crosses over the domain and stops at some discrete \emph{events}.
+The idea can be visualized by a moving line that crosses over the domain and stops at some discrete \emph{events}.
 As the sweep line progresses, we gradually update the solution to take into account the parts of the domain encountered in the events.
 The sweep line method allows us to transform the two-dimensional illumination problem into a series of easier one-dimensional problems.
 
@@ -1024,7 +1024,7 @@ The number of canonical nodes and their ancestors is $O(\log\segsize)$, so the t
 The segment tree can be generalized into a two or higher dimensional structure~\cite{highseg}.
 A two-dimensional segment tree allows storing rectangles and performing efficient queries for rectangular regions.
 Correspondingly a $D$-dimensional segment tree allows performing efficient operations for $D$-dimensional hyperrectangles.
-We use the terms rectangle and hyperrectangle interchangeably to refer to a hyperrectangles of any dimension $D$.
+We use the terms rectangle and hyperrectangle interchangeably to refer to a hyperrectangle of any dimension $D$.
 
 A multidimensional segment tree is composed of nested regular segment trees.
 The shape of a $D$-dimensional segment tree is a one-dimensional segment tree whose each node stores a $(D-1)$-dimensional segment tree.
@@ -1615,7 +1615,7 @@ The sweep in direction $-y$ is identical.
 \begin{lem}\label{lem:light2dtime}The running time of Algorithm~\ref{alg:light2d} is $O(m\log m)$ where $m$ is the number of visited rectangles and their neighbor links.\end{lem}
 \begin{proof}
 The outermost loop processes a different rectangle $r$ each time, so it is executed $O(m)$ times.
-For each obstacle $o$ adjacent to $r$, we cut of all the parts of the ranges touching $o$ from the binary search tree.
+For each obstacle $o$ adjacent to $r$, we cut off all the parts of the ranges touching $o$ from the binary search tree.
 The cutting takes $O(\log m + k)$ time, where $k$ is the number of removed ranges.
 For each rectangle adjacent to $r$, we perform a single binary tree operation and possibly a single insertion to the priority queue, which can both be done in $O(\log m)$ time.
 Thus the total time complexity is $O(m\log m)$.
@@ -1773,7 +1773,8 @@ Algorithm~\ref{alg:minlink3d} implements the staged illumination method by itera
 	\State $E_d\gets$ Event set containing an \addE at \spt with width and \\
 		\hspace{16.5mm} height 0 and a \cellE for the cell containing \spt.
 \EndFor
-\While{$E_d$ is not empty for some $d$}\Comment $E_d$-sets define the boundary of $\reach{k}$.
+\While{$E_d$ is not empty for some $d$}
+	\State \LComment $E_d$-sets define the boundary of $\reach{k}$.
 	\ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
 		\State $E_d'\gets$ Empty event set.
 	\EndFor
@@ -1967,7 +1968,7 @@ We develop a generalization of Algorithm~\ref{alg:minlink3d} that computes a rec
 The illumination in the $D$-dimensional space is done using the same kinds of events as were used in the three-dimensional case.
 The sweep plane is replaced by a $(D-1)$-dimensional hyperplane, and each event $e$ defines a $(D-1)$-dimensional hyperrectangle \hrectof{e}.
 
-We use a $D$-dimensional unified segment tree to store the sweep hyperplane state during the sweeps.
+We use a $(D-1)$-dimensional unified segment tree to store the sweep hyperplane state during the sweeps.
 The unified tree and the $D$-dimensional space decomposition allow us to use an almost identical algorithm for the high dimensional case as the algorithm for three-dimensional domains.
 Algorithm~\ref{alg:sweepdd} shows the sweep in direction $+D$, the other directions being identical.
 Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination by performing the hyperplane sweep in all the directions on each step.
