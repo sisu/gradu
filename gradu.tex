@@ -1743,10 +1743,10 @@ The sweeps in the other directions are identical.
 
 \begin{algorithm}
 \caption{Illuminate by a plane sweep in direction $+z$ starting from provided events.
-	Produces \addEs in directions $\pm x$ and $\pm y$ for the next illumination step.}\label{alg:sweep3d}
+	Produces \addEs and \cellEs in directions $\pm x$ and $\pm y$ for the next illumination step.}\label{alg:sweep3d}
 \begin{algorithmic}
 \Require Initial event set $E$.
-\Output List of \addEs for the next illumination step.
+\Output List of \addEs and \cellEs for the next illumination step.
 \State $Q\gets$ Priority queue containing $E$.
 \State $T\gets$ Empty two-dimensional unified segment tree.
 \State $R\gets$ Empty list of output events.
@@ -1757,6 +1757,7 @@ The sweeps in the other directions are identical.
 	\ElsIf{$e$ is \cellE}
 		\If{\rectof{e} touches any rectangle in $T$}
 			\State $c\gets\cellof{e}$.
+			\State Insert \cellEs for $c$ in directions $\pm x$ and $\pm y$ into $R$.
 			\ForAll{$o\in\obsd{c}{+z}$}
 				\State Insert \obsE for $o$ into $Q$.
 			\EndFor
@@ -1992,7 +1993,7 @@ We omit again the final path generation from the pseudocode.
 
 \begin{algorithm}
 \caption{Illuminate by a hyperplane sweep in direction $+D$ starting from provided events.
-	Produces \addEs in directions other than $\pm D$ for the next illumination step.}
+	Produces \addEs and \cellEs in directions other than $\pm D$ for the next illumination step.}
 \label{alg:sweepdd}
 \begin{algorithmic}
 \Require Initial event set $E$.
@@ -2007,6 +2008,7 @@ We omit again the final path generation from the pseudocode.
 	\ElsIf{$e$ is \cellE}
 		\If{\hrectof{e} touches any hyperrectangle in $T$}
 			\State $c\gets\cellof{e}$.
+			\State Insert \cellEs for $c$ in directions other than $\pm D$ into $R$.
 			\ForAll{$o\in\obsd{c}{+D}$}
 				\State Insert \obsE for $o$ into $Q$.
 			\EndFor
