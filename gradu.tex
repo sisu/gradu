@@ -21,6 +21,7 @@
 \renewcommand{\algorithmicensure}{\textbf{Effect:}}
 \algnewcommand\algorithmicoutput{\textbf{Output:}}
 \algnewcommand\Output{\item[\algorithmicoutput]}
+\algnewcommand\LComment[1]{\(\triangleright\) #1}
 
 \newtheorem{theo}{Theorem}
 \newtheorem{lem}{Lemma}[section]
@@ -276,7 +277,7 @@ This is analogous to how various algorithms in computational geometry construct 
 In Section~\ref{sec:decomposition} we present an algorithm to construct a decomposition suitable for the minimum link path algorithms.
 
 Because the possible directions of the links of the path are limited, we can use \emph{sweep line algorithms} to efficiently compute \reach{k+1} from \reach{k}.
-Sweep line algorithms are a generic technique used for a wide range of computational geometry problems~\cite[Section 33.2]{clrs}.
+Sweep line algorithms are a generic technique used for a wide range of computational geometry problems~\cite[Section~33.2]{clrs}.
 The idea is to image a line that crosses over the domain and stops at some discrete \emph{events}.
 As the sweep line progresses, we gradually update the solution to take into account the parts of the domain encountered in the events.
 The sweep line method allows us to transform the two-dimensional illumination problem into a series of easier one-dimensional problems.
@@ -363,13 +364,13 @@ In both cases the rectangles touching the obstacle edge are removed from the sea
 \State $R\gets$ Empty list of cells.
 \ForAll{$e\in E$}
 	\If{Normal of $e$ points down}
-		\Comment Exactly one $x$-interval in $T$ intersects \xrange{e}.
+		\State \LComment Exactly one $x$-interval in $T$ intersects \xrange{e}.
 		\State $v\gets\text{Lookup $T$ for interval touching \xrange{e}}$.
 		\State Remove $v$ from $T$.
 		\State $\yranget{v}{end}\gets\y{e}$.
 		\State Insert $v$ into $R$.
+		\State \LComment Loop over remaining parts of the entry removed from $T$.
 		\ForAll{$u\gets \xrange{v}\setminus \xrange{e}$}
-			\Comment Loop over remaining parts of the entry removed from $T$.
 			\State $a\gets$ New rectangle with $x$-range $u$ and starting $y$-coordinate $\y{e}$.
 			\State Insert $a$ into $T$.
 		\EndFor
@@ -616,7 +617,8 @@ The method is similar to how Algorithm~\ref{alg:split3d} forms the three-dimensi
 \State $Z\gets$ All $D$-coordinates of the obstacles in $E$.
 \State Sort $Z$ in increasing order.
 \State $R\gets$ Empty list of result cells.
-\State $M\gets$ Empty binary search tree mapping $D-1$-dimensional hyperrectangles to indices in $R$.
+\State $M\gets$ Empty binary search tree mapping $D-1$-dimensional hyperrectangles to \\
+	\hspace{10mm} indices in $R$.
 \ForAll{$z\in Z$}
 	\State $E_z\gets$ Obstacles of $E$ whose $D$-range contains $z$.
 	\State $T\gets$ $(D-1)$-dimensional decomposition for $E_z$ recursively.
@@ -626,7 +628,8 @@ The method is similar to how Algorithm~\ref{alg:split3d} forms the three-dimensi
 		\State Remove $m$ from $M$.
 	\EndFor
 	\ForAll{$t\in T\setminus M$}
-		\State $c\gets$ New cell with the first $D-1$ coordinates defined by $t$ and starting $D$-coordinate $z$.
+		\State $c\gets$ New cell with the first $D-1$ coordinates defined by $t$ and starting \\
+			\hspace{20mm} $D$-coordinate $z$.
 		\State Insert $c$ into $R$.
 		\State $M[t]\gets$ index of $c$ in $R$.
 	\EndFor
@@ -1356,7 +1359,7 @@ In the end we regenerate the bits describing the values in the descendants by us
 		\State \Return
 	\EndIf
 	\If{$\rect{s}_d\nsubseteq R_d$}
-		\Comment $s_i\in\canonpar{R_d}$
+		\Comment $s_d\in\canonpar{R_d}$
 		\State $\pdst(d-1,s,d)$.
 	\EndIf
 	\State $\cleardt(d-1,s)$.
@@ -1365,7 +1368,7 @@ In the end we regenerate the bits describing the values in the descendants by us
 		\State $\cleardt(d,\rightu{s}{d})$.
 	\EndIf
 	\If{$\rect{s}_d\nsubseteq R_d$}
-		\Comment $s_i\in\canonpar{R_d}$
+		\Comment $s_d\in\canonpar{R_d}$
 		\State $\recomp(d,s)$.
 	\EndIf
 \EndProcedure
@@ -1586,7 +1589,8 @@ The sweep in direction $-y$ is identical.
 \begin{algorithmic}
 \Require A decomposition of the free space into rectangles and a subset of the rectangles $R$.
 \Output Rectangles reachable by moving in direction $+y$ from any point in $R$.
-\State $Q\gets$ Priority queue containing the rectangles of $R$ ordered by the topmost $y$-coordinate.
+\State $Q\gets$ Priority queue containing the rectangles of $R$ ordered by the topmost \\
+	\hspace{10mm} $y$-coordinate.
 \State $T\gets$ Empty binary search tree.
 \While{$Q$ is not empty}
 	\State $r\gets\pop{Q}$.
@@ -1749,7 +1753,8 @@ The sweeps in the other directions are identical.
 		\EndIf
 	\ElsIf{$e$ is \obsE}
 		\State Clear \rectof{e} from $T$.
-		\State Generate \addEs for the cleared canonical rectangles into $R$ (Section~\ref{sec:evtgen}).
+		\State Generate \addEs for the cleared canonical rectangles into $R$ \\
+			\hspace{20mm} (Section~\ref{sec:evtgen}).
 	\EndIf
 \EndWhile
 \State \Return $R$.
@@ -1765,7 +1770,8 @@ Algorithm~\ref{alg:minlink3d} implements the staged illumination method by itera
 \Output Link distance between \spt and \ept.
 \State Compute decomposition of \fspace into cells using Algorithm~\ref{alg:split3d}.
 \ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
-	\State $E_d\gets$ Event set containing \addE at \spt with width and height 0 and \cellE for the cell containing \spt.
+	\State $E_d\gets$ Event set containing an \addE at \spt with width and \\
+		\hspace{16.5mm} height 0 and a \cellE for the cell containing \spt.
 \EndFor
 \While{$E_d$ is not empty for some $d$}\Comment $E_d$-sets define the boundary of $\reach{k}$.
 	\ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
@@ -1992,7 +1998,8 @@ Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination
 		\EndIf
 	\ElsIf{$e$ is \obsE}
 		\State Clear \hrectof{e} from $T$.
-		\State Generate \addEs for the cleared canonical hyperrectangles into $R$.
+		\State Generate \addEs for the cleared canonical hyperrectangles \\
+			\hspace{20mm} into $R$.
 	\EndIf
 \EndWhile
 \State \Return $R$.
@@ -2007,7 +2014,8 @@ Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination
 \Output Link distance between \spt and \ept.
 \State Compute decomposition of \fspace into $D$-dimensional cells using Algorithm~\ref{alg:splitdd}.
 \ForAll{$d\in\set{\pm1,\dots,\pm D}$}
-	\State $E_d\gets$ Event set containing \addE at \spt with size 0 and \cellE for the cell containing \spt.
+	\State $E_d\gets$ Event set containing an \addE at \spt with size 0 and a \\
+		\hspace{16mm} \cellE for the cell containing \spt.
 \EndFor
 \While{$E_d$ is not empty for some $d$}
 	\ForAll{$d\in\set{\pm1,\dots,\pm D}$}
