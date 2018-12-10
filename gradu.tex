@@ -1167,7 +1167,8 @@ The nodes $s$ of the innermost tree have dimension 0, and they contain only a si
 \end{algorithmic}
 \end{algorithm}
 
-\begin{lem}\adddt and \checkdt both have time complexity $O(\log^D\segsize)$.\end{lem}
+\begin{lem}\label{lem:rectaddtime}
+\adddt and \checkdt both have time complexity $O(\log^D\segsize)$.\end{lem}
 \begin{proof}
 Proof by induction on $D$.
 For the base case $D=0$ both algorithms finish in constant time.
@@ -1295,6 +1296,18 @@ For example if $D=4$ then $\texttt{invertBits}(0111_2)=1000_2$.
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+
+\begin{lem}\label{lem:uaddtime}Algorithm~\ref{alg:uadd} and Algorithm~\ref{alg:ucheck} both have time complexity $O(\log^D\segsize)$.\end{lem}
+\begin{proof}
+The proof is similar to Lemma~\ref{lem:rectaddtime}.
+The algorithms use recursion with argument $d$ defining the axis along which the tree is traversed.
+Initially the recursive functions are called with argument $d=D$.
+We prove the claim by induction on $d$.
+
+For the base case $d=0$ both algorithms finish in constant time.
+For $d\ge 1$, the algorithms iterate over the canonical nodes and their ancestors by moving along axis $d$, making $O(\log\segsize)$ calls with argument $d-1$.
+By induction the operations with argument $d-1$ are done in $O(\log^{d-1}\segsize)$ time, so the time complexity is $O(\log^d\segsize)$.
+\end{proof}
 
 Both \adddt and \checkdt iterate over the canonical nodes of the input rectangle as well as their ancestors, and access \hasbita{s} for each such node $s$.
 When adding a rectangle $A$, we set $\hasbits{s}{b}$ for each bitmask $b$ whose bits are covered by $\maskof{A,s}$.
@@ -1940,10 +1953,11 @@ We are ready to prove the main result of this section.
 A minimum link path can be computed by running the staged illumination of Algorithm~\ref{alg:minlink3d} and tracing back the path when the illumination reaches the endpoint.
 
 By Lemma~\ref{lem:celle3} each cell is visited $O(1)$ times during the illumination.
-On each \cellE we perform a single lookup to the unified tree in $O(\log^2 n)$ time, and iterate over the neighbors of the cell.
+On each \cellE we perform a single lookup to the unified tree and iterate over the neighbors of the cell.
+By Lemma~\ref{lem:uaddtime} the lookup can be done in $O(\log^2 n)$ time.
 Since the decomposition has $O(n^2)$ cells and $O(n^2)$ links, the total time taken in processing \cellEs is $O(n^2\log^2 n)$.
 
-On each \addE we insert a new rectangle to the unified tree in $O(\log^2 n)$ time.
+On each \addE we insert a new rectangle to the unified tree in $O(\log^2 n)$ time by Lemma~\ref{lem:uaddtime}.
 By Lemma~\ref{lem:adde3} the number of \addEs is $O(n^2)$, so the events are processed in $O(n^2\log^2 n)$ time.
 The filtering of \addEs can be done in linear time, and the total number of unfiltered events is at most the number of \addEs multiplied by the $O(\log^2 n)$ canonical nodes used to store a rectangle in the unified tree.
 Thus the time spent in the filtering is also $O(n^2\log^2 n)$.
@@ -2115,10 +2129,11 @@ We are now ready to state the final result.
 A minimum link path can be computed by running the staged illumination of Algorithm~\ref{alg:minlinkdd} and tracing back the path when the illumination reaches the endpoint.
 
 By Lemma~\ref{lem:celled} each cell is visited $O(1)$ times during the illumination.
-On each \cellE we perform a single lookup to the unified tree in $O(\log^{D-1} n)$ time, and iterate over the neighbors of the cell.
+On each \cellE we perform a single lookup to the unified tree and iterate over the neighbors of the cell.
+By Lemma~\ref{lem:uaddtime} the lookup can be done in $O(\log^{D-1} n)$ time.
 Since the decomposition has $O(n^{D-1})$ cells and $O(n^{D-1})$ links, the total time taken in processing \cellEs is $O(n^{D-1}\log^{D-1} n)$.
 
-On each \addE we insert a new rectangle to the unified tree in $O(\log^{D-1} n)$ time.
+On each \addE we insert a new rectangle to the unified tree in $O(\log^{D-1} n)$ time by Lemma~\ref{lem:uaddtime}.
 By Lemma~\ref{lem:added} the number of \addEs is $O(n^{D-1})$, so the events are processed in $O(n^{D-1}\log^{D-1} n)$ time.
 The filtering of \addEs can be done in linear time, and the total number of unfiltered events is at most the number of \addEs multiplied by the $O(\log^{D-1} n)$ canonical nodes used to store a hyperrectangle in the unified tree.
 Thus the time spent in filtering is also $O(n^{D-1}\log^{D-1} n)$.
