@@ -1435,6 +1435,7 @@ In the end we regenerate the bits describing the values in the descendants by us
 		\If{$\rect{s}_a \subseteq R_a$}
 			\State $\texttt{Continue}$.
 		\EndIf
+		\State \LComment $\rect{s}_a$ is not minimal, so \leftu{s}{a} and \rightu{s}{a} are defined.
 		\State $c_1\gets\leftu{s}{a}$.
 		\State $c_2\gets\rightu{s}{a}$.
 		\ForAll{$b \in 0 \dots 2^D-1$}
