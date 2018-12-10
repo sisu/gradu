@@ -1433,7 +1433,7 @@ In the end we regenerate the bits describing the values in the descendants by us
 	\State $\hasbits{s}{0\dots 2^{D-1}}\gets\texttt{false}$.
 	\State $m\gets\maskof{R,s}$.
 	\ForAll{$a \in 1\dots D$}
-		\If{$\rect{s}_a \subseteq R_a$}
+		\If{Bit $a$ set in $m$ or (\leftu{s}{a} and \rightu{s}{a} not defined)}
 			\State $\texttt{Continue}$.
 		\EndIf
 		\State $c_1\gets\leftu{s}{a}$.
