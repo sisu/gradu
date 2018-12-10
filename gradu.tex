@@ -1762,12 +1762,14 @@ The sweeps in the other directions are identical.
 \end{algorithm}
 
 Algorithm~\ref{alg:minlink3d} implements the staged illumination method by iteratively applying the sweep algorithm.
+We can find the minimum link path between two points by stopping the illumination when it reaches the endpoint and tracing back the path.
+The stopping condition and path generation have been omitted to focus on the core algorithm.
 
 \begin{algorithm}
 \caption{Run staged illumination in a three-dimensional domain.}\label{alg:minlink3d}
 \begin{algorithmic}
-\Require Set of obstacle faces and points \spt and \ept.
-\Output Link distance between \spt and \ept.
+\Require Set of obstacle faces and a starting point \spt.
+\Ensure Discovers all the points reachable from \spt with the staged illumination.
 \State Compute decomposition of \fspace into cells using Algorithm~\ref{alg:split3d}.
 \ForAll{$d\in\set{\pm x,\pm y,\pm z}$}
 	\State $E_d\gets$ Event set containing an \addE at \spt with width and \\
@@ -1972,6 +1974,7 @@ We use a $(D-1)$-dimensional unified segment tree to store the sweep hyperplane 
 The unified tree and the $D$-dimensional space decomposition allow us to use an almost identical algorithm for the high dimensional case as the algorithm for three-dimensional domains.
 Algorithm~\ref{alg:sweepdd} shows the sweep in direction $+D$, the other directions being identical.
 Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination by performing the hyperplane sweep in all the directions on each step.
+We omit again the final path generation from the pseudocode.
 
 \begin{algorithm}
 \caption{Illuminate by a hyperplane sweep in direction $+D$ starting from provided events.
@@ -2011,8 +2014,8 @@ Algorithm~\ref{alg:minlinkdd} implements the $D$-dimensional staged illumination
 \caption{Run staged illumination in a $D$-dimensional domain.}
 \label{alg:minlinkdd}
 \begin{algorithmic}
-\Require Set of obstacle faces and points \spt and \ept.
-\Output Link distance between \spt and \ept.
+\Require Set of obstacle faces and a point \spt.
+\Ensure Discovers all the points reachable from \spt with the staged illumination.
 \State Compute decomposition of \fspace into $D$-dimensional cells using Algorithm~\ref{alg:splitdd}.
 \ForAll{$d\in\set{\pm1,\dots,\pm D}$}
 	\State $E_d\gets$ Event set containing an \addE at \spt with size 0 and a \\
