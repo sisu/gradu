@@ -724,10 +724,10 @@ We may again generate some links multiple times, but the total number of generat
 	\State $R\gets$ Empty list of pairs.
 	\ForAll{$g\in G$}
 		\State $z\gets$ the $D$-coordinate of $g$.
-		\State $S_A\gets$ Elements of $A$ with lower bound $z$.
-		\State $S_B\gets$ Elements of $B$ with lower bound $z$.
-		\State $T_A\gets$ Elements of $A$ with upper bound $z$.
-		\State $T_B\gets$ Elements of $B$ with upper bound $z$.
+		\State $S_A\gets$ Elements of $A$ with $D$-range lower bound $z$.
+		\State $S_B\gets$ Elements of $B$ with $D$-range lower bound $z$.
+		\State $T_A\gets$ Elements of $A$ with $D$-range upper bound $z$.
+		\State $T_B\gets$ Elements of $B$ with $D$-range upper bound $z$.
 		\State $P_A\gets P_A\setminus T_A$.
 		\State $P_B\gets P_B\setminus T_B$.
 		\State $R\gets R + \findol(D-1,P_A,S_B)$.
