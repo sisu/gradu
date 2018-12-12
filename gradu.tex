@@ -604,6 +604,7 @@ The ideas of the three-dimensional decomposition can be generalized to allow als
 A $D$-dimensional domain is defined by a set of $(D-1)$-dimensional hyperrectangle obstacle faces.
 The construction is done recursively so that the $D$-dimensional decomposition is created by solving a sequence of $(D-1)$-dimensional subproblems.
 The method is similar to how Algorithm~\ref{alg:split3d} forms the three-dimensional decomposition from a series of planar decompositions.
+We use the terms rectangle and hyperrectangle interchangeably when it is obvious that we are referring to multidimensional rectangles.
 
 \begin{algorithm}
 \caption{Decompose the free space into $D$-dimensional hyperrectangles.}
@@ -617,8 +618,8 @@ The method is similar to how Algorithm~\ref{alg:split3d} forms the three-dimensi
 \State $Z\gets$ All $D$-coordinates of the obstacles in $E$.
 \State Sort $Z$ in increasing order.
 \State $R\gets$ Empty list of result cells.
-\State $M\gets$ Empty binary search tree mapping $D-1$-dimensional hyperrectangles to \\
-	\hspace{10mm} indices in $R$.
+\State $M\gets$ Empty binary search tree mapping $(D-1)$-dimensional rectangles to indices \\
+	\hspace{10mm} in $R$.
 \ForAll{$z\in Z$}
 	\State $E_z\gets$ Obstacles of $E$ whose $D$-range contains $z$.
 	\State $T\gets$ $(D-1)$-dimensional decomposition for $E_z$ recursively.
@@ -669,7 +670,7 @@ Next we consider how to generate links for the adjacent pairs of a $D$-dimension
 \begin{lem}\label{lem:decompddch}
 Consider two obstacle sets $A$ and $B$ that each define a $D$-dimensional domain.
 Let $n$ be the total number of $(D-1)$-dimensional obstacle faces in $A$ and $B$, and $k$ be the number of faces that are present in exactly one of the sets.
-The number of pairs of overlapping $D$-dimensional hyperrectangles in the decompositions of $A$ and $B$ is $O(n^{D-1}k)$.
+The number of pairs of overlapping $D$-dimensional rectangles in the decompositions of $A$ and $B$ is $O(n^{D-1}k)$.
 \end{lem}
 \begin{proof}
 Proof by induction on $D$.
@@ -705,16 +706,16 @@ The links in direction $D$ are computed by performing an additional sweep betwee
 We may again generate some links multiple times, but the total number of generated links is still $O(n^{D-1})$ so the duplicates can be removed in $O(n^{D-1}\log n)$ time.
 
 \begin{algorithm}
-\caption{Find all the overlapping pairs of two sets of $D$-dimensional hyperrectangles.}
+\caption{Find all the overlapping pairs of two sets of $D$-dimensional rectangles.}
 \label{alg:overlapdd}
 \begin{algorithmic}
-\Require Sets of disjoint $D$-dimensional hyperrectangles $A$ and $B$.
+\Require Sets of disjoint $D$-dimensional rectangles $A$ and $B$.
 \Output All the overlapping pairs of elements in $A$ and $B$.
 \Procedure{\findol}{$D,A,B$}
 	\If{$D=2$}
 		\State \Return overlapping pairs computed with Algorithm~\ref{alg:overlap2d}.
 	\EndIf
-	\State $E\gets$ List of all the hyperrectangles in $A$ and $B$ perpendicular to $D$-axis.
+	\State $E\gets$ List of all the rectangles in $A$ and $B$ perpendicular to $D$-axis.
 	\State Sort $E$ by $D$-coordinate.
 	\State $G\gets$ Groups of consecutive elements of $E$ with equal $D$-coordinate.
 	\State $P_A\gets$ Empty set of references to $A$.
@@ -741,8 +742,8 @@ We may again generate some links multiple times, but the total number of generat
 
 Algorithm~\ref{alg:overlapdd} shows how to find the overlapping pairs in a single cross section.
 The algorithm processes each set of events with equal $D$-coordinate as a single unit.
-For each unit we recursively search for new links between the newly added hyperrectangles, as well as between old and new hyperrectangles.
-We maintain the set of hyperrectangles currently intersecting the sweep hyperplane to avoid adding duplicates to the result.
+For each unit we recursively search for new links between the newly added rectangles, as well as between old and new rectangles.
+We maintain the set of rectangles currently intersecting the sweep hyperplane to avoid adding duplicates to the result.
 
 \begin{lem}\label{lem:overlapddok}
 Algorithm~\ref{alg:overlapdd} finds each intersecting pair between the input sets $A$ and $B$ exactly once.
