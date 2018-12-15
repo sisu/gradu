@@ -1769,7 +1769,7 @@ The sweeps in the other directions are identical.
 		\EndIf
 	\ElsIf{$e$ is \obsE}
 		\State Clear \rectof{e} from $T$.
-		\State Generate \addEs for the cleared canonical rectangles into $R$ \\
+		\State Generate \addEs for the cleared canonical nodes into $R$ \\
 			\hspace{20mm} (Section~\ref{sec:evtgen}).
 	\EndIf
 \EndWhile
@@ -1820,9 +1820,14 @@ The goal is to generate \addEs on the boundary of the space illuminated during i
 During a $+z$ sweep we generate \addEs in directions $\pm x$ and $\pm y$.
 On an \obsE we perform a clear operation on the unified tree containing the sweep plane status.
 This clears some of the tree nodes.
-As a first step in the event generation, we create an \addE on each side of every cleared canonical rectangle.
-This can create an unnecessarily large amount of events, because each rectangle added to the tree is split into $O(\log^2 n)$ canonical rectangles.
+As a first step in the event generation, we create an \addE on each side of every cleared canonical node.
 
+Each generated event $e$ is assigned a rectangle \rectof{e} that will be added to the unified tree when the event is processed.
+Each rectangle is defined by two intervals; for example if $e$ is an event in direction $+x$ then \rectof{e} is defined by a $z$-range and a $y$-range.
+The $z$-range is bounded by the $z$-coordinate of the \obsE generating $e$ and the $z$-coordinate of the \addE that added the cleared canonical node.
+The other range is defined by the side of the cleared canonical node.
+
+Creating \addEs for each cleared canonical node can lead to a large number of events, because each rectangle is split into $O(\log^2 n)$ canonical nodes in the tree.
 To reduce the number of generated events we perform \emph{filtering}, which consists of the following two steps:
 \begin{enumerate}
 \item Remove all the pairs of \addEs with the same position but opposite direction.
