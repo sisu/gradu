@@ -2,10 +2,10 @@
 
 #include <vector>
 
+// Replacement of std::span for pre-C++20 compilers.
 template<class T>
 class Span {
 public:
-//	Span(std::vector<T>& v): Span(&*v.begin(), &*v.end()) {}
 	template<class C>
 	Span(C& v): Span(&*v.begin(), &*v.end()) {}
 	Span(T* a, T* b): from(a), to(b) {}

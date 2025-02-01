@@ -13,9 +13,18 @@ using namespace std;
 
 namespace {
 
-enum class EventType { ADD_RECT, CELL, OBSTACLE };
+// Type of event in the sweep-plane algorithm.
+enum class EventType {
+	// Add new illumination rectangle to the sweep plane state.
+	ADD_RECT,
+	// The sweep plane illuminates a new cell.
+	CELL,
+	// Remove illumination rectangle from the sweep plane state.
+	OBSTACLE
+};
 const string eventTypeNames[] = {"add", "cell", "obstacle"};
 
+// Event of the sweep-plane algorithm.
 template<int D>
 struct Event {
 	EventType type = EventType::ADD_RECT;
@@ -36,8 +45,6 @@ ostream& operator<<(ostream& out, const Event<D>& e) {
 
 template<class T, class C>
 void removeEquals(vector<T>& v1, vector<T>& v2, C&& compare) {
-//	cout<<"v1: "<<v1<<endl;
-//	cout<<"v2: "<<v2<<endl;
 	sort(v1.begin(), v1.end(), compare);
 	sort(v2.begin(), v2.end(), compare);
 	auto it1=v1.begin(), it2=v2.begin();
@@ -78,6 +85,8 @@ void mergeAdjacentElements(vector<T>& vec, M&& tryMerge) {
 	vec.erase(keep, vec.end());
 }
 
+// Merge adjacent events along `axis`. For example two ADD_RECT events for
+// ranges [1,5] and [5,7] can be merged to a single event of range [1,7].
 template<int D>
 void mergeAdjacentEvents(vector<Event<D>>& events, int axis) {
 	sort(events.begin(), events.end(), [axis](const Event<D>& a, const Event<D>& b) {
@@ -101,6 +110,7 @@ void mergeAdjacentEvents(vector<Event<D>>& events, int axis) {
 	});
 }
 
+// Stores sweep-plane events for sweeps in all directions.
 template<int D>
 struct EventSet {
 	vector<Event<D>> events[2*D];
@@ -115,6 +125,9 @@ struct EventSet {
 	}
 	void genCellEvents(const Decomposition<D>& dec);
 
+	// Performs "event filtering" which involves removing redundant ADD_RECT
+	// events and merging adjacent ones. We assume that `events` contains only
+	// ADD_RECT events when this is called.
 	void filterAddEvents() {
 		for(int a=0; a<D; ++a) {
 			removeEquals(events[2*a], events[2*a+1], [](const Event<D>& a, const Event<D>& b) {
@@ -195,6 +208,11 @@ array<int, D-1> buildSize(const Decomposition<D>& dec) {
 	return arr;
 }
 
+// State of the staged illumination algorithm for min-link-path computation.
+//
+// Maintains `EventSet` for current and next steps. On each step, run
+// illumination in all directions and constructs the initial event set for the
+// next step in the process.
 template<int D>
 struct IlluminateState {
 	typedef UnifiedTree<TreeItem, D-1> Plane;
@@ -262,6 +280,9 @@ struct IlluminateState {
 		}
 	}
 
+	// Runs when we remove free space from the sweep plane on OBSTACLE event.
+	// At this point we generate new ADD_RECT events for the next step on the
+	// boundaries of the removed free space cell.
 	void onRemove(int axis, Index index, const TreeItem& item, int position, int obsTime) {
 		Range range = item.start<position ? Range{item.start, position} : Range{position, item.start};
 		cout<<"Remove "<<axis<<' '<<index<<' '<<item<<' '<<position<<'\n';

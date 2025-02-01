@@ -17,9 +17,14 @@ using namespace std;
 
 namespace {
 
+// Event of the 2D sweepline algorithm. Each event represents either start or
+// end of an obstacle.
 struct Event {
+	// Coordinate where the obstacle is encountered.
 	int pos = -1;
+	// Index of the obstacle.
 	int idx = -1;
+	// Whether the event is the start (or end) of the obstacle.
 	bool startObstacle = false;
 
 	bool operator<(const Event& e) const {
@@ -30,21 +35,25 @@ struct Event {
 
 constexpr int X_AXIS = 0;
 constexpr int Y_AXIS = 1;
-constexpr int Z_AXIS = 2;
 
 constexpr int UP = 2;
 constexpr int DOWN = 3;
 
+// Represents a partially built free-space node during the line-sweep
+// algorithm. The x-range and the start y-coordinate are known, but the end
+// y-coordinate is not yet fixed.
 struct DecomposeNode {
 	Range xRange;
 	int yStart = -1;
+	// Mutable to avoid copy when movin data to the final decomposition.
 	mutable vector<int> backLinks;
+	// Mutable to avoid copy when movin data to the final decomposition.
 	mutable vector<int> backObstacles;
 
 	Cell<2> consumeToCell(int yEnd, int obstacle) const {
 		Cell<2> res(Box<2>{{xRange, {yStart, yEnd}}});
-		res.links[UP] = move(backLinks);
-		res.obstacles[UP] = move(backObstacles);
+		res.links[UP] = std::move(backLinks);
+		res.obstacles[UP] = std::move(backObstacles);
 		if (obstacle >= 0) {
 			res.obstacles[DOWN].push_back(obstacle);
 		}
@@ -56,11 +65,6 @@ struct DecomposeNode {
 		return xRange.from < n.xRange.from;
 	}
 };
-#if 0
-bool operator<(const DecomposeNode& n, int i) {
-	return n.xRange.from < i;
-}
-#endif
 bool operator<(int i, const DecomposeNode& n) {
 	return i < n.xRange.from;
 }
@@ -73,6 +77,11 @@ void moveContentsUnordered(vector<T>& to, vector<T>& from) {
 	to.insert(to.end(), make_move_iterator(from.begin()), make_move_iterator(from.end()));
 }
 
+// Maintains the current state of the 2D sweepline algorithm.
+//
+// The state consists of the partially constructed free-space nodes
+// intersecting the current sweepline and the decomposition that is already
+// built.
 class Sweepline {
 public:
 	Sweepline(const ObstacleSet<2>* obstacles): obstacles(*obstacles) {}
@@ -88,6 +97,10 @@ public:
 	Decomposition<2>& result() { return decomposition; }
 
 private:
+	// Process obstacle start event. There should be an intersecting free space
+	// in `nodeSet` which is bound by the new obstacle. We create a new
+	// `decomposition` item for the bound free space and possibly new `nodeSet`
+	// items for the remaining free space.
 	void addObstacleEvent(const Event& event) {
 		const Range range = obstacles[event.idx].box[X_AXIS];
 		auto it = nodeSet.upper_bound(range.from);
@@ -115,6 +128,9 @@ private:
 		}
 	}
 
+	// Process obstacle end event. New free space starts at obstacle end that
+	// is added to `nodeSet`. There might be also free space on either side of
+	// the ending obstacle that is linked to the newly added `nodeSet` item.
 	void endObstacleEvent(const Event& event) {
 		const Range range = obstacles[event.idx].box[X_AXIS];
 		Range totalRange = range;
@@ -139,7 +155,7 @@ private:
 			totalRange = totalRange.union_(it->xRange);
 			it = nodeSet.erase(it);
 		}
-		DecomposeNode node{totalRange, event.pos, move(links), move(obstacles)};
+		DecomposeNode node{totalRange, event.pos, std::move(links), std::move(obstacles)};
 		cout<<"insert to nodeset "<<totalRange<<' '<<event.idx<<'\n';
 		nodeSet.insert(std::move(node));
 	}
@@ -192,6 +208,9 @@ void addXObstacles(Decomposition<2>& decomposition,
 
 } // namespace
 
+// 2D-decomposition is implemented as a special case by a sweepline algorithm
+// in O(n*log n) time. The other dimensions are by a recursive algorithm that
+// uses the 2D algorithm as the base case.
 template<>
 Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	vector<Event> events;
@@ -212,25 +231,12 @@ Decomposition<2> decomposeFreeSpace<2>(const ObstacleSet<2>& obstacles) {
 	for(Event event : events) {
 		sweepline.handleEvent(event);
 	}
-	Decomposition<2> decomposition = move(sweepline.result());
+	Decomposition<2> decomposition = std::move(sweepline.result());
 
 	addReverseLinks(decomposition);
 	addXObstacles(decomposition, cornerToObstacle);
 	cleanLinks(decomposition);
 	return decomposition;
-}
-
-//namespace {
-
-template<int A, int B>
-int compare(const Box<A>& a, const Box<B>& b) {
-	int n = min(A,B);
-	for(int i=0; i<n; ++i) {
-		for(int j=0; j<2; ++j) {
-			if (a[i][j] != b[i][j]) return a[i][j] - b[i][j];
-		}
-	}
-	return 0;
 }
 
 template<int D>
@@ -244,6 +250,12 @@ struct IndexedBoxes {
 	vector<Box<D>> box;
 };
 
+// State of the D-dimensional sweepline algorithm for free-space decomposition.
+//
+// The algorithm works by stopping at each obstacle start and computing the
+// (D-1)-dimensional decomposition of the cross-section recursively. The
+// (D-1)-dimensional free-space rectangles are then assigned with the
+// additional dimension and linked in the D-axis as needed.
 template<int D>
 class SweepState {
 public:
@@ -254,7 +266,7 @@ public:
 		vector<int> obsIndex;
 		for(size_t i=0; i<obstacles.size(); ++i) {
 			const Obstacle<D>& obs = obstacles[i];
-			if (obs.box[Z_AXIS].contains(z)) {
+			if (obs.box[D-1].contains(z)) {
 				crossSection.push_back({obs.box.project(), obs.direction});
 				obsIndex.push_back(i);
 			}
@@ -280,7 +292,6 @@ public:
 				back_inserter(newObs));
 		vector<Box<D-1>> newObsBox;
 		for(int i: newObs) newObsBox.push_back(obstacles[i].box.project());
-//		overlappingBoxes(removedBoxes, newObsBox);
 
 		prevObsIndex = obsIndex;
 	}
@@ -313,7 +324,7 @@ private:
 			decomposition[p.second].box[D-1].to = curZ;
 			removedCells.add(p.second, p.first);
 		}
-		activeIndex = move(newMap);
+		activeIndex = std::move(newMap);
 		auto newLinks = overlappingBoxes(removedCells.box, addedBoxes);
 		for(auto p: newLinks) {
 			int a = removedCells.index[p.first];
@@ -359,6 +370,11 @@ vector<Box<D-1>> getProjBoxes(const ObstacleSet<D>& items, Span<const int> idx) 
 	return getProjBoxesT<D>(items, idx);
 }
 
+// Modifies `decomposition` to add missing links in direction `axis`.
+//
+// Works by a sweep-plane algorithm that stops at each cell start and end and
+// computes (D-1)-dimensional intersections between the cells starting and
+// ending at the current sweep plane position.
 template<int D>
 void computeLinksInDir(Decomposition<D>& decomposition, const ObstacleSet<D>& obstacles, int axis) {
 	map<int, vector<int>> decFrom;
@@ -401,14 +417,16 @@ void computeLinksInDir(Decomposition<D>& decomposition, const ObstacleSet<D>& ob
 	}
 }
 
-//} // namespace
-
+// Generic D-dimensional decomposition algorithm. Works by computing the
+// (D-1)-dimensional decomposition recursively at each start and end coordinate
+// of the obstacles, and adding the D-dimension to the resulting free space
+// cells and computing connections between them.
 template<int D>
 Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 	vector<int> depths;
 	for(const auto& obs: obstacles) {
-		if (obs.box[Z_AXIS].size() == 0) {
-			depths.push_back(obs.box[Z_AXIS].from);
+		if (obs.box[D-1].size() == 0) {
+			depths.push_back(obs.box[D-1].from);
 		}
 	}
 	sortUnique(depths);
@@ -417,7 +435,7 @@ Decomposition<D> decomposeFreeSpace(const ObstacleSet<D>& obstacles) {
 	for(int z: depths) {
 		state.advanceToDepth(z);
 	}
-	Decomposition<D> decomposition = move(state.result());
+	Decomposition<D> decomposition = std::move(state.result());
 	computeLinksInDir(decomposition, obstacles, D-1);
 	cleanLinks(decomposition);
 	return decomposition;

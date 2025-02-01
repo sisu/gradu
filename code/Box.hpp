@@ -5,8 +5,11 @@
 #include <cstring>
 #include <cassert>
 
+// Point in D-dimensional space.
 template<int D>
 struct Point {
+	int data[D];
+
 	Point() {
 		memset(data,0,sizeof(data));
 	}
@@ -14,11 +17,8 @@ struct Point {
 		std::copy(x.begin(), x.end(), data);
 	}
 
-	int data[D];
 	int& operator[](int i) { return data[i]; }
 	int operator[](int i) const { return data[i]; }
-	const int* begin() const { return data; }
-	const int* end() const { return data+D; }
 };
 template<int D>
 inline bool operator==(const Point<D>& a, const Point<D>& b) {
@@ -26,6 +26,9 @@ inline bool operator==(const Point<D>& a, const Point<D>& b) {
 	return true;
 }
 
+// Axis-aligned D-dimensional rectangle.
+//
+// Represented as a cartesian product of D simple ranges.
 template<int D>
 struct Box {
 	Range ranges[D];
@@ -33,6 +36,7 @@ struct Box {
 	Range& operator[](int i) { return ranges[i]; }
 	Range operator[](int i) const { return ranges[i]; }
 
+	// Returns (D-1)-dimensional box with dimension `rm` removed.
 	Box<D-1> project(int rm=D-1) const {
 		Box<D-1> res;
 		for(int i=0; i<rm; ++i) res[i]=(*this)[i];
@@ -72,7 +76,6 @@ inline bool operator<(const Box<D>& a, const Box<D>& b) {
 	}
 	return false;
 }
-
 
 namespace std {
 	template<int D>

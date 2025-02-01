@@ -20,17 +20,17 @@ CXXFLAGS:=$(BASEFLAGS) $(DFLAGS)
 TFLAGS:=-Wall -Wextra -std=c++14 -MMD -I. -g
 CC=clang++
 
-.PHONY: all clean $(BIN)
-BIN:=minlink
+.PHONY: all clean $(LIB)
+LIB:=minlink.so
 
-all: $(ODIRS) $(BIN)
+all: $(ODIRS) $(LIB)
 
 test: test-build $(TRUN)
 
 test-build: $(ODIRS) $(TBIN)
 
-$(BIN): $(OBJ)
-	$(CC) -o $@ $(OBJ) $(CXXFLAGS)
+$(LIB): $(OBJ)
+	$(CC) -shared -o $@ $(OBJ) $(CXXFLAGS)
 
 $(OBJ): $(ODIR)/%.o: %.cpp
 	$(CC) $< -c -o "$@" $(CXXFLAGS)

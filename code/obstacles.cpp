@@ -7,11 +7,11 @@ using namespace std;
 namespace {
 
 constexpr int LEFT = 0;
-constexpr int RIGHT = 1;
+//constexpr int RIGHT = 1;
 constexpr int UP = 2;
 constexpr int DOWN = 3;
 constexpr int ZMINUS = 4;
-constexpr int ZPLUS = 5;
+//constexpr int ZPLUS = 5;
 
 template<int D>
 Point<D> dirVec(int dir) {
@@ -152,7 +152,7 @@ void addObstaclesForVolume(ObstacleSet<3>& result,
 			newRects.push_back({box, curP.direction});
 		}
 		result.insert(result.end(), activeRects.begin()+b, activeRects.end());
-		activeRects = move(newRects);
+		activeRects = std::move(newRects);
 	}
 	result.insert(result.end(), activeRects.begin(), activeRects.end());
 }

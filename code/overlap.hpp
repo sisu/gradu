@@ -1,3 +1,6 @@
+// Contains utility function for finding intersecting pairs of boxes from
+// collection of `Box` objects.
+
 #include "Box.hpp"
 #include "print.hpp"
 #include "util.hpp"
@@ -11,28 +14,10 @@ using std::make_pair;
 using std::pair;
 using std::vector;
 
-template<int D>
-inline vector<int> getOverlappingIndices(const vector<Box<D>>& boxes, int z) {
-	vector<int> res;
-	for(size_t i=0; i<boxes.size(); ++i) {
-		if (boxes[i][D-1].contains(z)) {
-			res.push_back(i);
-		}
-	}
-	return res;
-}
-
 template<class T>
 inline vector<T> vectorDifference(const vector<T>& a, const vector<T>& b) {
 	vector<T> res;
 	std::set_difference(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(res));
-	return res;
-}
-
-template<class T>
-inline vector<T> vectorIntersection(const vector<T>& a, const vector<T>& b) {
-	vector<T> res;
-	std::set_intersection(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(res));
 	return res;
 }
 
@@ -45,7 +30,7 @@ inline vector<Box<D-1>> getProjected(const vector<Box<D>>& v, const vector<int>&
 }
 
 template<int D>
-void addOverlappingBoxes(vector<pair<int,int>>& result,
+inline void addOverlappingBoxes(vector<pair<int,int>>& result,
 		const vector<Box<D>>& bs1,
 		const vector<Box<D>>& bs2,
 		const vector<int>& idx1,
@@ -55,6 +40,11 @@ void addOverlappingBoxes(vector<pair<int,int>>& result,
 	}
 }
 
+// Returns all pairs (a,b) where bs1[a] intersects bs2[b].
+//
+// Implemented using a sweep-plane algorithm that maintains the set of boxes
+// intersecting the sweep plane and recursively finding the intersections in
+// the current cross-section.
 template<int D>
 inline vector<pair<int,int>> overlappingBoxes(
 		const vector<Box<D>>& bs1,
@@ -78,7 +68,6 @@ inline vector<pair<int,int>> overlappingBoxes(
 	vector<int> old1, old2;
 	for(const auto& item: zToData) {
 		const Data& data = item.second;
-//		std::cout<<"item "<<item.first<<' '<<old1<<' '<<old2<<" : "<<data.begin1<<' '<<data.begin2<<' '<<data.end1<<' '<<data.end2<<'\n';
 		old1 = vectorDifference(old1, data.end1);
 		old2 = vectorDifference(old2, data.end2);
 
@@ -97,6 +86,11 @@ inline pair<int,int> makePair(int a, int b, bool swap) {
 	return swap ? make_pair(b, a) : make_pair(a,b);
 }
 
+// Faster implementation for 2-dimensional case.
+//
+// Uses a sweepline algorithm that maintains the set of currently intersected
+// rectangles of `bs1` and `bs2`. Time complexity O(n*log n+k) where k is the
+// number of intersections.
 template<>
 inline vector<pair<int,int>> overlappingBoxes(
 		const vector<Box<2>>& bs1,

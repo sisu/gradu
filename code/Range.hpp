@@ -1,6 +1,7 @@
 #pragma once
 #include <ostream>
 
+// 1-dimensional half-open integer range.
 struct Range {
 	Range() {}
 	Range(int from, int to): from(from), to(to) {}
